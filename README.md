@@ -1,4 +1,4 @@
-# 🚀 PowerShell Profile - Modular Refactor
+# PowerShell Profile
 
 A completely, modular PowerShell profile that transforms your terminal into a powerful development environment. Built with maintainability, extensibility, and developer productivity in mind.
 
@@ -27,7 +27,7 @@ A completely, modular PowerShell profile that transforms your terminal into a po
 
 ```powershell
 # Download and run the setup script
-irm https://raw.githubusercontent.com/https/powershell-profile/main/setup.ps1 | iex
+irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/Setup-Modular.ps1 | iex
 ```
 
 ### Manual Installation
@@ -39,47 +39,19 @@ git clone https://github.com/hetfs/powershell-profile.git "$env:TEMP\powershell-
 Set-Location "$env:TEMP\powershell-profile"
 
 # Option 2: Download manually
-# Download setup.ps1 and Microsoft.PowerShell_profile.ps1 to your PowerShell directory
+# Download Setup-Modular.ps1 and Microsoft.PowerShell_profile.ps1 to your PowerShell directory
 ```
 
 2. **Run the setup script**
 ```powershell
 # Run as Administrator for full installation
-.\setup.ps1
+.\Setup-Modular.ps1
 ```
 
 3. **Restart PowerShell/Terminal**
 ```powershell
 # Close and reopen your terminal, or run:
 . $PROFILE
-```
-
----
-
-## 📁 Project Structure
-
-```
-Documents/PowerShell/
-├── Microsoft.PowerShell_profile.ps1         # Main profile entry point
-├── CTTcustom.ps1                            # Custom overrides (optional)
-├── Modules/                                 # All modular components
-│   ├── ProfileConfig.ps1                    # Configuration and settings
-│   ├── CoreFunctions.psm1                   # Essential utility functions
-│   ├── DebugModule.psm1                     # Debug mode functionality
-│   ├── UpdateModule.psm1                    # Profile and PowerShell updates
-│   ├── AdminModule.psm1                     # Admin functions and prompt
-│   ├── EditorModule.psm1                    # Editor configuration
-│   ├── NetworkModule.psm1                   # Networking utilities
-│   ├── SystemModule.psm1                    # System information tools
-│   ├── GitModule.psm1                       # Git shortcuts and functions
-│   ├── NavigationModule.psm1                # Directory navigation
-│   ├── UtilityModule.psm1                   # General utilities
-│   ├── PSReadLineModule.psm1                # Enhanced command line
-│   ├── CompletionModule.psm1                # Auto-completion setup
-│   ├── ThemeModule.psm1                     # Prompt theming (Starship)
-│   ├── ZoxideModule.psm1                    # Smart directory navigation
-│   └── HelpModule.psm1                      # Help system
-└── LastExecutionTime.txt                    # Update tracking
 ```
 
 ---
@@ -110,7 +82,6 @@ The setup script installs the following modern CLI tools via Winget:
 
 * **Nerd Fonts** Installs CaskaydiaCove NF font for proper icon support
 * **PowerShell Modules** Terminal-Icons, PSReadLine enhancements
-* **Chocolatey** Optional package manager installation
 * **Profile Structure** Creates modular profile with auto-update capability
 
 ---
@@ -132,21 +103,22 @@ $modulesToLoad = @(
 ```
 
 **Add a custom module:**
-1. Create `Modules\CustomModule.psm1`
+1. Create `Modules\CustomModule.ps1`
 2. Add functions and export them with `Export-ModuleMember`
 3. Add "CustomModule" to the `$modulesToLoad` array
 
 ### Override System
 
-Create or edit `CTTcustom.ps1` in your PowerShell directory to override settings:
+Create or edit `HFCustom.ps1` in your PowerShell directory to override settings:
 
 ```powershell
-# $HOME\Documents\PowerShell\CTTcustom.ps1
+# $HOME\Documents\PowerShell\HFCustom.ps1
 
 # Variable overrides
 $debug_Override = $false
 $EDITOR_Override = "nvim"
 $updateInterval_Override = 14  # Check for updates every 2 weeks
+$repo_root_Override = "https://github.com/hetfs/powershell-profile"  # Your repository
 
 # Function overrides
 function Update-Profile_Override {
@@ -168,7 +140,7 @@ function Get-Theme_Override {
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `$debug_Override` | Enable debug mode | `$false` |
-| `$repo_root_Override` | Custom update source | ChrisTitusTech repo |
+| `$repo_root_Override` | Custom update source | Your repo |
 | `$timeFilePath_Override` | Custom update tracking file | `LastExecutionTime.txt` |
 | `$updateInterval_Override` | Update frequency (days) | `7` |
 | `$EDITOR_Override` | Preferred editor | Auto-detected |
@@ -288,7 +260,7 @@ truncate_to_repo = true
 ### Enable Debug Mode
 
 ```powershell
-# In your CTTcustom.ps1 or directly in profile
+# In your HFCustom.ps1 or directly in profile
 $debug_Override = $true
 ```
 
@@ -307,7 +279,7 @@ $debug_Override = $true
 
 ```powershell
 # Test specific module
-. $PSScriptRoot\Modules\GitModule.psm1
+. $PSScriptRoot\Modules\GitModule.ps1
 gs  # Should show git status
 
 # Check loaded modules
@@ -341,7 +313,7 @@ Update-PowerShell # Update PowerShell itself
 Copy-Item "$HOME\Documents\PowerShell" "$HOME\Documents\PowerShell_Backup_$(Get-Date -Format 'yyyyMMdd')" -Recurse
 
 # Backup individual module
-Copy-Item "$HOME\Documents\PowerShell\Modules\GitModule.psm1" "$HOME\Backups\"
+Copy-Item "$HOME\Documents\PowerShell\Modules\GitModule.ps1" "$HOME\Backups\"
 ```
 
 ---
@@ -356,37 +328,6 @@ Copy-Item "$HOME\Documents\PowerShell\Modules\GitModule.psm1" "$HOME\Backups\"
 4. **Help Comments** Add comment-based help for functions
 5. **Testing** Test module in isolation before integration
 
-### Example Module Template
-```powershell
-# Modules/NewModule.psm1
-<#
-.SYNOPSIS
-    Brief description of module
-.DESCRIPTION
-    Detailed description of module functionality
-#>
-
-function New-Function {
-    <#
-    .SYNOPSIS
-        Brief description
-    .EXAMPLE
-        New-Function -Parameter Value
-    #>
-    [CmdletBinding()]
-    param()
-    
-    try {
-        # Function logic here
-    }
-    catch {
-        Write-Error "Error in New-Function: $_"
-    }
-}
-
-Export-ModuleMember -Function New-Function
-```
-
 ---
 
 ## 📚 Learning Resources
@@ -399,13 +340,13 @@ Export-ModuleMember -Function New-Function
 
 ---
 
-## ⚖️ License
+## [ ⚖️License](./LICENSE)
 
 MIT License - See LICENSE file for details
 
 ## 🙏 Acknowledgments
 
-* [Chris Titus Tech](https://christitus.com/) Original profile inspiration
+Based on the original work by [Chris Titus Tech](https://christitus.com/)
 * [Starship](https://starship.rs/) Cross-shell prompt
 * [Nerd Fonts](https://www.nerdfonts.com/) Iconic font patches
 * [Terminal Icons](https://github.com/devblackops/Terminal-Icons) File type icons
@@ -415,11 +356,9 @@ MIT License - See LICENSE file for details
 
 ## 🆘 Support
 
-* **Issues**: [GitHub Issues](https://github.com/ChrisTitusTech/powershell-profile/issues)
-* **Discussion**: Check the GitHub Discussions
+* **Issues**: [GitHub Issues](https://github.com/hetfs/powershell-profile/issues)
 * **Quick Help**: Run `Show-Help` in PowerShell
 
 ---
 
 **Happy PowerShelling!** 🎉
-

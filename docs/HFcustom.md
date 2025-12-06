@@ -1,26 +1,26 @@
-# 🎨 `CTTcustom.ps1` Complete Customization Guide
+# 🎨 `HFCustom.ps1` COMPLETE CUSTOMIZATION GUIDE
 
-## 📖 Introduction
+## 📖 INTRODUCTION
 
-`CTTcustom.ps1` is your personal customization file for the Modular PowerShell Profile. It allows you to personalize and extend your PowerShell environment without modifying the core modules, ensuring your customizations persist through updates.
+`HFCustom.ps1` is your personal customization file for the modular PowerShell profile. It allows you to personalize and extend your PowerShell environment without modifying the core modules, ensuring your customizations persist through updates.
 
-## 📍 File Location & Loading
+## 📍 FILE LOCATION & LOADING
 
-### **Location:**
+### **LOCATION:**
 ```
-$HOME\Documents\PowerShell\CTTcustom.ps1
+$HOME\Documents\PowerShell\HFCustom.ps1
 ```
 
-### **Loading Order:**
+### **LOADING ORDER:**
 1. Main profile (`Microsoft.PowerShell_profile.ps1`) loads
 2. Modular configuration (`ProfileConfig.ps1`) loads
 3. All modules from `Modules\` directory load in order
-4. **Finally:** `CTTcustom.ps1` loads (if it exists)
+4. **FINALLY:** `HFCustom.ps1` loads (if it exists)
 
-### **Verification:**
+### **VERIFICATION:**
 ```powershell
-# Check if CTTcustom.ps1 exists
-Test-Path "$HOME\Documents\PowerShell\CTTcustom.ps1"
+# Check if HFCustom.ps1 exists
+Test-Path "$HOME\Documents\PowerShell\HFCustom.ps1"
 
 # Check loading order in debug mode
 $debug_Override = $true
@@ -29,9 +29,9 @@ $debug_Override = $true
 
 ---
 
-## 🎯 Override System
+## 🎯 OVERRIDE SYSTEM
 
-### **Variable Overrides**
+### **VARIABLE OVERRIDES**
 
 Override core variables by appending `_Override` to their names:
 
@@ -39,19 +39,20 @@ Override core variables by appending `_Override` to their names:
 |----------|-------------|---------------|---------|
 | `$debug_Override` | Enable debug mode | `$false` | `$debug_Override = $true` |
 | `$EDITOR_Override` | Preferred text editor | Auto-detected | `$EDITOR_Override = "code"` |
-| `$repo_root_Override` | Update source URL | ChrisTitusTech repo | `$repo_root_Override = "https://raw.githubusercontent.com/YOUR_USERNAME/powershell-profile"` |
+| `$repo_root_Override` | Update source URL | Your repo | `$repo_root_Override = "https://raw.githubusercontent.com/hetfs/powershell-profile"` |
 | `$timeFilePath_Override` | Update tracking file | `LastExecutionTime.txt` | `$timeFilePath_Override = "$env:TEMP\PowerShellUpdates.txt"` |
 | `$updateInterval_Override` | Update frequency (days) | `7` | `$updateInterval_Override = 14` |
 
-**Example:**
+**EXAMPLE:**
 ```powershell
-# CTTcustom.ps1
+# HFCustom.ps1
 $debug_Override = $false  # Keep debug off
 $EDITOR_Override = "nvim" # Use Neovim as editor
 $updateInterval_Override = 30  # Check monthly
+$repo_root_Override = "https://raw.githubusercontent.com/hetfs/powershell-profile"
 ```
 
-### **Function Overrides**
+### **FUNCTION OVERRIDES**
 
 Replace core functions by appending `_Override`:
 
@@ -61,11 +62,11 @@ Replace core functions by appending `_Override`:
 | `Update-Profile_Override` | Profile update logic | Custom update source/method |
 | `Update-PowerShell_Override` | PowerShell update | Different update strategy |
 | `Clear-Cache_Override` | Cache clearing | Additional cache locations |
-| `Get-Theme_Override` | Prompt theming | Custom Starship/Posh setup |
+| `Get-Theme_Override` | Prompt theming | Custom Starship/posh setup |
 | `WinUtilDev_Override` | WinUtil script | Different WinUtil source |
 | `Set-PredictionSource_Override` | PSReadLine prediction | Custom prediction settings |
 
-**Example:**
+**EXAMPLE:**
 ```powershell
 function Update-Profile_Override {
     Write-Host "🔄 Custom profile update running..." -ForegroundColor Yellow
@@ -75,15 +76,15 @@ function Update-Profile_Override {
     New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
     Copy-Item "$HOME\Documents\PowerShell\Modules" $backupDir -Recurse -Force
     
-    # Use default update logic
+    # Use YOUR repository for updates
     try {
-        $url = "https://raw.githubusercontent.com/ChrisTitusTech/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
-        $oldhash = Get-FileHash $PROFILE
-        Invoke-RestMethod $url -OutFile "$env:temp\profile_update.ps1"
-        $newhash = Get-FileHash "$env:temp\profile_update.ps1"
+        $url = "https://raw.githubusercontent.com/hetfs/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
+        $oldHash = Get-FileHash $PROFILE
+        Invoke-RestMethod $url -OutFile "$env:TEMP\profile_update.ps1"
+        $newHash = Get-FileHash "$env:TEMP\profile_update.ps1"
         
-        if ($newhash.Hash -ne $oldhash.Hash) {
-            Copy-Item -Path "$env:temp\profile_update.ps1" -Destination $PROFILE -Force
+        if ($newHash.Hash -ne $oldHash.Hash) {
+            Copy-Item -Path "$env:TEMP\profile_update.ps1" -Destination $PROFILE -Force
             Write-Host "✅ Profile updated with backup at: $backupDir" -ForegroundColor Green
         } else {
             Write-Host "📦 Profile already up to date" -ForegroundColor Blue
@@ -93,18 +94,18 @@ function Update-Profile_Override {
         Write-Error "❌ Update failed: $_"
     }
     finally {
-        Remove-Item "$env:temp\profile_update.ps1" -ErrorAction SilentlyContinue
+        Remove-Item "$env:TEMP\profile_update.ps1" -ErrorAction SilentlyContinue
     }
 }
 ```
 
 ---
 
-## 🛠️ Custom Functions & Aliases
+## 🛠️ CUSTOM FUNCTIONS & ALIASES
 
-### **Creating Custom Functions**
+### **CREATING CUSTOM FUNCTIONS**
 
-**Basic Pattern:**
+**BASIC PATTERN:**
 ```powershell
 function Verb-Noun {
     [CmdletBinding()]
@@ -139,9 +140,9 @@ function Verb-Noun {
 }
 ```
 
-### **Example Functions:**
+### **EXAMPLE FUNCTIONS:**
 
-**1. Project Management:**
+**1. PROJECT MANAGEMENT:**
 ```powershell
 function proj {
     param(
@@ -159,7 +160,7 @@ function proj {
     }
     
     if ($List) {
-        Write-Host "📁 Available Projects:" -ForegroundColor Cyan
+        Write-Host "📁 Available projects:" -ForegroundColor Cyan
         Get-ChildItem -Path $projectsRoot -Directory | ForEach-Object {
             Write-Host "  • $($_.Name)" -ForegroundColor White
         }
@@ -194,7 +195,7 @@ function proj {
 }
 ```
 
-**2. Enhanced Git Shortcuts:**
+**2. ENHANCED GIT SHORTCUTS:**
 ```powershell
 function git-branch-cleanup {
     # Clean up merged branches
@@ -221,26 +222,26 @@ function git-commit-amend {
 }
 ```
 
-**3. System Diagnostics:**
+**3. SYSTEM DIAGNOSTICS:**
 ```powershell
 function system-health {
-    Write-Host "🏥 SYSTEM HEALTH CHECK" -ForegroundColor Cyan
+    Write-Host "🏥 System Health Check" -ForegroundColor Cyan
     Write-Host "=" * 30 -ForegroundColor Cyan
     
-    # CPU Usage
+    # CPU usage
     $cpuUsage = Get-CimInstance Win32_Processor | 
         Measure-Object -Property LoadPercentage -Average | 
         Select-Object -ExpandProperty Average
     Write-Host "CPU Usage: $cpuUsage%" -ForegroundColor $(if ($cpuUsage -gt 80) { "Red" } else { "Green" })
     
-    # Memory Usage
+    # Memory usage
     $memory = Get-CimInstance Win32_OperatingSystem
     $usedMemory = [math]::Round(($memory.TotalVisibleMemorySize - $memory.FreePhysicalMemory) / 1MB, 2)
     $totalMemory = [math]::Round($memory.TotalVisibleMemorySize / 1MB, 2)
     $memoryPercent = [math]::Round(($usedMemory / $totalMemory) * 100, 1)
     Write-Host "Memory: ${usedMemory}GB / ${totalMemory}GB (${memoryPercent}%)" -ForegroundColor $(if ($memoryPercent -gt 85) { "Red" } elseif ($memoryPercent -gt 70) { "Yellow" } else { "Green" })
     
-    # Disk Space
+    # Disk space
     Get-PSDrive -PSProvider FileSystem | Where-Object { $_.Used -gt 0 } | ForEach-Object {
         $freeGB = [math]::Round($_.Free / 1GB, 2)
         $usedGB = [math]::Round($_.Used / 1GB, 2)
@@ -252,14 +253,14 @@ function system-health {
 }
 ```
 
-### **Creating Aliases**
+### **CREATING ALIASES**
 
-**Syntax:**
+**SYNTAX:**
 ```powershell
-Set-Alias -Name <Shortcut> -Value <Command/Function>
+Set-Alias -Name <shortcut> -Value <command/function>
 ```
 
-**Example Aliases:**
+**EXAMPLE ALIASES:**
 ```powershell
 # Navigation
 Set-Alias -Name home -Value { Set-Location $HOME }
@@ -293,9 +294,9 @@ Set-Alias -Name glog -Value { git log --oneline --graph --all }
 
 ---
 
-## 🌍 Environment Variables
+## 🌍 ENVIRONMENT VARIABLES
 
-### **Setting Environment Variables:**
+### **SETTING ENVIRONMENT VARIABLES:**
 
 ```powershell
 # User-specific variables
@@ -309,11 +310,11 @@ $env:GOPATH = "$HOME\go"
 $env:CARGO_HOME = "$HOME\.cargo"
 $env:NODE_ENV = "development"
 
-# API Keys (consider using secure methods instead)
+# API keys (consider using secure methods instead)
 # $env:GITHUB_TOKEN = "your-token-here"
 ```
 
-### **Adding to PATH:**
+### **ADDING TO PATH:**
 ```powershell
 # Add custom directories to PATH
 $customPaths = @(
@@ -333,7 +334,7 @@ foreach ($path in $customPaths) {
 }
 ```
 
-### **Persistent Environment Variables:**
+### **PERSISTENT ENVIRONMENT VARIABLES:**
 
 For variables that should persist across sessions, set them in Windows:
 
@@ -347,15 +348,15 @@ For variables that should persist across sessions, set them in Windows:
 
 ---
 
-## 🎨 Prompt Customization
+## 🎨 PROMPT CUSTOMIZATION
 
-### **Custom Prompt Functions:**
+### **CUSTOM PROMPT FUNCTIONS:**
 
-**Basic Custom Prompt:**
+**BASIC CUSTOM PROMPT:**
 ```powershell
 function prompt {
     # Save original location
-    $currentPath = $executionContext.SessionState.Path.CurrentLocation
+    $currentPath = $ExecutionContext.SessionState.Path.CurrentLocation
     
     # Git information
     $gitInfo = ""
@@ -380,7 +381,7 @@ function prompt {
 }
 ```
 
-**With Color and Icons:**
+**WITH COLOR AND ICONS:**
 ```powershell
 function prompt {
     $currentPath = $(Get-Location).Path
@@ -410,13 +411,13 @@ function prompt {
 }
 ```
 
-### **Starship Customization:**
+### **STARSHIP CUSTOMIZATION:**
 
-**Basic Starship Config:**
+**BASIC STARSHIP CONFIG:**
 ```powershell
 function Get-Theme_Override {
     if (Get-Command starship -ErrorAction SilentlyContinue) {
-        # Load Starship with custom config path
+        # Load starship with custom config path
         $starshipConfig = "$HOME\.config\starship.toml"
         if (Test-Path $starshipConfig) {
             $env:STARSHIP_CONFIG = $starshipConfig
@@ -429,7 +430,7 @@ function Get-Theme_Override {
 }
 ```
 
-**Create a custom Starship config:**
+**CREATE A CUSTOM STARSHIP CONFIG:**
 ```powershell
 # Generate a custom config
 @"
@@ -454,7 +455,7 @@ $character"""
 [character]
 success_symbol = "[➜](bold green)"
 error_symbol = "[✗](bold red)"
-vimcmd_symbol = "[V](bold blue)"
+vimcmd_symbol = "[v](bold blue)"
 
 [directory]
 truncation_length = 3
@@ -477,9 +478,9 @@ format = "took [\$duration](\$style)"
 
 ---
 
-## 📦 Module Management
+## 📦 MODULE MANAGEMENT
 
-### **Importing Additional Modules:**
+### **IMPORTING ADDITIONAL MODULES:**
 
 ```powershell
 # Development modules
@@ -505,7 +506,7 @@ foreach ($path in $customModulePaths) {
 }
 ```
 
-### **Loading Specific Modules Conditionally:**
+### **LOADING SPECIFIC MODULES CONDITIONALLY:**
 
 ```powershell
 # Load Azure module only when needed
@@ -523,10 +524,10 @@ function Connect-Azure {
 
 # Load modules based on environment
 $computerName = $env:COMPUTERNAME
-if ($computerName -match "WORK") {
+if ($computerName -match "work") {
     Import-Module ActiveDirectory -ErrorAction SilentlyContinue
     Import-Module ExchangeOnlineManagement -ErrorAction SilentlyContinue
-} elseif ($computerName -match "DEV") {
+} elseif ($computerName -match "dev") {
     Import-Module DockerCompletion -ErrorAction SilentlyContinue
     Import-Module Pester -ErrorAction SilentlyContinue
 }
@@ -534,15 +535,15 @@ if ($computerName -match "WORK") {
 
 ---
 
-## 👔 Work & Personal Environments
+## 👔 WORK & PERSONAL ENVIRONMENTS
 
-### **Environment-Specific Configurations:**
+### **ENVIRONMENT-SPECIFIC CONFIGURATIONS:**
 
 ```powershell
 # Detect environment
-$isWorkComputer = $env:COMPUTERNAME -match "CORP"
-$isPersonalComputer = $env:COMPUTERNAME -match "HOME|LAPTOP"
-$isServer = $env:COMPUTERNAME -match "SRV"
+$isWorkComputer = $env:COMPUTERNAME -match "corp"
+$isPersonalComputer = $env:COMPUTERNAME -match "home|laptop"
+$isServer = $env:COMPUTERNAME -match "srv"
 
 # Work environment setup
 if ($isWorkComputer) {
@@ -600,17 +601,17 @@ if ($isPersonalComputer) {
 }
 ```
 
-### **Machine-Specific Configurations:**
+### **MACHINE-SPECIFIC CONFIGURATIONS:**
 
 ```powershell
 # Machine-specific configuration file
-$machineConfig = "$PSScriptRoot\CTTcustom-$($env:COMPUTERNAME).ps1"
+$machineConfig = "$PSScriptRoot\HFCustom-$($env:COMPUTERNAME).ps1"
 if (Test-Path $machineConfig) {
     . $machineConfig
     Write-Host "📱 Loaded machine-specific config for: $($env:COMPUTERNAME)" -ForegroundColor Green
 }
 
-# Example machine-specific file (CTTcustom-DESKTOP-ABC123.ps1):
+# Example machine-specific file (HFCustom-Desktop-ABC123.ps1):
 # @"
 # # Desktop machine at home
 # $env:SCREEN_RESOLUTION = "4K"
@@ -624,9 +625,9 @@ if (Test-Path $machineConfig) {
 
 ---
 
-## 🔧 Advanced Customization
+## 🔧 ADVANCED CUSTOMIZATION
 
-### **Event-Driven Actions:**
+### **EVENT-DRIVEN ACTIONS:**
 
 ```powershell
 # Run when directory changes
@@ -662,13 +663,13 @@ $function:prompt = {
 }
 ```
 
-### **Profile Performance Monitoring:**
+### **PROFILE PERFORMANCE MONITORING:**
 
 ```powershell
-# Add to beginning of CTTcustom.ps1
+# Add to beginning of HFCustom.ps1
 $profileStartTime = Get-Date
 
-# Add to end of CTTcustom.ps1
+# Add to end of HFCustom.ps1
 $profileEndTime = Get-Date
 $loadTime = ($profileEndTime - $profileStartTime).TotalMilliseconds
 
@@ -693,7 +694,7 @@ if ($slowModules) {
 }
 ```
 
-### **Secure Credential Management:**
+### **SECURE CREDENTIAL MANAGEMENT:**
 
 ```powershell
 # Store credentials securely
@@ -736,21 +737,166 @@ function Get-SecureCredential {
 }
 
 # Usage:
-# Save-SecureCredential -Key "GitHubToken" -Value "ghp_abc123"
-# $token = Get-SecureCredential -Key "GitHubToken"
+# Save-SecureCredential -Key "githubToken" -Value "ghp_abc123"
+# $token = Get-SecureCredential -Key "githubToken"
 ```
 
 ---
 
-## 🚀 Quick Start Templates
+## 🚀 QUICK START TEMPLATES
 
-### **Minimal Customization (For Beginners):**
+### **MINIMAL CUSTOMIZATION (FOR BEGINNERS):**
 ```powershell
-# CTTcustom.ps1 - Minimal version
+# HFCustom.ps1 - Minimal version
 
 # 1. Set your editor
 $EDITOR_Override = "code"
 
 # 2. Add a few useful aliases
 Set-Alias -Name home -Value { Set-Location $HOME }
-Set-Al
+Set-Alias -Name cls -Value Clear-Host
+Set-Alias -Name ll -Value Get-ChildItem
+
+# 3. Personal functions
+function proj {
+    Set-Location "$HOME\Projects"
+    Write-Host "📁 Projects directory" -ForegroundColor Green
+}
+
+function weather {
+    Invoke-RestMethod "wttr.in/?format=3" | Write-Host
+}
+
+# 4. Environment variables
+$env:BAT_THEME = "TwoDark"
+$env:EDITOR = "code"
+
+Write-Host "✨ Custom profile loaded!" -ForegroundColor Green
+```
+
+### **DEVELOPER CUSTOMIZATION:**
+```powershell
+# HFCustom.ps1 - Developer version
+
+# Debug mode
+$debug_Override = $true
+
+# Editor preferences
+$EDITOR_Override = "nvim"
+$env:EDITOR = "nvim"
+
+# Development tools setup
+function dev {
+    Write-Host "💻 Starting development environment..." -ForegroundColor Cyan
+    
+    # Check for required tools
+    $tools = @("node", "python", "git", "docker")
+    foreach ($tool in $tools) {
+        if (Get-Command $tool -ErrorAction SilentlyContinue) {
+            Write-Host "  ✅ $tool" -ForegroundColor Green
+        } else {
+            Write-Host "  ❌ $tool not found" -ForegroundColor Red
+        }
+    }
+    
+    # Set up development environment
+    $env:NODE_ENV = "development"
+    $env:PYTHONPATH = "$HOME\dev\python"
+    
+    # Start dev tools
+    # code .
+    # docker-compose up -d
+    
+    Write-Host "✅ Development environment ready!" -ForegroundColor Green
+}
+
+# Git shortcuts
+function gcom {
+    param([string]$Message)
+    git add .
+    git commit -m $Message
+    Write-Host "📝 Committed: $Message" -ForegroundColor Green
+}
+
+function gpush {
+    git push
+    Write-Host "🚀 Pushed changes" -ForegroundColor Green
+}
+
+# Project navigation
+$projects = @{
+    "web" = "$HOME\Projects\web-app"
+    "api" = "$HOME\Projects\api-server"
+    "mobile" = "$HOME\Projects\mobile-app"
+}
+
+foreach ($key in $projects.Keys) {
+    Set-Alias -Name "go-$key" -Value { Set-Location $projects[$key] }
+}
+
+Write-Host "🚀 Developer profile loaded!" -ForegroundColor Cyan
+```
+
+---
+
+## ❓ TROUBLESHOOTING
+
+### **COMMON ISSUES:**
+
+1. **Profile not loading:**
+   ```powershell
+   # Check execution policy
+   Get-ExecutionPolicy -List
+   
+   # Set execution policy
+   Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+   
+   # Check for syntax errors
+   . $PROFILE -ErrorAction Stop
+   ```
+
+2. **Function conflicts:**
+   ```powershell
+   # Find function conflicts
+   Get-Command -Type Function | Group-Object Name | Where-Object Count -gt 1
+   
+   # Remove conflicting function
+   Remove-Item Function:conflicting-function
+   ```
+
+3. **Module loading issues:**
+   ```powershell
+   # Check module paths
+   $env:PSModulePath -split ';'
+   
+   # List available modules
+   Get-Module -ListAvailable | Select-Object Name, Version, Path
+   ```
+
+### **DEBUGGING:**
+```powershell
+# Enable debug mode
+$debug_Override = $true
+
+# Test profile loading
+. $PROFILE -Verbose
+
+# Check loaded modules
+Get-Module | Format-Table Name, Version, Path -AutoSize
+
+# View recent errors
+$Error[0..5] | Format-List -Force
+```
+
+---
+
+## 📚 ADDITIONAL RESOURCES
+
+* **Your Repository:** [https://github.com/hetfs/powershell-profile](https://github.com/hetfs/powershell-profile)
+* **PowerShell Documentation:** [Microsoft Docs](https://learn.microsoft.com/powershell/)
+* **Starship Prompt:** [starship.rs](https://starship.rs/)
+* **Nerd Fonts:** [nerdfonts.com](https://www.nerdfonts.com/)
+
+---
+
+**🎉 HAPPY CUSTOMIZING!** Your PowerShell environment is now tailored to your workflow. Remember to back up your `HFCustom.ps1` file when making significant changes.
