@@ -137,9 +137,9 @@ $wingetTools = @(
     @{Id = "gerardog.gsudo"; Name = "gsudo"},
     @{Id = "GitHub.cli"; Name = "GitHub CLI"},
     @{Id = "JesseDuffield.lazygit"; Name = "lazygit"},
-   @{Id = "starship.starship"; Name = "Starship"},
-   @{Id = "neovim.neovim"; Name = "Neovim"},
-   @{Id = "tealdeer.tealdeer"; Name = "tldr"}
+    @{Id = "starship.starship"; Name = "Starship"},
+    @{Id = "neovim.neovim"; Name = "Neovim"},
+    @{Id = "tealdeer.tealdeer"; Name = "tldr"}
 )
 
 Install-WingetTools -ToolsList $wingetTools
