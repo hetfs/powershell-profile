@@ -1,6 +1,13 @@
-### PowerShell Profile Refactor
 ### Version 1.05 - Refactored for HETFS Repository
 ### Repository: https://github.com/hetfs/powershell-profile
+
+$debug = $false
+
+# Define the path to the file that stores the last execution time
+$timeFilePath = [Environment]::GetFolderPath("MyDocuments") + "\PowerShell\LastExecutionTime.txt"
+
+# Define the update interval in days, set to -1 to always check
+$updateInterval = 7
 
 ################################################################################################
 # SECTION 1: HEADER AND WARNINGS
@@ -42,8 +49,9 @@
 # SECTION 2: VARIABLE DEFINITIONS
 ################################################################################################
 
-# Debug mode
 if ($debug_Override){
+    # If variable debug_Override is defined in profile.ps1 file
+    # then use it instead
     $debug = $debug_Override
 } else {
     $debug = $false
@@ -56,14 +64,19 @@ if ($repo_root_Override){
     $repo_root = "https://raw.githubusercontent.com/hetfs"
 }
 
-# Update tracking configuration
+# Define the path to the file that stores the last execution time
 if ($timeFilePath_Override){
+    # If variable $timeFilePath_Override is defined in profile.ps1 file
+    # then use it instead
     $timeFilePath = $timeFilePath_Override
 } else {
     $timeFilePath = "$env:USERPROFILE\Documents\PowerShell\LastExecutionTime.txt"
 }
 
+# Define the update interval in days, set to -1 to always check
 if ($updateInterval_Override){
+    # If variable $updateInterval_Override is defined in profile.ps1 file
+    # then use it instead
     $updateInterval = $updateInterval_Override
 } else {
     $updateInterval = 7
@@ -601,7 +614,7 @@ $scriptblock = {
 Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
 
 ################################################################################################
-# SECTION 17: STARSHIP PROMPT (REPLACED OH MY POSH)
+# SECTION 17: STARSHIP PROMPT
 ################################################################################################
 
 # Initialize Starship prompt
@@ -610,7 +623,7 @@ if (Get-Command -Name starship -ErrorAction SilentlyContinue) {
 } else {
     Write-Host "Starship not found. Installing via winget..."
     try {
-        winget install starship
+        winget install -e --id Starship.Starship
         Invoke-Expression (&starship init powershell)
     } catch {
         Write-Error "Failed to install Starship. Error: $_"

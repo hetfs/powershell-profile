@@ -1,5 +1,4 @@
 # PowerShell Profile Setup Script
-# Version 2.0 - Refactored for HETFS Repository
 # Repository: https://github.com/hetfs/powershell-profile
 
 ################################################################################################
@@ -160,7 +159,7 @@ function Setup-PowerShellProfile {
 function Install-Packages {
     Write-Host "`n📦 Installing required packages..." -ForegroundColor Cyan
     
-    # 5.1 Install Starship Prompt (replacing Oh My Posh)
+    # 5.1 Install Starship Prompt
     Write-Host "🚀 Installing Starship prompt..." -ForegroundColor Yellow
     try {
         winget install -e --accept-source-agreements --accept-package-agreements starship
