@@ -614,40 +614,6 @@ $scriptblock = {
 Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
 
 ################################################################################################
-# SECTION 17: STARSHIP PROMPT
-################################################################################################
-
-# Initialize Starship prompt
-if (Get-Command -Name starship -ErrorAction SilentlyContinue) {
-    Invoke-Expression (&starship init powershell)
-} else {
-    Write-Host "Starship not found. Installing via winget..."
-    try {
-        winget install -e --id Starship.Starship
-        Invoke-Expression (&starship init powershell)
-    } catch {
-        Write-Error "Failed to install Starship. Error: $_"
-    }
-}
-
-################################################################################################
-# SECTION 18: ZOXIDE INITIALIZATION
-################################################################################################
-
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& { (zoxide init --cmd z powershell | Out-String) })
-} else {
-    Write-Host "zoxide command not found. Attempting to install via winget..."
-    try {
-        winget install -e --id ajeetdsouza.zoxide
-        Write-Host "zoxide installed successfully. Initializing..."
-        Invoke-Expression (& { (zoxide init --cmd z powershell | Out-String) })
-    } catch {
-        Write-Error "Failed to install zoxide. Error: $_"
-    }
-}
-
-################################################################################################
 # SECTION 19: HELP FUNCTION
 ################################################################################################
 
