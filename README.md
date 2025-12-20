@@ -1,17 +1,17 @@
-# PowerShell Profile
+# PowerShell Profile hetfs Edition
 
-A completely, modular PowerShell profile that transforms your terminal into a powerful development environment. Built with maintainability, extensibility, and developer productivity in mind.
+A completely modular PowerShell profile that transforms your terminal into a powerful development environment. Built with maintainability, extensibility, and developer productivity in mind.
 
 ## ✨ Features
 
-* **🎯 Modular Architecture** Clean separation of concerns with individual module files
-* **🔄 Selective Loading** Enable/disable modules by commenting in the load order
-* **🔧 Easy Maintenance** Edit individual modules without touching the core profile
-* **📦 Version Control Friendly** Track changes to specific modules
-* **🎨 Modern Tools** Starship prompt, zoxide navigation, bat/eza for better listings
-* **⚡ Auto-Updating**  Built-in update checks for profile and PowerShell
+* **🎯 Modular Architecture** Clean, organized sections with clear separation of concerns
+* **🔄 Starship Prompt** Fast, cross-shell prompt with extensive customization
+* **📁 Smart Navigation** zoxide for intelligent directory jumping
+* **🎨 Terminal Icons** Beautiful file and folder icons
+* **⚡ Auto-Updating** Built-in update checks for profile and PowerShell
+* **🔧 Override System** Safe customization without modifying main profile
 * **🎯 Developer Focused** Git shortcuts, smart completions, productivity tweaks
-* **🔍 Easy Debugging** Isolate issues to specific modules
+* **🔍 Easy Debugging** Isolate issues with debug mode
 
 ---
 
@@ -26,26 +26,26 @@ A completely, modular PowerShell profile that transforms your terminal into a po
 ### One-Line Installation
 
 ```powershell
-# Download and run the setup script
-irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/Setup-Modular.ps1 | iex
+# Download and run the setup script (Run as Administrator)
+irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/setup.ps1 | iex
 ```
 
 ### Manual Installation
 
 1. **Clone or download the repository**
 ```powershell
-# Option 1: Clone (if you have Git)
-git clone https://github.com/hetfs/powershell-profile.git "$env:TEMP\powershell-profile"
-Set-Location "$env:TEMP\powershell-profile"
+# Option 1: Clone (if you have git)
+git clone https://github.com/hetfs/powershell-profile.git "$env:temp\powershell-profile"
+Set-Location "$env:temp\powershell-profile"
 
 # Option 2: Download manually
-# Download Setup-Modular.ps1 and Microsoft.PowerShell_profile.ps1 to your PowerShell directory
+# Download setup.ps1 and Microsoft.PowerShell_profile.ps1 to your PowerShell directory
 ```
 
 2. **Run the setup script**
 ```powershell
 # Run as Administrator for full installation
-.\Setup-Modular.ps1
+.\setup.ps1
 ```
 
 3. **Restart PowerShell/Terminal**
@@ -60,79 +60,78 @@ Set-Location "$env:TEMP\powershell-profile"
 
 ### What Gets Installed
 
-The setup script installs the following modern CLI tools via Winget:
+The setup script installs the following modern CLI tools:
 
-| Tool | Purpose | Winget ID |
-|------|---------|-----------|
-| Git | Version control | Git.Git |
-| Starship | Cross-shell prompt | starship.starship |
-| zoxide | Smarter cd command | ajeetdsouza.zoxide |
-| fd | Fast file finder | sharkdp.fd |
-| ripgrep | Fast text search | BurntSushi.ripgrep.MSVC |
-| bat | Better cat command | sharkdp.bat |
-| eza | Modern ls replacement | eza.eza |
-| delta | Git diff viewer | dandavison.delta |
-| gsudo | Sudo for Windows | gerardog.gsudo |
-| GitHub CLI | GitHub from terminal | GitHub.cli |
-| lazygit | Terminal Git UI | JesseDuffield.lazygit |
-| Neovim | Modern Vim editor | neovim.neovim |
-| tldr | Simplified man pages | tealdeer.tealdeer |
+| Tool | Purpose | Installation Method |
+|------|---------|-------------------|
+| **Starship** | Cross-shell prompt | Winget |
+| **zoxide** | Smart directory navigation | Winget |
+| **Terminal Icons** | File type icons | PowerShell Gallery |
+| **Nerd Font** | CaskaydiaCove NF font | GitHub releases |
+| **Optional: Chocolatey** | Package manager | Installation script |
 
-### Additional Components
+### Components
 
-* **Nerd Fonts** Installs CaskaydiaCove NF font for proper icon support
-* **PowerShell Modules** Terminal-Icons, PSReadLine enhancements
-* **Profile Structure** Creates modular profile with auto-update capability
+| Component | Description |
+|-----------|-------------|
+| **Starship Prompt** | Fast, customizable prompt written in Rust |
+| **zoxide** | Smarter `cd` command that learns your habits |
+| **PSReadLine** | Enhanced command line editing |
+| **Terminal Icons** | Visual file type indicators |
+| **Custom Aliases** | Shortcuts for common commands |
+| **Git Integration** | Useful Git workflows and aliases |
+| **System Utilities** | Network, file, and system management tools |
 
 ---
 
 ## 🎯 Customization
 
-### Module Management
-
-**Disable a module:** Comment it out in the `$modulesToLoad` array in `Microsoft.PowerShell_profile.ps1`:
-
-```powershell
-$modulesToLoad = @(
-    "CoreFunctions",
-    "DebugModule",
-    # "ThemeModule",     # Disabled - uses default prompt
-    "ZoxideModule",
-    # ... other modules
-)
-```
-
-**Add a custom module:**
-1. Create `Modules\CustomModule.ps1`
-2. Add functions and export them with `Export-ModuleMember`
-3. Add "CustomModule" to the `$modulesToLoad` array
-
 ### Override System
 
-Create or edit `HFCustom.ps1` in your PowerShell directory to override settings:
+Create or edit `$HOME\Documents\PowerShell\profile.ps1` to override settings:
 
 ```powershell
-# $HOME\Documents\PowerShell\HFCustom.ps1
+# Example overrides in profile.ps1
 
-# Variable overrides
+# Variable Overrides
 $debug_Override = $false
 $EDITOR_Override = "nvim"
-$updateInterval_Override = 14  # Check for updates every 2 weeks
-$repo_root_Override = "https://github.com/hetfs/powershell-profile"  # Your repository
+$updateInterval_Override = 14  # Check updates every 2 weeks
+$repo_root_Override = "https://raw.githubusercontent.com/YOUR_USERNAME/powershell-profile"
 
-# Function overrides
-function Update-Profile_Override {
-    Write-Host "Using custom update logic..." -ForegroundColor Yellow
-    # Your custom update code here
+# Function Overrides
+function Debug-Message_Override {
+    Write-Host "=== CUSTOM DEBUG MODE ===" -ForegroundColor Cyan
 }
 
 function Get-Theme_Override {
-    # Custom theme setup - Starship with custom config
+    # Custom Starship configuration
     if (Get-Command starship -ErrorAction SilentlyContinue) {
-        # Load custom starship config
-        Invoke-Expression (&starship init powershell --config ~/.config/starship-custom.toml)
+        # Load custom Starship config
+        $env:STARSHIP_CONFIG = "$HOME\.config\starship-custom.toml"
+        Invoke-Expression (&starship init powershell)
     }
 }
+```
+
+### HETFScustom.ps1
+
+For more extensive customizations, create `HETFScustom.ps1` in your PowerShell directory:
+
+```powershell
+# Load additional modules
+Import-Module PSScriptAnalyzer
+
+# Add custom functions
+function Get-Weather {
+    param([string]$City = "London")
+    (Invoke-WebRequest "https://wttr.in/$City").Content
+}
+
+# Custom aliases
+Set-Alias -Name weather -Value Get-Weather
+Set-Alias -Name dcup -Value { docker-compose up }
+Set-Alias -Name dcdown -Value { docker-compose down }
 ```
 
 ### Available Overrides
@@ -140,8 +139,8 @@ function Get-Theme_Override {
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `$debug_Override` | Enable debug mode | `$false` |
-| `$repo_root_Override` | Custom update source | Your repo |
-| `$timeFilePath_Override` | Custom update tracking file | `LastExecutionTime.txt` |
+| `$repo_root_Override` | Custom update source | hetfs repo |
+| `$timeFilePath_Override` | Update tracking file | `LastExecutionTime.txt` |
 | `$updateInterval_Override` | Update frequency (days) | `7` |
 | `$EDITOR_Override` | Preferred editor | Auto-detected |
 
@@ -167,6 +166,7 @@ function Get-Theme_Override {
 | `Edit-Profile` | Edit the main profile | `ep` |
 | `reload-profile` | Reload the profile | |
 | `Clear-Cache` | Clear system cache | |
+| `Show-Help` | Display help message | |
 
 ### Git Shortcuts
 | Shortcut | Command | Description |
@@ -174,11 +174,12 @@ function Get-Theme_Override {
 | `gs` | `git status` | Check status |
 | `ga` | `git add .` | Stage all changes |
 | `gc "msg"` | `git commit -m "msg"` | Commit with message |
-| `gpush` | `git push` | Push changes |
+| `gpush` | `git push` | Push changes | `gp` |
 | `gpull` | `git pull` | Pull changes |
-| `gcom "msg"` | Add + commit | Stage and commit |
-| `lazyg "msg"` | Add + commit + push | Complete workflow |
+| `gcom "msg"` | add + commit | Stage and commit |
+| `lazyg "msg"` | add + commit + push | Complete workflow |
 | `gcl <url>` | `git clone` | Clone repository |
+| `g` | `zoxide github` | Jump to GitHub directory |
 
 ### Navigation
 | Command | Description |
@@ -187,7 +188,6 @@ function Get-Theme_Override {
 | `dtop` | Go to Desktop folder |
 | `mkcd <dir>` | Create and enter directory |
 | `z <query>` | Smart directory jump (zoxide) |
-| `g` | Jump to GitHub directory |
 | `la` | List all files (detailed) |
 | `ll` | List including hidden files |
 
@@ -200,13 +200,13 @@ function Get-Theme_Override {
 | `flushdns` | Clear DNS cache |
 | `Get-PubIP` | Get public IP address |
 | `winutil` | System utility tool |
-| `winutildev` | Dev version of winutil |
+| `winutildev` | Dev version of WinUtil |
 
 ### File Operations
 | Command | Description |
 |---------|-------------|
 | `touch <file>` | Create empty file |
-| `trash <path>` | Move to Recycle Bin |
+| `trash <path>` | Move to recycle bin |
 | `ff <pattern>` | Find files by name |
 | `unzip <file>` | Extract archive |
 | `hb <file>` | Upload to hastebin |
@@ -228,13 +228,10 @@ function Get-Theme_Override {
 
 ### Starship Configuration
 
-After installation, customize your prompt:
+After installation, customize your Starship prompt:
 
 ```powershell
-# Create a basic starship config
-starship preset pastel-powerline > ~/.config/starship.toml
-
-# Or create your own config
+# Create a basic Starship config
 @"
 # ~/.config/starship.toml
 [character]
@@ -243,15 +240,20 @@ error_symbol = "[✗](bold red)"
 
 [directory]
 truncation_length = 3
-truncate_to_repo = true
+style = "cyan bold"
+
+[git_branch]
+symbol = "🌱 "
+style = "bold green"
 "@ | Set-Content ~/.config/starship.toml
 ```
 
 ### Font Setup
 
-1. **Restart Windows Terminal** after installation
-2. **Set font** to "CaskaydiaCove NF" in terminal settings
-3. **Configure icons** by setting `$env:TERMINAL_ICONS_CUSTOM_FOLDER` if needed
+1. **Install Nerd Font** - Setup script installs CaskaydiaCove NF
+2. **Restart Windows Terminal** after installation
+3. **Set Font** to "CaskaydiaCove NF" in terminal settings
+4. **Configure Icons** - Terminal Icons module handles icon display
 
 ---
 
@@ -260,8 +262,12 @@ truncate_to_repo = true
 ### Enable Debug Mode
 
 ```powershell
-# In your HFCustom.ps1 or directly in profile
+# In your profile.ps1 or directly in profile
 $debug_Override = $true
+
+# Or temporarily at runtime
+$debug = $true
+Update-Profile
 ```
 
 ### Common Issues
@@ -269,24 +275,25 @@ $debug_Override = $true
 | Issue | Solution |
 |-------|----------|
 | **Profile not loading** | Run `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
-| **Module not found** | Check module path and spelling in `$modulesToLoad` |
-| **Starship not showing** | Install starship: `winget install starship.starship` |
+| **Starship not showing** | Install Starship: `winget install Starship.Starship` |
 | **Font not appearing** | Restart terminal, set font to "CaskaydiaCove NF" |
-| **zoxide not working** | Add `Invoke-Expression (& { (zoxide init powershell | Out-String) })` to profile |
+| **zoxide not working** | Ensure it's installed: `winget install ajeetdsouza.zoxide` |
 | **Permission errors** | Run PowerShell as Administrator |
+| **Update checks failing** | Check internet connection, set `$canConnectToGitHub` |
 
-### Testing Module Loading
+### Testing Profile Loading
 
 ```powershell
-# Test specific module
-. $PSScriptRoot\Modules\GitModule.ps1
-gs  # Should show git status
-
-# Check loaded modules
-Get-Module | Select-Object Name
+# Test profile loading
+. $PROFILE
 
 # Check for errors
-$Error[0..5] | Format-List -Force
+$error[0..5] | Format-List -Force
+
+# Test specific functions
+Get-PubIP
+gs
+la
 ```
 
 ---
@@ -295,6 +302,7 @@ $Error[0..5] | Format-List -Force
 
 ### Automatic Updates
 The profile checks for updates every 7 days by default. Change interval:
+
 ```powershell
 $updateInterval_Override = 14  # Check every 2 weeks
 $updateInterval_Override = -1  # Always check
@@ -309,48 +317,97 @@ Update-PowerShell # Update PowerShell itself
 
 ### Creating Backups
 ```powershell
-# Backup entire profile structure
-Copy-Item "$HOME\Documents\PowerShell" "$HOME\Documents\PowerShell_Backup_$(Get-Date -Format 'yyyyMMdd')" -Recurse
+# Backup entire profile
+Copy-Item $PROFILE "$PROFILE.backup-$(Get-Date -Format 'yyyyMMdd')"
 
-# Backup individual module
-Copy-Item "$HOME\Documents\PowerShell\Modules\GitModule.ps1" "$HOME\Backups\"
+# Backup customizations
+Copy-Item "$HOME\Documents\PowerShell\profile.ps1" "$HOME\Backups\"
 ```
+
+---
+
+## 🏗️ Project Structure
+
+```
+powershell-profile/
+├── setup.ps1                    # Main installation script
+├── setprofile.ps1              # Manual profile copy utility
+├── Microsoft.PowerShell_profile.ps1  # Main profile (21 sections)
+├── HETFScustom.ps1.example     # Customization template
+├── starship.toml.example       # Starship configuration example
+├── docs/
+│   └── CUSTOMIZATION.md        # Detailed customization guide
+├── .gitignore                  # Git ignore rules
+├── README.md                   # This file
+└── LICENSE                     # MIT License
+```
+
+### Profile Sections
+
+1. **Configuration & Header** - Warnings and license info
+2. **Override System Initialization** - Customization framework
+3. **Debug & Core Functions** - Debug mode and core utilities
+4. **Update System** - Auto-update functionality
+5. **Utility Functions** - General utilities
+6. **Module Imports** - External module loading
+7. **Editor Configuration** - Editor preferences
+8. **File Operations** - File management utilities
+9. **Network Utilities** - Network tools
+10. **System Utilities** - System information tools
+11. **Directory Management** - Navigation utilities
+12. **Git Shortcuts** - Git workflows
+13. **WinUtil Functions** - System maintenance tools
+14. **Quality of Life Aliases** - Common shortcuts
+15. **PSReadLine Configuration** - Enhanced command line
+16. **Starship Prompt Configuration** - Modern prompt setup
+17. **Auto-Completion** - Smart tab completion
+18. **zoxide Configuration** - Smart directory navigation
+19. **Help Function** - Built-in documentation
+20. **Customizations Loader** - External customization loading
 
 ---
 
 ## 🤝 Contributing
 
-### Module Development Guidelines
+### Development Guidelines
 
-1. **Single Responsibility** Each module should handle one concern
-2. **Export Functions** Use `Export-ModuleMember -Function <name>`
-3. **Error Handling** Include try/catch blocks for robustness
-4. **Help Comments** Add comment-based help for functions
-5. **Testing** Test module in isolation before integration
+1. **Maintain Override System** - Always support `_Override` functions
+2. **Error Handling** - Include try/catch blocks for robustness
+3. **Documentation** - Add comments and update help text
+4. **Backward Compatibility** - Don't break existing functionality
+5. **Testing** - Test changes in both Windows PowerShell and PowerShell 7
+
+### Module Structure Principles
+
+- **Single Responsibility** - Each section handles one concern
+- **Clear Dependencies** - Load order matters, document dependencies
+- **Override Support** - Always allow user customization
+- **Error Resilience** - Fail gracefully with helpful messages
 
 ---
 
 ## 📚 Learning Resources
 
-* [PowerShell Documentation](https://learn.microsoft.com/powershell/) Official Microsoft docs
-* [Starship Documentation](https://starship.rs/) Cross-shell prompt guide
-* [Oh My Posh Themes](https://ohmyposh.dev/docs/themes) Alternative theming
-* [Windows Terminal Docs](https://learn.microsoft.com/windows/terminal/) Terminal configuration
-* [PowerShell Gallery](https://www.powershellgallery.com/) Community modules
+* [PowerShell Documentation](https://learn.microsoft.com/powershell/) - Official Microsoft docs
+* [Starship Documentation](https://starship.rs/) - Cross-shell prompt guide
+* [zoxide Documentation](https://github.com/ajeetdsouza/zoxide) - Smart `cd` replacement
+* [Windows Terminal Docs](https://learn.microsoft.com/windows/terminal/) - Terminal configuration
+* [PowerShell Gallery](https://www.powershellgallery.com/) - Community modules
 
 ---
 
-## [ ⚖️License](./LICENSE)
+## ⚖️ License
 
-MIT License - See LICENSE file for details
+MIT License - See [LICENSE](./LICENSE) file for details
 
 ## 🙏 Acknowledgments
 
 Based on the original work by [Chris Titus Tech](https://christitus.com/)
-* [Starship](https://starship.rs/) Cross-shell prompt
-* [Nerd Fonts](https://www.nerdfonts.com/) Iconic font patches
-* [Terminal Icons](https://github.com/devblackops/Terminal-Icons) File type icons
-* [PSReadLine](https://github.com/PowerShell/PSReadLine) Enhanced command line
+* [Starship](https://starship.rs/) - Cross-shell prompt
+* [Nerd Fonts](https://www.nerdfonts.com/) - Iconic font patches
+* [Terminal Icons](https://github.com/devblackops/Terminal-Icons) - File type icons
+* [zoxide](https://github.com/ajeetdsouza/zoxide) - Smarter `cd` command
+* [PSReadLine](https://github.com/PowerShell/PSReadLine) - Enhanced command line
 
 ---
 
@@ -358,7 +415,58 @@ Based on the original work by [Chris Titus Tech](https://christitus.com/)
 
 * **Issues**: [GitHub Issues](https://github.com/hetfs/powershell-profile/issues)
 * **Quick Help**: Run `Show-Help` in PowerShell
+* **Customization Help**: See `docs/CUSTOMIZATION.md`
 
 ---
 
 **Happy PowerShelling!** 🎉
+
+## 🚀 Quick Reference Card
+
+### Installation Cheat Sheet
+
+```powershell
+# One-line install (Admin)
+irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/setup.ps1 | iex
+
+# Manual steps
+1. Clone repo
+2. Run setup.ps1 as Admin
+3. Restart terminal
+4. Customize as needed
+```
+
+### Essential Commands
+
+```powershell
+# Profile management
+ep           # Edit profile
+Update-Profile   # Update from repo
+reload-profile   # Reload current profile
+
+# Git workflow
+gs           # git status
+ga           # git add .
+gc "msg"     # git commit -m "msg"
+lazyg "msg"  # add + commit + push
+
+# Navigation
+z <folder>   # Smart directory jump
+docs         # Go to Documents
+dtop         # Go to Desktop
+la           # List all files
+
+# System
+admin        # Open admin terminal
+uptime       # System uptime
+sysinfo      # System information
+```
+
+### Configuration Files
+
+| File | Purpose | Location |
+|------|---------|----------|
+| Main Profile | Core functionality | `$PROFILE` |
+| Custom Overrides | Personal settings | `$HOME\Documents\PowerShell\profile.ps1` |
+| Extended Custom | Additional functions | `$HOME\Documents\PowerShell\HETFScustom.ps1` |
+| Starship Config | Prompt customization | `$HOME\.config\starship.toml` |

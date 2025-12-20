@@ -1,0 +1,45 @@
+# Initialize git repository
+git init
+
+# Create .gitignore file
+New-Item -ItemType File -Name .gitignore -Value @"
+# Windows
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# PowerShell
+*.ps1xml
+*.pssc
+*.psd1
+*.psm1
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+_Backup/
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains
+.idea/
+*.iml
+
+# Virtual Environments
+venv/
+env/
+.venv/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+"@

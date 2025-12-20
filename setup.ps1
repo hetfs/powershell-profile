@@ -1,202 +1,389 @@
-# PowerShell Environment Setup for HETFS
+# PowerShell Profile Setup Script
+# Version 2.0 - Refactored for HETFS Repository
 # Repository: https://github.com/hetfs/powershell-profile
 
-# Admin check
+################################################################################################
+# SECTION 1: ADMINISTRATOR CHECK
+################################################################################################
+
+# Ensure the script can run with elevated privileges
 if (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Warning "⚠️ Please run this script as Administrator!"
-    exit 1
+    Write-Host "❌ Please run this script as an Administrator!" -ForegroundColor Red
+    Write-Host "   Right-click PowerShell and select 'Run as Administrator'" -ForegroundColor Yellow
+    break
 }
 
-Write-Host "🚀 HETFS PowerShell Environment Setup" -ForegroundColor Cyan
-Write-Host "Repository: https://github.com/hetfs/powershell-profile" -ForegroundColor Blue
-Write-Host ""
+################################################################################################
+# SECTION 2: INTERNET CONNECTIVITY CHECK
+################################################################################################
 
-# Configuration
-$RepoBase = "https://github.com/hetfs/powershell-profile"
-$ProfileUrl = "$RepoBase/raw/main/Microsoft.PowerShell_profile.ps1"
-$CustomConfigUrl = "$RepoBase/raw/main/HETFScustom.ps1"
-
-# Function to check internet
-function Test-ConnectionToGitHub {
+function Test-InternetConnection {
     try {
-        Test-Connection github.com -Count 1 -Quiet -TimeoutSeconds 3
+        Write-Host "🌐 Testing internet connection..." -ForegroundColor Cyan
+        Test-Connection -ComputerName www.google.com -Count 1 -ErrorAction Stop | Out-Null
+        Write-Host "✅ Internet connection is available" -ForegroundColor Green
         return $true
-    } catch {
+    }
+    catch {
+        Write-Host "❌ Internet connection is required but not available." -ForegroundColor Red
+        Write-Host "   Please check your connection and try again." -ForegroundColor Yellow
         return $false
     }
 }
 
-# Main setup
-Write-Host "🔍 Checking internet connection..." -ForegroundColor Yellow
-if (-not (Test-ConnectionToGitHub)) {
-    Write-Error "❌ No internet connection. Setup cannot continue."
-    exit 1
-}
+################################################################################################
+# SECTION 3: NERD FONTS INSTALLATION
+################################################################################################
 
-# Step 1: Install PowerShell profile
-Write-Host "`n📁 Step 1: Installing PowerShell profile..." -ForegroundColor Cyan
+function Install-NerdFonts {
+    param (
+        [string]$FontName = "CascadiaCode",
+        [string]$FontDisplayName = "CaskaydiaCove NF",
+        [string]$Version = "3.2.1"
+    )
 
-$profileDir = if ($PSVersionTable.PSEdition -eq "Core") {
-    "$env:USERPROFILE\Documents\PowerShell"
-} else {
-    "$env:USERPROFILE\Documents\WindowsPowerShell"
-}
-
-# Create directory if needed
-if (-not (Test-Path $profileDir)) {
-    New-Item -ItemType Directory -Path $profileDir -Force | Out-Null
-}
-
-# Download main profile
-try {
-    Write-Host "📥 Downloading main profile..." -ForegroundColor Yellow
-    Invoke-WebRequest -Uri $ProfileUrl -OutFile $PROFILE -UseBasicParsing
-    Write-Host "✅ Main profile installed" -ForegroundColor Green
-} catch {
-    Write-Error "❌ Failed to download profile: $_"
-    exit 1
-}
-
-# Download custom config template
-try {
-    Write-Host "📥 Downloading custom config template..." -ForegroundColor Yellow
-    $customPath = Join-Path $profileDir "HETFScustom.ps1"
-    if (-not (Test-Path $customPath)) {
-        Invoke-WebRequest -Uri $CustomConfigUrl -OutFile $customPath -UseBasicParsing
-        Write-Host "✅ Custom config template installed" -ForegroundColor Green
-    } else {
-        Write-Host "⚠️ Custom config already exists, skipping..." -ForegroundColor Yellow
-    }
-} catch {
-    Write-Warning "Custom config template not available, continuing..."
-}
-
-# Step 2: Install Starship
-Write-Host "`n🚀 Step 2: Installing Starship prompt..." -ForegroundColor Cyan
-
-if (Get-Command starship -ErrorAction SilentlyContinue) {
-    Write-Host "✅ Starship already installed" -ForegroundColor Green
-} else {
     try {
-        Write-Host "📦 Installing via winget..." -ForegroundColor Yellow
-        winget install Starship.Starship -e --accept-source-agreements --accept-package-agreements
-        Write-Host "✅ Starship installed" -ForegroundColor Green
-    } catch {
-        Write-Error "❌ Failed to install Starship. Please install manually from https://starship.rs/"
+        Write-Host "📝 Checking for Nerd Font installation..." -ForegroundColor Cyan
+        
+        # Check if font is already installed
+        [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+        $fontFamilies = (New-Object System.Drawing.Text.InstalledFontCollection).Families.Name
+        
+        if ($fontFamilies -notcontains "${FontDisplayName}") {
+            Write-Host "📥 Downloading ${FontDisplayName} font..." -ForegroundColor Yellow
+            
+            $fontZipUrl = "https://github.com/ryanoasis/nerd-fonts/releases/download/v${Version}/${FontName}.zip"
+            $zipFilePath = "$env:TEMP\${FontName}.zip"
+            $extractPath = "$env:TEMP\${FontName}"
+
+            # Download font
+            Invoke-WebRequest -Uri $fontZipUrl -OutFile $zipFilePath
+            
+            # Extract font
+            Expand-Archive -Path $zipFilePath -DestinationPath $extractPath -Force
+            
+            # Install font files
+            $destination = (New-Object -ComObject Shell.Application).Namespace(0x14)
+            $fontFiles = Get-ChildItem -Path $extractPath -Recurse -Filter "*.ttf"
+            
+            foreach ($fontFile in $fontFiles) {
+                If (-not(Test-Path "C:\Windows\Fonts\$($fontFile.Name)")) {
+                    $destination.CopyHere($fontFile.FullName, 0x10)
+                }
+            }
+
+            # Cleanup
+            Remove-Item -Path $extractPath -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path $zipFilePath -Force -ErrorAction SilentlyContinue
+            
+            Write-Host "✅ ${FontDisplayName} font installed successfully" -ForegroundColor Green
+        } else {
+            Write-Host "✅ ${FontDisplayName} font is already installed" -ForegroundColor Green
+        }
+    }
+    catch {
+        Write-Host "❌ Failed to download or install ${FontDisplayName} font." -ForegroundColor Red
+        Write-Host "   Error: $_" -ForegroundColor Yellow
     }
 }
 
-# Step 3: Install Terminal Icons
-Write-Host "`n🎨 Step 3: Installing Terminal Icons..." -ForegroundColor Cyan
+################################################################################################
+# SECTION 4: PROFILE SETUP
+################################################################################################
 
-if (Get-Module -ListAvailable Terminal-Icons) {
-    Write-Host "✅ Terminal Icons already installed" -ForegroundColor Green
-} else {
-    try {
-        Install-Module Terminal-Icons -Repository PSGallery -Force -AllowClobber -Scope CurrentUser
-        Write-Host "✅ Terminal Icons installed" -ForegroundColor Green
-    } catch {
-        Write-Error "❌ Failed to install Terminal Icons"
-    }
-}
-
-# Step 4: Install zoxide
-Write-Host "`n📁 Step 4: Installing zoxide..." -ForegroundColor Cyan
-
-if (Get-Command zoxide -ErrorAction SilentlyContinue) {
-    Write-Host "✅ zoxide already installed" -ForegroundColor Green
-} else {
-    try {
-        winget install ajeetdsouza.zoxide -e --accept-source-agreements --accept-package-agreements
-        Write-Host "✅ zoxide installed" -ForegroundColor Green
-    } catch {
-        Write-Error "❌ Failed to install zoxide"
-    }
-}
-
-# Step 5: Create basic Starship config
-Write-Host "`n⚙️  Step 5: Configuring Starship..." -ForegroundColor Cyan
-
-$starshipConfigDir = "$env:USERPROFILE\.config"
-if (-not (Test-Path $starshipConfigDir)) {
-    New-Item -ItemType Directory -Path $starshipConfigDir -Force | Out-Null
-}
-
-$starshipConfigPath = "$starshipConfigDir\starship.toml"
-if (-not (Test-Path $starshipConfigPath)) {
-    $basicConfig = @"
-# Starship configuration for HETFS
-# Docs: https://starship.rs/config/
-
-format = """
-$username\
-$hostname\
-$directory\
-$git_branch\
-$git_state\
-$git_status\
-$cmd_duration\
-$line_break\
-$character"""
-
-[character]
-success_symbol = "[➜](bold green)"
-error_symbol = "[✗](bold red)"
-vimcmd_symbol = "[❮](bold green)"
-
-[directory]
-truncation_length = 3
-truncate_to_repo = false
-style = "blue bold"
-
-[git_branch]
-symbol = " "
-style = "bold green"
-
-[cmd_duration]
-format = "[$duration]($style)"
-style = "yellow"
-
-[time]
-disabled = false
-format = '[🕙 $time]($style)'
-time_format = "%R"
-style = "bold dimmed white"
-"@
+function Setup-PowerShellProfile {
+    Write-Host "`n🔧 Setting up PowerShell profile..." -ForegroundColor Cyan
     
-    Set-Content -Path $starshipConfigPath -Value $basicConfig
-    Write-Host "✅ Basic Starship config created" -ForegroundColor Green
+    # Determine PowerShell version and profile path
+    $profilePath = ""
+    if ($PSVersionTable.PSEdition -eq "Core") {
+        $profilePath = "$env:userprofile\Documents\PowerShell"
+    }
+    elseif ($PSVersionTable.PSEdition -eq "Desktop") {
+        $profilePath = "$env:userprofile\Documents\WindowsPowerShell"
+    }
+    
+    # Create profile directory if it doesn't exist
+    if (!(Test-Path -Path $profilePath)) {
+        Write-Host "📁 Creating PowerShell profile directory..." -ForegroundColor Yellow
+        New-Item -Path $profilePath -ItemType "directory" -Force | Out-Null
+    }
+    
+    # Check if profile already exists
+    if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
+        try {
+            Write-Host "📄 Creating new PowerShell profile..." -ForegroundColor Yellow
+            $profileUrl = "https://raw.githubusercontent.com/hetfs/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
+            Invoke-RestMethod $profileUrl -OutFile $PROFILE
+            Write-Host "✅ PowerShell profile created at: [$PROFILE]" -ForegroundColor Green
+        }
+        catch {
+            Write-Host "❌ Failed to create the profile." -ForegroundColor Red
+            Write-Host "   Error: $_" -ForegroundColor Yellow
+            return $false
+        }
+    }
+    else {
+        try {
+            # Backup existing profile
+            Write-Host "📦 Backing up existing profile..." -ForegroundColor Yellow
+            $backupPath = Join-Path (Split-Path $PROFILE) "oldprofile.ps1"
+            Copy-Item -Path $PROFILE -Destination $backupPath -Force
+            
+            # Download new profile
+            Write-Host "🔄 Updating PowerShell profile..." -ForegroundColor Yellow
+            $profileUrl = "https://raw.githubusercontent.com/hetfs/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
+            Invoke-RestMethod $profileUrl -OutFile $PROFILE
+            
+            Write-Host "✅ PowerShell profile updated at: [$PROFILE]" -ForegroundColor Green
+            Write-Host "📦 Your old profile has been backed up to: [$backupPath]" -ForegroundColor Cyan
+        }
+        catch {
+            Write-Host "❌ Failed to backup and update the profile." -ForegroundColor Red
+            Write-Host "   Error: $_" -ForegroundColor Yellow
+            return $false
+        }
+    }
+    
+    Write-Host "`n⚠️ IMPORTANT NOTE:" -ForegroundColor Yellow
+    Write-Host "   If you want to make any personal changes or customizations," -ForegroundColor Cyan
+    Write-Host "   please create a custom file at: [$profilePath\HETFScustom.ps1]" -ForegroundColor Cyan
+    Write-Host "   The main profile has an automatic updater that will overwrite changes." -ForegroundColor Cyan
+    
+    return $true
+}
+
+################################################################################################
+# SECTION 5: PACKAGE INSTALLATIONS
+################################################################################################
+
+function Install-Packages {
+    Write-Host "`n📦 Installing required packages..." -ForegroundColor Cyan
+    
+    # 5.1 Install Starship Prompt (replacing Oh My Posh)
+    Write-Host "🚀 Installing Starship prompt..." -ForegroundColor Yellow
+    try {
+        winget install -e --accept-source-agreements --accept-package-agreements starship
+        Write-Host "✅ Starship prompt installed successfully" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "❌ Failed to install Starship prompt." -ForegroundColor Red
+        Write-Host "   Error: $_" -ForegroundColor Yellow
+    }
+    
+    # 5.2 Install Chocolatey
+    Write-Host "🍫 Installing Chocolatey package manager..." -ForegroundColor Yellow
+    try {
+        Set-ExecutionPolicy Bypass -Scope Process -Force
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+        iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        Write-Host "✅ Chocolatey installed successfully" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "❌ Failed to install Chocolatey." -ForegroundColor Red
+        Write-Host "   Error: $_" -ForegroundColor Yellow
+    }
+    
+    # 5.3 Install Terminal Icons module
+    Write-Host "🎨 Installing Terminal Icons module..." -ForegroundColor Yellow
+    try {
+        Install-Module -Name Terminal-Icons -Repository PSGallery -Force -Scope CurrentUser
+        Write-Host "✅ Terminal Icons module installed successfully" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "❌ Failed to install Terminal Icons module." -ForegroundColor Red
+        Write-Host "   Error: $_" -ForegroundColor Yellow
+    }
+    
+    # 5.4 Install zoxide
+    Write-Host "📁 Installing zoxide (smarter cd command)..." -ForegroundColor Yellow
+    try {
+        winget install -e --id ajeetdsouza.zoxide
+        Write-Host "✅ zoxide installed successfully" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "❌ Failed to install zoxide." -ForegroundColor Red
+        Write-Host "   Error: $_" -ForegroundColor Yellow
+    }
+}
+
+################################################################################################
+# SECTION 6: FINAL VERIFICATION
+################################################################################################
+
+function Verify-Installation {
+    Write-Host "`n🔍 Verifying installation..." -ForegroundColor Cyan
+    
+    $verificationResults = @()
+    
+    # Check if profile was created/updated
+    if (Test-Path -Path $PROFILE -PathType Leaf) {
+        $verificationResults += @{
+            Component = "PowerShell Profile"
+            Status = "✅ Installed"
+            Color = "Green"
+        }
+    } else {
+        $verificationResults += @{
+            Component = "PowerShell Profile"
+            Status = "❌ Missing"
+            Color = "Red"
+        }
+    }
+    
+    # Check if Starship is installed
+    try {
+        $starshipCheck = winget list --name "starship" -e 2>$null
+        if ($starshipCheck -like "*starship*") {
+            $verificationResults += @{
+                Component = "Starship Prompt"
+                Status = "✅ Installed"
+                Color = "Green"
+            }
+        } else {
+            $verificationResults += @{
+                Component = "Starship Prompt"
+                Status = "❌ Missing"
+                Color = "Red"
+            }
+        }
+    } catch {
+        $verificationResults += @{
+            Component = "Starship Prompt"
+            Status = "⚠️ Check failed"
+            Color = "Yellow"
+        }
+    }
+    
+    # Check if font is installed
+    try {
+        [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
+        $fontFamilies = (New-Object System.Drawing.Text.InstalledFontCollection).Families.Name
+        if ($fontFamilies -contains "CaskaydiaCove NF") {
+            $verificationResults += @{
+                Component = "Nerd Font"
+                Status = "✅ Installed"
+                Color = "Green"
+            }
+        } else {
+            $verificationResults += @{
+                Component = "Nerd Font"
+                Status = "⚠️ Not found (may require restart)"
+                Color = "Yellow"
+            }
+        }
+    } catch {
+        $verificationResults += @{
+            Component = "Nerd Font"
+            Status = "⚠️ Check failed"
+            Color = "Yellow"
+        }
+    }
+    
+    # Check if Terminal Icons module is installed
+    try {
+        if (Get-Module -ListAvailable -Name Terminal-Icons) {
+            $verificationResults += @{
+                Component = "Terminal Icons"
+                Status = "✅ Installed"
+                Color = "Green"
+            }
+        } else {
+            $verificationResults += @{
+                Component = "Terminal Icons"
+                Status = "❌ Missing"
+                Color = "Red"
+            }
+        }
+    } catch {
+        $verificationResults += @{
+            Component = "Terminal Icons"
+            Status = "⚠️ Check failed"
+            Color = "Yellow"
+        }
+    }
+    
+    # Display verification results
+    Write-Host "`n📊 INSTALLATION SUMMARY:" -ForegroundColor Cyan
+    Write-Host "=" * 50
+    
+    foreach ($result in $verificationResults) {
+        Write-Host "$($result.Component): " -NoNewline
+        Write-Host "$($result.Status)" -ForegroundColor $result.Color
+    }
+    
+    Write-Host "=" * 50
+    
+    # Count successes
+    $successCount = ($verificationResults | Where-Object { $_.Status -like "✅*" }).Count
+    $totalCount = $verificationResults.Count
+    
+    if ($successCount -eq $totalCount) {
+        Write-Host "`n🎉 All components installed successfully!" -ForegroundColor Green
+        return $true
+    } elseif ($successCount -gt 0) {
+        Write-Host "`n⚠️ $successCount out of $totalCount components installed successfully." -ForegroundColor Yellow
+        Write-Host "   Some components may need manual installation." -ForegroundColor Yellow
+        return $false
+    } else {
+        Write-Host "`n❌ Installation failed. Please check the errors above." -ForegroundColor Red
+        return $false
+    }
+}
+
+################################################################################################
+# SECTION 7: MAIN EXECUTION
+################################################################################################
+
+# Display header
+Write-Host "=========================================" -ForegroundColor Cyan
+Write-Host "    PowerShell Profile Setup Script     " -ForegroundColor Cyan
+Write-Host "    Repository: hetfs/powershell-profile" -ForegroundColor Cyan
+Write-Host "=========================================" -ForegroundColor Cyan
+Write-Host ""
+
+# Step 1: Check internet connection
+if (-not (Test-InternetConnection)) {
+    Write-Host "`n💡 Tips:" -ForegroundColor Yellow
+    Write-Host "   - Check your network connection" -ForegroundColor Cyan
+    Write-Host "   - Disable VPN if using one" -ForegroundColor Cyan
+    Write-Host "   - Try running the script again" -ForegroundColor Cyan
+    break
+}
+
+# Step 2: Install Nerd Fonts
+Install-NerdFonts -FontName "CascadiaCode" -FontDisplayName "CaskaydiaCove NF"
+
+# Step 3: Setup PowerShell profile
+$profileSetup = Setup-PowerShellProfile
+if (-not $profileSetup) {
+    Write-Host "`n❌ Profile setup failed. Exiting." -ForegroundColor Red
+    break
+}
+
+# Step 4: Install packages
+Install-Packages
+
+# Step 5: Verify installation
+$verification = Verify-Installation
+
+# Step 6: Final instructions
+Write-Host "`n📋 NEXT STEPS:" -ForegroundColor Cyan
+Write-Host "=" * 40
+
+if ($verification) {
+    Write-Host "1️⃣ RESTART PowerShell or Terminal to apply changes" -ForegroundColor Green
 } else {
-    Write-Host "✅ Starship config already exists" -ForegroundColor Green
+    Write-Host "1️⃣ Check the installation summary above for missing components" -ForegroundColor Yellow
 }
 
-# Completion
-Write-Host "`n" + "="*50 -ForegroundColor Green
-Write-Host "✨ SETUP COMPLETE ✨" -ForegroundColor Cyan
-Write-Host "="*50 -ForegroundColor Green
+Write-Host "2️⃣ Customize your profile by creating:" -ForegroundColor Cyan
+Write-Host "   $env:USERPROFILE\Documents\PowerShell\HETFScustom.ps1" -ForegroundColor Yellow
 
-Write-Host "`n📋 Components installed:" -ForegroundColor Yellow
-Write-Host "  ✓ Modular PowerShell profile" -ForegroundColor Green
-Write-Host "  ✓ Starship prompt" -ForegroundColor Green
-Write-Host "  ✓ Terminal Icons" -ForegroundColor Green
-Write-Host "  ✓ zoxide (smart cd)" -ForegroundColor Green
-Write-Host "  ✓ Custom config template (HETFScustom.ps1)" -ForegroundColor Green
-if ($installChoco -match '^[Yy]') {
-    Write-Host "  ✓ Chocolatey package manager" -ForegroundColor Green
-}
+Write-Host "3️⃣ For additional customization:" -ForegroundColor Cyan
+Write-Host "   - Run 'starship preset' for preset configurations" -ForegroundColor Yellow
+Write-Host "   - Visit https://starship.rs for Starship documentation" -ForegroundColor Yellow
+Write-Host "   - Visit https://github.com/hetfs/powershell-profile for updates" -ForegroundColor Yellow
 
-Write-Host "`n🚀 Next steps:" -ForegroundColor Cyan
-Write-Host "  1. Restart your PowerShell/terminal" -ForegroundColor White
-Write-Host "  2. Run 'Show-Help' to see available commands" -ForegroundColor White
-Write-Host "  3. Customize your setup:" -ForegroundColor White
-Write-Host "     - Edit profile: ep (or Edit-Profile)" -ForegroundColor White
-Write-Host "     - Custom config: $profileDir\HETFScustom.ps1" -ForegroundColor White
-Write-Host "     - Starship config: $starshipConfigPath" -ForegroundColor White
-Write-Host "  4. Check for updates: Update-Profile" -ForegroundColor White
-
-Write-Host "`n🔗 Links:" -ForegroundColor Cyan
-Write-Host "  Repository: $RepoBase" -ForegroundColor Blue
-Write-Host "  Starship: https://starship.rs/" -ForegroundColor Blue
-Write-Host "  PowerShell Docs: https://docs.microsoft.com/powershell/" -ForegroundColor Blue
-
-Write-Host "`n🎉 Setup complete! Restart your terminal to enjoy the new experience." -ForegroundColor Green
+Write-Host "=" * 40
+Write-Host "`n🎯 Setup completed!" -ForegroundColor Cyan

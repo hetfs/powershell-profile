@@ -13,9 +13,7 @@ $HOME\Documents\PowerShell\HFCustom.ps1
 
 ### **LOADING ORDER:**
 1. Main profile (`Microsoft.PowerShell_profile.ps1`) loads
-2. Modular configuration (`ProfileConfig.ps1`) loads
-3. All modules from `Modules\` directory load in order
-4. **FINALLY:** `HFCustom.ps1` loads (if it exists)
+2. **FINALLY:** `HFCustom.ps1` loads (if it exists)
 
 ### **VERIFICATION:**
 ```powershell
@@ -62,7 +60,7 @@ Replace core functions by appending `_Override`:
 | `Update-Profile_Override` | Profile update logic | Custom update source/method |
 | `Update-PowerShell_Override` | PowerShell update | Different update strategy |
 | `Clear-Cache_Override` | Cache clearing | Additional cache locations |
-| `Get-Theme_Override` | Prompt theming | Custom Starship/posh setup |
+| `Get-Theme_Override` | Prompt theming | Custom Starship setup |
 | `WinUtilDev_Override` | WinUtil script | Different WinUtil source |
 | `Set-PredictionSource_Override` | PSReadLine prediction | Custom prediction settings |
 
@@ -71,10 +69,10 @@ Replace core functions by appending `_Override`:
 function Update-Profile_Override {
     Write-Host "🔄 Custom profile update running..." -ForegroundColor Yellow
     
-    # Backup current modules
+    # Backup current profile
     $backupDir = "$HOME\PowerShellBackups\$(Get-Date -Format 'yyyyMMdd')"
     New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
-    Copy-Item "$HOME\Documents\PowerShell\Modules" $backupDir -Recurse -Force
+    Copy-Item $PROFILE "$backupDir\profile.ps1" -Force
     
     # Use YOUR repository for updates
     try {
