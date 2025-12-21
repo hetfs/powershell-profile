@@ -208,3 +208,6 @@ windows:
   terminals:
     - windows-terminal
 ```
+
+
+https://github.com/koalaman/shellcheck?tab=readme-ov-file#installing

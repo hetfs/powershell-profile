@@ -1,6 +1,8 @@
 ### Version 1.05 - Refactored for HETFS Repository
 ### Repository: https://github.com/hetfs/powershell-profile
 
+Clear-Host # Hide just the "PowerShell 7.5.4" line but keep other details (like OS version) available
+
 $debug = $false
 
 # Define the path to the file that stores the last execution time
@@ -428,7 +430,7 @@ function uptime {
         # find date/time format
         $dateFormat = [System.Globalization.CultureInfo]::CurrentCulture.DateTimeFormat.ShortDatePattern
         $timeFormat = [System.Globalization.CultureInfo]::CurrentCulture.DateTimeFormat.LongTimePattern
-        
+
         # check powershell version
         if ($PSVersionTable.PSVersion.Major -eq 5) {
             $lastBoot = (Get-WmiObject win32_operatingsystem).LastBootUpTime
@@ -438,7 +440,7 @@ function uptime {
             $lastBoot = $bootTime.ToString("$dateFormat $timeFormat")
         } else {
             # the Get-Uptime cmdlet was introduced in PowerShell 6.0
-            $lastBoot = (Get-Uptime -Since).ToString("$dateFormat $timeFormat")            
+            $lastBoot = (Get-Uptime -Since).ToString("$dateFormat $timeFormat")
             $bootTime = [System.DateTime]::ParseExact($lastBoot, "$dateFormat $timeFormat", [System.Globalization.CultureInfo]::InvariantCulture)
         }
 
@@ -486,12 +488,12 @@ function sysinfo { Get-ComputerInfo }
 ################################################################################################
 
 # Navigation Shortcuts
-function docs { 
+function docs {
     $docs = if(([Environment]::GetFolderPath("MyDocuments"))) {([Environment]::GetFolderPath("MyDocuments"))} else {$HOME + "\Documents"}
     Set-Location -Path $docs
 }
-    
-function dtop { 
+
+function dtop {
     $dtop = if ([Environment]::GetFolderPath("Desktop")) {[Environment]::GetFolderPath("Desktop")} else {$HOME + "\Documents"}
     Set-Location -Path $dtop
 }
@@ -594,7 +596,7 @@ $scriptblock = {
         'npm' = @('install', 'start', 'run', 'test', 'build')
         'deno' = @('run', 'compile', 'bundle', 'test', 'lint', 'fmt', 'cache', 'info', 'doc', 'upgrade')
     }
-    
+
     $command = $commandAst.CommandElements[0].Value
     if ($customCompletions.ContainsKey($command)) {
         $customCompletions[$command] | Where-Object { $_ -like "$wordToComplete*" } | ForEach-Object {
@@ -682,7 +684,18 @@ if (Test-Path "$PSScriptRoot\HETFScustom.ps1") {
 }
 
 ################################################################################################
-# SECTION 21: FINAL MESSAGE
+# SECTION 21:  SHOWS HELP Command
 ################################################################################################
 
+# Comment if don't like to display "Use 'Show-Help' to display help"
 Write-Host "$($PSStyle.Foreground.Yellow)Use 'Show-Help' to display help$($PSStyle.Reset)"
+
+################################################################################################
+# SECTION 22:  EXTRA TOOLS CONFIGURATION
+################################################################################################
+
+# Starship configuration
+if (Get-Command starship -ErrorAction SilentlyContinue) {
+    $env:STARSHIP_CONFIG = "$HOME\.config\starship\starship.toml"
+    Invoke-Expression (& starship init powershell)
+
