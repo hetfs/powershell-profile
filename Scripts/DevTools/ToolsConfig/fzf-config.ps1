@@ -103,58 +103,38 @@ if (-not $fzfFound) {
 # -------------------------------
 # PowerShell Profile Configuration
 # -------------------------------
-# fzf configuration for PowerShell
 $FzfConfigBlock = @'
-# ===== fzf configuration ======
-
-if (Get-Command fzf -ErrorAction SilentlyContinue) {
-    # Import the fzf module if available
-    if (Get-Module -ListAvailable -Name PSFzf) {
-        Import-Module PSFzf
-        # Set PSReadLine key handler for fzf if PSReadLine is available
-        if (Get-Module -ListAvailable -Name PSReadLine) {
-            Set-PsFzfOption -PSReadlineChordProvider 'Ctrl+f' -PSReadlineChordReverseHistory 'Ctrl+r'
-        }
-    } else {
-        # Fallback basic integration if PSFzf module is not installed
-        function fzf-select {
-            fzf --height 40% --reverse --border
-        }
-
-        # Simple directory change with fzf
-        function fzf-cd {
-            $directory = Get-ChildItem -Directory -Recurse -Depth 3 |
-                        Where-Object { $_.FullName -notmatch 'node_modules|\.git' } |
-                        Select-Object -ExpandProperty FullName |
-                        fzf-select
-            if ($directory) {
-                Set-Location $directory
-            }
-        }
-
-        # Command history search with fzf
-        function fzf-history {
-            $command = [Microsoft.PowerShell.PSConsoleReadLine]::GetHistory() | fzf-select
-            if ($command) {
-                [Microsoft.PowerShell.PSConsoleReadLine]::Insert($command)
-            }
-        }
-
-        # Set aliases for convenience
-        Set-Alias -Name fz -Value fzf-select
-        Set-Alias -Name fcd -Value fzf-cd
-        Set-Alias -Name fh -Value fzf-history
-
-        Write-Host "fzf basic integration loaded. Use 'fcd' to navigate, 'fh' for history." -ForegroundColor Cyan
-    }
-
-    # Set default fzf options for better Windows experience
-    # $env:FZF_DEFAULT_OPTS = '--height 40% --layout=reverse --border --color=bg+:#3b4252,bg:#2e3440,spinner:#81a1c1,hl:#616e88,fg:#d8dee9,header:#616e88,info:#81a1c1,pointer:#81a1c1,marker:#81a1c1,fg+:#d8dee9,prompt:#81a1c1,hl+:#81a1c1'
-
-    # Catppuccin for fzf  https://github.com/catppuccin/fzf/blob/main/themes/catppuccin-fzf-macchiato.ps1
-     $env:FZF_DEFAULT_OPTS = '--height 40% --layout=reverse --border --color=bg+:#363A4F,bg:#24273A,spinner:#F4DBD6,hl:#ED8796, --color=fg:#CAD3F5,header:#ED8796,info:#C6A0F6,pointer:#F4DBD6, --color=marker:#B7BDF8,fg+:#CAD3F5,prompt:#C6A0F6,hl+:#ED8796, --color=selected-bg:#494D64, --color=border:#6E738D,label:#CAD3F5'
+# ===== BEGIN FZF CONFIGURATION =====
+if (-not (Get-Command fzf -ErrorAction SilentlyContinue)) {
+    return
 }
-# ============= End fzf configuration ===========
+
+# Global fzf defaults
+# Catppuccin Macchiato theme
+# https://github.com/catppuccin/fzf
+$env:FZF_DEFAULT_OPTS = @"
+--height=40%
+--layout=reverse
+--info=inline
+--border
+--margin=1
+--padding=1
+--multi
+--walker-skip .git,node_modules,target
+--preview 'bat --color=always {}'
+--preview-window '~3'
+--bind 'enter:become(nvim {+})'
+--color=bg:#24273A,bg+:#363A4F
+--color=fg:#CAD3F5,fg+:#CAD3F5
+--color=hl:#ED8796,hl+:#ED8796
+--color=info:#C6A0F6,prompt:#C6A0F6
+--color=pointer:#F4DBD6,marker:#B7BDF8
+--color=spinner:#F4DBD6
+--color=selected-bg:#494D64
+--color=border:#6E738D,label:#CAD3F5
+# ---- Enable key bindings here ------
+"@
+# ===== END FZF CONFIGURATION =====
 '@
 
 # Ensure the profile file exists
@@ -173,20 +153,6 @@ if ($profileContent -and $profileContent -match '(fzf|PSFzf|fzf-select|fzf-cd|fz
     Write-Host "fzf configuration has been added to your PowerShell profile." -ForegroundColor Green
 }
 
-# -------------------------------
-# Optional: Install PSFzf module
-# -------------------------------
-$installPSFzf = Read-Host "Would you like to install PSFzf module for better integration? (Y/N, default: Y)"
-if ($installPSFzf -notmatch '^[Nn]') {
-    Write-Host "Installing PSFzf module..." -ForegroundColor Cyan
-    try {
-        Install-Module -Name PSFzf -Scope CurrentUser -Force -ErrorAction Stop
-        Write-Host "PSFzf module installed successfully." -ForegroundColor Green
-    } catch {
-        Write-Host "Failed to install PSFzf module: $_" -ForegroundColor Red
-        Write-Host "You can install it manually later with: Install-Module PSFzf" -ForegroundColor Yellow
-    }
-}
 
 # -------------------------------
 # Completion and Instructions
@@ -205,15 +171,6 @@ if (Get-Command fzf -ErrorAction SilentlyContinue) {
 Write-Host ""
 Write-Host "NEXT STEPS:" -ForegroundColor Cyan
 Write-Host "1. Restart PowerShell or run: . `$PROFILE" -ForegroundColor White
-Write-Host "2. If you installed PSFzf, you can use:" -ForegroundColor White
-Write-Host "   - Ctrl+R          # Search command history" -ForegroundColor Gray
-Write-Host "   - Ctrl+T          # File search" -ForegroundColor Gray
-Write-Host "   - Alt+C           # Directory navigation" -ForegroundColor Gray
-Write-Host "3. Without PSFzf, use the provided aliases:" -ForegroundColor White
-Write-Host "   - 'fcd'           # Change directory interactively" -ForegroundColor Gray
-Write-Host "   - 'fh'            # Search command history" -ForegroundColor Gray
-Write-Host "   - 'fz'            # Generic fzf selection" -ForegroundColor Gray
-Write-Host "4. Try: Get-ChildItem | fz    # Pipe any list to fzf" -ForegroundColor White
 Write-Host ""
 Write-Host "Your profile is located at: $PROFILE" -ForegroundColor DarkGray
 Write-Host ""

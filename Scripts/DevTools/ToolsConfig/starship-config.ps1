@@ -231,13 +231,12 @@ vimcmd_visual_symbol = '[](bold fg:lavender)'
 # PowerShell initialization
 # -------------------------------
 $ProfileContent = @'
-# ====== Starship configuration =======
-
+# ===== BEGIN STARSHIP CONFIGURATION =====
 if (Get-Command starship -ErrorAction SilentlyContinue) {
     $env:STARSHIP_CONFIG = "$HOME\.config\starship\starship.toml"
     Invoke-Expression (& starship init powershell)
 }
-# ===== End Starship =================
+# ===== END STARSHIP CONFIGURATION =====
 '@
 
 # Ensure profile file exists

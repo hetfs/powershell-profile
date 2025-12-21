@@ -35,8 +35,7 @@ function Test-ZoxideInstalled {
 
 function Get-ZoxideInitScript {
     @'
-# ==== Zoxide configuration smart directory jumping ====
-
+# ==== ZOXIDE CONFIGURATION ====
 if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     Invoke-Expression (& {
         $hook = if ($PSVersionTable.PSVersion.Major -lt 6) { 'prompt' } else { 'pwd' }
@@ -87,7 +86,7 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     # zc - clear entire database
     function zc { __zoxide_zc }
 }
-    # ======= End zoxide ==========
+# ===== END ZOXIDE CONFIGURATION ======
 '@
 }
 

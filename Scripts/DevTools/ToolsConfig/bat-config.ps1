@@ -1,246 +1,328 @@
+# bat-config.ps1
 # =======================================================
-# PowerShell Bat Setup
-# Author: Fredaw Lomdo (Adapted for bat)
-# Repository: https://github.com/hetfs/powershell-profile
+# bat + Catppuccin Mocha setup
+# Official theme instructions compliant
+# Windows-first, CI-safe, idempotent
 # =======================================================
 
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# Check if bat is already installed
-$batFound = $false
-
-# Also check if it's in PATH
-if (-not $batFound) {
-    $batFound = [bool](Get-Command bat -ErrorAction SilentlyContinue)
-    # Note: On Debian/Ubuntu, bat is sometimes installed as 'batcat' [citation:1]
-    if (-not $batFound) {
-        $batFound = [bool](Get-Command batcat -ErrorAction SilentlyContinue)
-    }
+$Colors = @{
+    Info    = 'Cyan'
+    Success = 'Green'
+    Warning = 'Yellow'
+    Error   = 'Red'
 }
 
-# If bat not found, offer installation options
-if (-not $batFound) {
-    Write-Host "bat not found. This is a 'cat' clone with syntax highlighting and Git integration." -ForegroundColor Yellow
-    Write-Host ""
-    Write-Host "You can install it using one of these methods:" -ForegroundColor Cyan
-
-    $installOptions = @(
-        [PSCustomObject]@{
-            Name     = 'WinGet'
-            Command  = 'winget install sharkdp.bat'
-            Comment  = '(Recommended for Windows)'
-        },
-        [PSCustomObject]@{
-            Name     = 'Scoop'
-            Command  = 'scoop install bat'
-        },
-        [PSCustomObject]@{
-            Name     = 'Chocolatey'
-            Command  = 'choco install bat'
-        },
-        [PSCustomObject]@{
-            Name     = 'Manual (Windows)'
-            Command  = 'Download from: https://github.com/sharkdp/bat/releases'
-            Comment  = '(Requires Visual C++ Redistributable) [citation:1]'
-        },
-        [PSCustomObject]@{
-            Name     = 'Homebrew (macOS/Linux)'
-            Command  = 'brew install bat'
-            Comment  = ''
-        },
-        [PSCustomObject]@{
-            Name     = 'Cargo (Rust)'
-            Command  = 'cargo install --locked bat'
-            Comment  = '(Requires Rust toolchain) [citation:1]'
-        }
+function Write-Status {
+    param(
+        [string]$Message,
+        [ValidateSet('Info','Success','Warning','Error')]
+        [string]$Type = 'Info'
     )
 
-    for ($i = 0; $i -lt $installOptions.Count; $i++) {
-        $option = $installOptions[$i]
-        $number = $i + 1
-        Write-Host ("  {0}. {1,-20} {2}" -f $number, $option.Name, $option.Command) -ForegroundColor Green
-        if ($option.Comment) { Write-Host ("     {0}" -f $option.Comment) -ForegroundColor DarkGray }
+    $icon = @{
+        Info    = '•'
+        Success = '✓'
+        Warning = '⚠'
+        Error   = '✗'
+    }[$Type]
+
+    Write-Host "$icon $Message" -ForegroundColor $Colors[$Type]
+}
+
+function Get-BatCommand {
+    if (Get-Command bat -ErrorAction SilentlyContinue) { return 'bat' }
+    if (Get-Command batcat -ErrorAction SilentlyContinue) { return 'batcat' }
+    return $null
+}
+
+function Install-Bat {
+    Write-Status "Installing bat..." -Type Info
+
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        Write-Status "Using winget package manager" -Type Info
+        winget install --id sharkdp.bat --source winget `
+            --accept-package-agreements --accept-source-agreements `
+            --silent
+        return
     }
 
-    Write-Host ""
-    $choice = Read-Host "Would you like to run one of these installers now? (Enter number, or press Enter to skip)"
+    if (Get-Command choco -ErrorAction SilentlyContinue) {
+        Write-Status "Using Chocolatey package manager" -Type Info
+        choco install bat -y
+        return
+    }
 
-    if ($choice -match '^\d+$' -and [int]$choice -ge 1 -and [int]$choice -le $installOptions.Count) {
-        $selected = $installOptions[[int]$choice - 1]
+    if (Get-Command scoop -ErrorAction SilentlyContinue) {
+        Write-Status "Using Scoop package manager" -Type Info
+        scoop install bat
+        return
+    }
 
-        if ($selected.Name -eq 'Manual (Windows)') {
-            Write-Host "Opening bat GitHub releases page..." -ForegroundColor Cyan
-            Start-Process "https://github.com/sharkdp/bat/releases"
-        } else {
-            Write-Host "Installing bat via $($selected.Name)..." -ForegroundColor Cyan
-            Invoke-Expression $selected.Command
+    throw "No supported package manager found. Install bat manually from: https://github.com/sharkdp/bat/releases"
+}
+
+function Get-BatConfigDir {
+    param([string]$BatCmd)
+
+    $result = & $BatCmd --config-dir
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to get bat config directory. Is bat installed correctly?"
+    }
+    return $result.Trim()
+}
+
+function Install-CatppuccinThemes {
+    param([string]$BatCmd)
+
+    Write-Status "Installing Catppuccin themes..." -Type Info
+
+    $configDir = Get-BatConfigDir $BatCmd
+    $themesDir = Join-Path $configDir 'themes'
+
+    # Create themes directory
+    if (-not (Test-Path $themesDir)) {
+        New-Item -ItemType Directory -Force -Path $themesDir | Out-Null
+        Write-Status "Created themes directory: $themesDir" -Type Success
+    }
+
+    # List of Catppuccin themes
+    $themes = @(
+        "Catppuccin Latte",
+        "Catppuccin Frappe",
+        "Catppuccin Macchiato",
+        "Catppuccin Mocha"
+    )
+
+    # Download each theme
+    foreach ($theme in $themes) {
+        $fileName = "$theme.tmTheme"
+        $filePath = Join-Path $themesDir $fileName
+
+        # Skip if already exists (idempotent)
+        if (Test-Path $filePath) {
+            Write-Status "Theme already exists: $fileName" -Type Info
+            continue
         }
-    } else {
-        Write-Host "Skipping installation. You can install bat manually later." -ForegroundColor Yellow
-        Write-Host "The profile configuration will still be added." -ForegroundColor Yellow
-    }
-}
 
-# -------------------------------
-# PowerShell Profile Configuration
-# -------------------------------
-# bat configuration for PowerShell
-$BatConfigBlock = @'
-# bat configuration - A cat(1) clone with syntax highlighting and Git integration [citation:1]
-if (Get-Command bat -ErrorAction SilentlyContinue) {
-    # Set default bat options
-    $env:BAT_PAGER = ""  # Disable pager for better PowerShell integration
-    $env:BAT_STYLE = "numbers,changes,header"
-    $env:BAT_THEME = "TwoDark"  # Use 'bat --list-themes' to see available themes
+        $urlTheme = $theme -replace " ", "%20"
+        $url = "https://github.com/catppuccin/bat/raw/main/themes/$urlTheme.tmTheme"
 
-    # Create alias to replace cat with bat (without paging) [citation:1]
-    if (-not (Get-Alias cat -ErrorAction SilentlyContinue)) {
-        Set-Alias -Name cat -Value bat -Option AllScope
-    }
-
-    # Function to view bat themes
-    function bat-themes {
-        bat --list-themes | fzf --preview "bat --theme={} --color=always $PSHOME\profile.ps1"
-    }
-
-    # Function to view with line numbers only
-    function batn {
-        param([Parameter(ValueFromPipeline=$true)]$Path)
-        bat --style=numbers $Path
-    }
-
-    # Function to show all characters (including non-printable) [citation:1]
-    function bata {
-        param([Parameter(ValueFromPipeline=$true)]$Path)
-        bat --show-all $Path
-    }
-
-    # Function for plain output (no decorations, good for piping) [citation:1]
-    function batp {
-        param([Parameter(ValueFromPipeline=$true)]$Path)
-        bat --plain $Path
-    }
-
-    # Function to use bat as a pager for other commands
-    function batpipe {
-        $input | bat --style=plain --color=always
-    }
-
-    # Function to view Git differences with bat
-    function batdiff {
-        git diff --name-only --relative --diff-filter=d | ForEach-Object {
-            bat --diff "$_"
+        try {
+            Write-Status "Downloading: $fileName" -Type Info
+            Invoke-WebRequest -Uri $url -OutFile $filePath -ErrorAction Stop
+            Write-Status "Downloaded: $fileName" -Type Success
+        }
+        catch {
+            Write-Status "Failed to download ${fileName}: $($_.Exception.Message)" -Type Error
+            # Continue with other themes even if one fails
         }
     }
 
-    # Function to view help with bat colorization [citation:1]
-    function bathelp {
-        param($Command)
-        if ($Command) {
-            & $Command --help 2>&1 | bat --language=help --style=plain
-        } else {
-            Write-Host "Usage: bathelp <command>" -ForegroundColor Yellow
-            Write-Host "Example: bathelp git" -ForegroundColor Gray
-        }
+    # Build bat cache
+    Write-Status "Building bat cache..." -Type Info
+    & $BatCmd cache --build
+    if ($LASTEXITCODE -eq 0) {
+        Write-Status "Bat cache built successfully" -Type Success
+    }
+    else {
+        Write-Status "Warning: Failed to build bat cache" -Type Warning
+    }
+}
+
+function Configure-Bat {
+    param([string]$BatCmd)
+
+    Write-Status "Configuring bat..." -Type Info
+
+    $configDir = Get-BatConfigDir $BatCmd
+    $configPath = Join-Path $configDir 'config'
+
+    # Check if config already exists
+    if (Test-Path $configPath) {
+        Write-Status "Backing up existing config file..." -Type Warning
+        $backupPath = "$configPath.backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+        Copy-Item $configPath $backupPath -Force
+        Write-Status "Backup saved to: $backupPath" -Type Info
     }
 
-    # Set BAT_CONFIG_DIR if you want a custom config location
-    # $env:BAT_CONFIG_DIR = "$HOME\.config\bat"
+    # Create comprehensive configuration
+@"
+# =======================================================
+# bat configuration file for Windows
+# Generated $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+# Repository: https://github.com/sharkdp/bat
+# Documentation: https://github.com/sharkdp/bat#configuration-file
+# Catppuccin themes: https://github.com/catppuccin/bat
+# =======================================================
 
-    Write-Host "bat loaded. Use 'cat' for bat, 'batn' for line numbers, 'bathelp <cmd>' for colored help." -ForegroundColor Cyan
-} elseif (Get-Command batcat -ErrorAction SilentlyContinue) {
-    # Handle Debian/Ubuntu systems where it's installed as batcat [citation:1]
-    Set-Alias -Name bat -Value batcat -Option AllScope
-    if (-not (Get-Alias cat -ErrorAction SilentlyContinue)) {
-        Set-Alias -Name cat -Value batcat -Option AllScope
-    }
-    Write-Host "bat (as batcat) loaded. Using 'batcat' command." -ForegroundColor Cyan
-}
-'@
-
-# Ensure the profile file exists [citation:2]
-if (-not (Test-Path $PROFILE)) {
-    Write-Host "Creating PowerShell profile at: $PROFILE" -ForegroundColor Cyan
-    New-Item -ItemType File -Path $PROFILE -Force | Out-Null
-}
-
-# Check if bat configuration already exists in profile
-$profileContent = Get-Content -Path $PROFILE -Raw -ErrorAction SilentlyContinue
-if ($profileContent -and $profileContent -match '(bat\s+configuration|BAT_PAGER|BAT_THEME|function batn|function bata)') {
-    Write-Host "bat configuration is already present in your PowerShell profile." -ForegroundColor Yellow
-} else {
-    # Add the configuration block to the profile
-    Add-Content -Path $PROFILE -Value "`n$BatConfigBlock"
-    Write-Host "bat configuration has been added to your PowerShell profile." -ForegroundColor Green
-}
-
-# -------------------------------
-# Optional: Create bat config directory and files
-# -------------------------------
-$batConfigDir = Join-Path $HOME ".config\bat"
-if (-not (Test-Path $batConfigDir)) {
-    Write-Host "Creating bat config directory: $batConfigDir" -ForegroundColor Cyan
-    New-Item -ItemType Directory -Path $batConfigDir -Force | Out-Null
-}
-
-# Create a basic config file if it doesn't exist
-$batConfigFile = Join-Path $batConfigDir "config"
-if (-not (Test-Path $batConfigFile)) {
-    @'
-# bat configuration file
-# See: https://github.com/sharkdp/bat#configuration-file
-
-# Disable paging by default (better for PowerShell)
+# ─── Core Behavior ─────────────────────────────────────
+# Disable paging by default (better for PowerShell/Windows Terminal)
 --paging=never
 
-# Always show line numbers, git modifications, and file header
---style=numbers,changes,header
+# Force color output (always use colors, even when piping)
+--color=always
 
-# Use a nice theme (change to your preference)
---theme=TwoDark
+# Set tab width (adjust to your preference)
+--tabs=4
 
-# Syntax highlighting for specific file types
---map-syntax "*.conf:INI"
---map-syntax ".env*:Shell"
---map-syntax "Dockerfile*:Dockerfile"
-'@ | Set-Content -Path $batConfigFile -Encoding UTF8
-    Write-Host "Created sample bat configuration at: $batConfigFile" -ForegroundColor Green
+# Show non-printable characters (like tabs, spaces, line endings)
+# --show-all
+
+
+# ─── Display Style ─────────────────────────────────────
+# Style components: numbers, changes (git), header, grid, rule
+--style=numbers,changes,header,grid
+
+# Show the line numbers (absolute)
+--line-range=
+# Highlight the line at the cursor position (when using --style=full)
+--highlight-line=
+
+# Wrap long lines (set to 'never', 'character', or 'number')
+--wrap=auto
+
+
+# ─── Theme & Colors ─────────────────────────────────────
+# Theme: Catppuccin Mocha (dark), Latte (light), Frappe, Macchiato
+--theme="Catppuccin Mocha"
+
+# Custom theme file (if you want to use a custom .tmTheme file)
+# --theme="path\to\your\theme.tmTheme"
+
+# Italic text support (requires terminal and font support)
+--italic-text=always
+
+
+# ─── Language & Syntax ──────────────────────────────────
+# Default language for unknown file types
+--language=
+
+# Map file extensions/names to languages
+--map-syntax="*.conf:INI"
+--map-syntax="*.env:INI"
+--map-syntax="Dockerfile*:Dockerfile"
+--map-syntax="Jenkinsfile*:Groovy"
+--map-syntax="Makefile:Makefile"
+--map-syntax="*.mk:Makefile"
+
+
+# ─── Git Integration ───────────────────────────────────
+# Show git modifications in the side bar (requires --style=changes)
+--diff-context=3
+
+# Only show git changes from the current file
+# --diff=file
+
+"@ | Set-Content -Path $configPath -Encoding UTF8
+
+    Write-Status "Configuration written to: $configPath" -Type Success
 }
 
-# -------------------------------
-# Completion and Instructions
-# -------------------------------
-Write-Host ""
-Write-Host "BAT SETUP COMPLETE" -ForegroundColor Green
+function Configure-PowerShellProfile {
+    Write-Status "Configuring PowerShell profile..." -Type Info
 
-# Verify bat is available
-$batCmd = if (Get-Command bat -ErrorAction SilentlyContinue) { "bat" }
-         elseif (Get-Command batcat -ErrorAction SilentlyContinue) { "batcat" }
-         else { $null }
+    # Create profile if it doesn't exist
+    if (-not (Test-Path $PROFILE)) {
+        New-Item -ItemType File -Path $PROFILE -Force | Out-Null
+        Write-Status "Created PowerShell profile: $PROFILE" -Type Success
+    }
 
-if ($batCmd) {
-    Write-Host "✓ bat is installed." -ForegroundColor Green
-} else {
-    Write-Host "⚠  bat is not yet installed or not in PATH." -ForegroundColor Yellow
-    Write-Host "   Install it using one of the methods above." -ForegroundColor Yellow
+    $profileContent = Get-Content $PROFILE -Raw
+
+    # Check if BAT_THEME is already set
+    if ($profileContent -match "BAT_THEME") {
+        Write-Status "BAT_THEME already configured in profile" -Type Info
+        return
+    }
+
+    # Add BAT_THEME environment variable
+    $batThemeConfig = @"
+
+# Bat configuration
+`$env:BAT_THEME = "Catppuccin Mocha"
+
+"@
+
+    Add-Content -Path $PROFILE -Value $batThemeConfig
+    Write-Status "Added BAT_THEME to PowerShell profile" -Type Success
 }
 
-Write-Host ""
-Write-Host "NEXT STEPS:" -ForegroundColor Cyan
-Write-Host "1. Restart PowerShell or run: . `$PROFILE" -ForegroundColor White
-Write-Host "2. Try these commands:" -ForegroundColor White
-Write-Host "   - 'cat README.md'            # View any file with syntax highlighting" -ForegroundColor Gray
-Write-Host "   - 'batn script.ps1'          # View with line numbers only" -ForegroundColor Gray
-Write-Host "   - 'bata file.txt'            # Show all characters" -ForegroundColor Gray
-Write-Host "   - 'bathelp git'              # View colored help for any command" -ForegroundColor Gray
-Write-Host "   - 'bat --list-themes'        # See all available color themes" -ForegroundColor Gray
-Write-Host "3. Customize themes: Change BAT_THEME in your profile or config file" -ForegroundColor White
-Write-Host ""
-Write-Host "TIP: For integration with fzf, use:" -ForegroundColor Magenta
-Write-Host "     fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}'" -ForegroundColor White
-Write-Host ""
-Write-Host "Configuration files:" -ForegroundColor DarkGray
-Write-Host "  PowerShell profile: $PROFILE" -ForegroundColor DarkGray
-if (Test-Path $batConfigFile) {
-    Write-Host "  bat config file:   $batConfigFile" -ForegroundColor DarkGray
+function Test-Administrator {
+    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+# =======================================================
+# Execution
+# =======================================================
+
+Write-Host "`n============================================================" -ForegroundColor Cyan
+Write-Host " bat + Catppuccin Theme Setup (Official)" -ForegroundColor Cyan
+Write-Host "============================================================`n" -ForegroundColor Cyan
+
+# Check if running as administrator (recommended for package managers)
+if (-not (Test-Administrator)) {
+    Write-Status "Warning: Not running as administrator. Some package managers may require elevated privileges." -Type Warning
+    Write-Status "If installation fails, try running this script as Administrator." -Type Warning
+    Write-Host ""
+}
+
+try {
+    # Check for bat installation
+    $batCmd = Get-BatCommand
+    if (-not $batCmd) {
+        Write-Status "bat not found. Installing..." -Type Info
+        Install-Bat
+        $batCmd = Get-BatCommand
+
+        if (-not $batCmd) {
+            throw "Failed to install or find bat. Please install manually."
+        }
+
+        Write-Status "bat installed successfully" -Type Success
+    }
+    else {
+        Write-Status "Found bat command: $batCmd" -Type Success
+    }
+
+    # Install Catppuccin themes
+    Install-CatppuccinThemes -BatCmd $batCmd
+
+    # Configure bat
+    Configure-Bat -BatCmd $batCmd
+
+    # Configure PowerShell profile
+    Configure-PowerShellProfile
+
+    Write-Host "`n" + "="*60 -ForegroundColor Green
+    Write-Status "Setup complete!" -Type Success
+    Write-Host ""
+    Write-Host "Next steps:" -ForegroundColor Cyan
+    Write-Host "1. Restart PowerShell or run: . `$PROFILE" -ForegroundColor Yellow
+    Write-Host "2. Test with: bat --list-themes | findstr Catppuccin" -ForegroundColor Yellow
+    Write-Host "3. Test with: bat C:\Windows\System32\drivers\etc\hosts" -ForegroundColor Yellow
+    Write-Host "4. Change theme with: bat --theme='Catppuccin Latte'" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Available Catppuccin themes:" -ForegroundColor Cyan
+    Write-Host "  • Catppuccin Mocha (dark - default)" -ForegroundColor White
+    Write-Host "  • Catppuccin Macchiato (dark)" -ForegroundColor White
+    Write-Host "  • Catppuccin Frappe (dark)" -ForegroundColor White
+    Write-Host "  • Catppuccin Latte (light)" -ForegroundColor White
+    Write-Host ""
+    Write-Host "To change the default theme, edit:" -ForegroundColor Cyan
+    Write-Host "  `$env:BAT_THEME in your PowerShell profile" -ForegroundColor Yellow
+    Write-Host "  or the --theme setting in $(bat --config-dir)\config" -ForegroundColor Yellow
+    Write-Host "="*60 -ForegroundColor Green
+}
+catch {
+    Write-Status "Setup failed: $($_.Exception.Message)" -Type Error
+    Write-Host "`nTroubleshooting tips:" -ForegroundColor Red
+    Write-Host "• Run PowerShell as Administrator" -ForegroundColor Yellow
+    Write-Host "• Install bat manually: winget install sharkdp.bat" -ForegroundColor Yellow
+    Write-Host "• Check network connection for theme downloads" -ForegroundColor Yellow
+    exit 1
 }
