@@ -1,32 +1,22 @@
 # =======================================================
-# PowerShell Starship Config
+# PowerShell Starship Config with Safe Update
 # Author: Fredaw Lomdo
 # Repository: https://github.com/hetfs/powershell-profile
 # =======================================================
 
 $ErrorActionPreference = 'Stop'
 
+# -------------------------------------------------------
 # Paths
-$ConfigDir = Join-Path $HOME '.config\starship'
+# -------------------------------------------------------
+$ConfigDir  = Join-Path $HOME '.config\starship'
 $ConfigFile = Join-Path $ConfigDir 'starship.toml'
+$BackupDir  = Join-Path $ConfigDir 'backups'
 
-# Ensure Starship exists
-if (-not (Get-Command starship -ErrorAction SilentlyContinue)) {
-    Write-Host "Starship not found. Please install via:" -ForegroundColor Yellow
-    Write-Host "  • WinGet: winget install starship" -ForegroundColor Cyan
-    Write-Host "  • Chocolatey: choco install starship" -ForegroundColor Cyan
-    Write-Host "  • Or manually: https://starship.rs/guide/#%F0%9F%9A%80-installation" -ForegroundColor Cyan
-    return
-}
-
-# Create config directory
-if (-not (Test-Path $ConfigDir)) {
-    New-Item -ItemType Directory -Path $ConfigDir -Force | Out-Null
-}
-
-# Create default starship.toml if missing
-if (-not (Test-Path $ConfigFile)) {
-    @'
+# -------------------------------------------------------
+# Default TOML template
+# -------------------------------------------------------
+$DefaultTOML = @'
 "$schema" = 'https://starship.rs/config-schema.json'
 
 format = """
@@ -56,18 +46,6 @@ $time\
 $line_break$character"""
 
 palette = 'catppuccin_mocha'
-
-[palettes.gruvbox_dark]
-color_fg0 = '#fbf1c7'
-color_bg1 = '#3c3836'
-color_bg3 = '#665c54'
-color_blue = '#458588'
-color_aqua = '#689d6a'
-color_green = '#98971a'
-color_orange = '#d65d0e'
-color_purple = '#b16286'
-color_red = '#cc241d'
-color_yellow = '#d79921'
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"
@@ -103,24 +81,8 @@ style = "bg:surface0 fg:text"
 
 [os.symbols]
 Windows = "󰍲"
-Ubuntu = "󰕈"
-SUSE = ""
-Raspbian = "󰐿"
-Mint = "󰣭"
-Macos = ""
-Manjaro = ""
 Linux = "󰌽"
-Gentoo = "󰣨"
-Fedora = "󰣛"
-Alpine = ""
-Amazon = ""
-Android = ""
-Arch = "󰣇"
-Artix = "󰣇"
-CentOS = ""
-Debian = "󰣚"
-Redhat = "󱄛"
-RedHatEnterprise = "󱄛"
+Macos = ""
 
 [username]
 show_always = true
@@ -133,13 +95,6 @@ style = "fg:mantle bg:peach"
 format = "[ $path ]($style)"
 truncation_length = 3
 truncation_symbol = "…/"
-
-[directory.substitutions]
-"Documents" = "󰈙 "
-"Downloads" = " "
-"Music" = "󰝚 "
-"Pictures" = " "
-"Developer" = "󰲋 "
 
 [git_branch]
 symbol = ""
@@ -155,51 +110,6 @@ symbol = ""
 style = "bg:teal"
 format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
 
-[c]
-symbol = " "
-style = "bg:teal"
-format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
-
-[rust]
-symbol = ""
-style = "bg:teal"
-format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
-
-[golang]
-symbol = ""
-style = "bg:teal"
-format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
-
-[php]
-symbol = ""
-style = "bg:teal"
-format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
-
-[java]
-symbol = " "
-style = "bg:teal"
-format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
-
-[kotlin]
-symbol = ""
-style = "bg:teal"
-format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
-
-[haskell]
-symbol = ""
-style = "bg:teal"
-format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
-
-[python]
-symbol = ""
-style = "bg:teal"
-format = '[[ $symbol( $version) ](fg:base bg:teal)]($style)'
-
-[docker_context]
-symbol = ""
-style = "bg:mantle"
-format = '[[ $symbol( $context) ](fg:#83a598 bg:color_bg3)]($style)'
-
 [time]
 disabled = false
 time_format = "%R"
@@ -213,23 +123,55 @@ disabled = false
 disabled = false
 success_symbol = '[](bold fg:green)'
 error_symbol = '[](bold fg:red)'
-vimcmd_symbol = '[](bold fg:creen)'
-vimcmd_replace_one_symbol = '[](bold fg:purple)'
-vimcmd_replace_symbol = '[](bold fg:purple)'
-vimcmd_visual_symbol = '[](bold fg:lavender)'
-'@ | Set-Content -Path $ConfigFile -Encoding UTF8
+'@
+
+# -------------------------------------------------------
+# Ensure directories exist
+# -------------------------------------------------------
+foreach ($dir in @($ConfigDir, $BackupDir)) {
+    if (-not (Test-Path $dir)) {
+        New-Item -ItemType Directory -Path $dir -Force | Out-Null
+    }
 }
 
-# Set STARSHIP_CONFIG (user-level)
-[Environment]::SetEnvironmentVariable(
-    'STARSHIP_CONFIG',
-    $ConfigFile,
-    [EnvironmentVariableTarget]::User
-)
+# -------------------------------------------------------
+# Write or safely update starship.toml
+# -------------------------------------------------------
+$DefaultHash = [System.BitConverter]::ToString((New-Object System.Security.Cryptography.SHA256Managed).ComputeHash([System.Text.Encoding]::UTF8.GetBytes($DefaultTOML)))
+$WriteFile = $false
 
-# -------------------------------
-# PowerShell initialization
-# -------------------------------
+if (-not (Test-Path $ConfigFile)) {
+    Write-Host "Creating new Starship config..." -ForegroundColor Green
+    $WriteFile = $true
+} else {
+    $ExistingContent = Get-Content -Path $ConfigFile -Raw -ErrorAction SilentlyContinue
+    $ExistingHash = [System.BitConverter]::ToString((New-Object System.Security.Cryptography.SHA256Managed).ComputeHash([System.Text.Encoding]::UTF8.GetBytes($ExistingContent)))
+
+    if ($ExistingHash -ne $DefaultHash) {
+        # Backup existing config
+        $timestamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+        $backupFile = Join-Path $BackupDir "starship.toml.$timestamp.bak"
+        Copy-Item -Path $ConfigFile -Destination $backupFile
+        Write-Host "Existing config backed up to $backupFile" -ForegroundColor Yellow
+        $WriteFile = $true
+    } else {
+        Write-Host "Starship config is up-to-date." -ForegroundColor Cyan
+    }
+}
+
+if ($WriteFile) {
+    $DefaultTOML | Set-Content -Path $ConfigFile -Encoding UTF8
+    Write-Host "Starship config written to $ConfigFile" -ForegroundColor Green
+}
+
+# -------------------------------------------------------
+# Set STARSHIP_CONFIG environment variable
+# -------------------------------------------------------
+[Environment]::SetEnvironmentVariable('STARSHIP_CONFIG', $ConfigFile, [EnvironmentVariableTarget]::User)
+
+# -------------------------------------------------------
+# PowerShell profile initialization (idempotent)
+# -------------------------------------------------------
 $ProfileContent = @'
 # ===== BEGIN STARSHIP CONFIGURATION =====
 if (Get-Command starship -ErrorAction SilentlyContinue) {
@@ -239,23 +181,19 @@ if (Get-Command starship -ErrorAction SilentlyContinue) {
 # ===== END STARSHIP CONFIGURATION =====
 '@
 
-# Ensure profile file exists
-if (-not (Test-Path $PROFILE)) {
-    New-Item -ItemType File -Path $PROFILE -Force | Out-Null
-}
-
-# Check if starship config already exists in profile
-$existingContent = Get-Content -Path $PROFILE -Raw -ErrorAction SilentlyContinue
-$starshipPattern = 'starship init powershell'
-
-if (-not $existingContent -or $existingContent -notmatch $starshipPattern) {
-    # Add starship configuration to profile
+if (-not (Test-Path $PROFILE)) { New-Item -ItemType File -Path $PROFILE -Force | Out-Null }
+$existingProfile = Get-Content -Path $PROFILE -Raw -ErrorAction SilentlyContinue
+if (-not $existingProfile -or $existingProfile -notmatch 'starship init powershell') {
     Add-Content -Path $PROFILE -Value "`n$ProfileContent"
     Write-Host "Starship configuration added to PowerShell profile." -ForegroundColor Green
 } else {
     Write-Host "Starship configuration already exists in PowerShell profile." -ForegroundColor Yellow
 }
 
+# -------------------------------------------------------
+# Completion
+# -------------------------------------------------------
 Write-Host "Starship setup complete!" -ForegroundColor Green
 Write-Host "Configuration file: $ConfigFile" -ForegroundColor Cyan
+Write-Host "Backups (if updated) are in: $BackupDir" -ForegroundColor Cyan
 Write-Host "Restart PowerShell or run: . `$PROFILE" -ForegroundColor Cyan
