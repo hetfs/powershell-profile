@@ -51,28 +51,23 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     function z {
         __zoxide_z @args
     }
-
     # Interactive jump (fzf optional)
     function zi {
         __zoxide_zi
     }
-
     # Add directory to database
     function za {
         param([string]$Path = (Get-Location).Path)
         zoxide add $Path
     }
-
     # Query database without cd
     function zq {
         zoxide query @args
     }
-
     # List matching directories
     function zl {
         zoxide query -l @args
     }
-
     # Remove directory from database
     function zr {
         param([string]$Path)
@@ -80,17 +75,24 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
             zoxide remove $Path
         }
     }
-
     # Clear entire database
     function zc {
         zoxide query -l | ForEach-Object { zoxide remove $_ }
     }
-
-    # ---------------------------------------------------
-    # Optional aliases (uncomment if desired)
-    # ---------------------------------------------------
-    # Set-Alias -Name cd -Value z -Description 'Zoxide enhanced cd'
-    # Set-Alias -Name zi -Value zi -Description 'Interactive directory selection'
+# ---------------------------------------------------
+# ZOXIDE COMMANDS
+# ---------------------------------------------------
+#
+#  z    Jump to a frequently used directory
+#  zi   Interactive directory selection
+#  za   Add the current directory to the database
+#  zq   Query the database without changing directories
+#  zl   List matching directories
+#  zr   Remove a directory from the database
+#  zc   Clear the entire zoxide database
+#
+#  cd   Enhanced cd powered by zoxide
+# ---------------------------------------------------
 }
 # ===== END ZOXIDE CONFIGURATION =====
 '@
