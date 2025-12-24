@@ -43,28 +43,28 @@ function Install-NerdFonts {
 
     try {
         Write-Host "📝 Checking for Nerd Font installation..." -ForegroundColor Cyan
-        
+
         # Check if font is already installed
         [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
         $fontFamilies = (New-Object System.Drawing.Text.InstalledFontCollection).Families.Name
-        
+
         if ($fontFamilies -notcontains "${FontDisplayName}") {
             Write-Host "📥 Downloading ${FontDisplayName} font..." -ForegroundColor Yellow
-            
+
             $fontZipUrl = "https://github.com/ryanoasis/nerd-fonts/releases/download/v${Version}/${FontName}.zip"
             $zipFilePath = "$env:TEMP\${FontName}.zip"
             $extractPath = "$env:TEMP\${FontName}"
 
             # Download font
             Invoke-WebRequest -Uri $fontZipUrl -OutFile $zipFilePath
-            
+
             # Extract font
             Expand-Archive -Path $zipFilePath -DestinationPath $extractPath -Force
-            
+
             # Install font files
             $destination = (New-Object -ComObject Shell.Application).Namespace(0x14)
             $fontFiles = Get-ChildItem -Path $extractPath -Recurse -Filter "*.ttf"
-            
+
             foreach ($fontFile in $fontFiles) {
                 If (-not(Test-Path "C:\Windows\Fonts\$($fontFile.Name)")) {
                     $destination.CopyHere($fontFile.FullName, 0x10)
@@ -74,7 +74,7 @@ function Install-NerdFonts {
             # Cleanup
             Remove-Item -Path $extractPath -Recurse -Force -ErrorAction SilentlyContinue
             Remove-Item -Path $zipFilePath -Force -ErrorAction SilentlyContinue
-            
+
             Write-Host "✅ ${FontDisplayName} font installed successfully" -ForegroundColor Green
         } else {
             Write-Host "✅ ${FontDisplayName} font is already installed" -ForegroundColor Green
@@ -92,7 +92,7 @@ function Install-NerdFonts {
 
 function Setup-PowerShellProfile {
     Write-Host "`n🔧 Setting up PowerShell profile..." -ForegroundColor Cyan
-    
+
     # Determine PowerShell version and profile path
     $profilePath = ""
     if ($PSVersionTable.PSEdition -eq "Core") {
@@ -101,13 +101,13 @@ function Setup-PowerShellProfile {
     elseif ($PSVersionTable.PSEdition -eq "Desktop") {
         $profilePath = "$env:userprofile\Documents\WindowsPowerShell"
     }
-    
+
     # Create profile directory if it doesn't exist
     if (!(Test-Path -Path $profilePath)) {
         Write-Host "📁 Creating PowerShell profile directory..." -ForegroundColor Yellow
         New-Item -Path $profilePath -ItemType "directory" -Force | Out-Null
     }
-    
+
     # Check if profile already exists
     if (!(Test-Path -Path $PROFILE -PathType Leaf)) {
         try {
@@ -128,12 +128,12 @@ function Setup-PowerShellProfile {
             Write-Host "📦 Backing up existing profile..." -ForegroundColor Yellow
             $backupPath = Join-Path (Split-Path $PROFILE) "oldprofile.ps1"
             Copy-Item -Path $PROFILE -Destination $backupPath -Force
-            
+
             # Download new profile
             Write-Host "🔄 Updating PowerShell profile..." -ForegroundColor Yellow
             $profileUrl = "https://raw.githubusercontent.com/hetfs/powershell-profile/main/Microsoft.PowerShell_profile.ps1"
             Invoke-RestMethod $profileUrl -OutFile $PROFILE
-            
+
             Write-Host "✅ PowerShell profile updated at: [$PROFILE]" -ForegroundColor Green
             Write-Host "📦 Your old profile has been backed up to: [$backupPath]" -ForegroundColor Cyan
         }
@@ -143,12 +143,12 @@ function Setup-PowerShellProfile {
             return $false
         }
     }
-    
+
     Write-Host "`n⚠️ IMPORTANT NOTE:" -ForegroundColor Yellow
     Write-Host "   If you want to make any personal changes or customizations," -ForegroundColor Cyan
     Write-Host "   please create a custom file at: [$profilePath\HETFScustom.ps1]" -ForegroundColor Cyan
     Write-Host "   The main profile has an automatic updater that will overwrite changes." -ForegroundColor Cyan
-    
+
     return $true
 }
 
@@ -158,7 +158,7 @@ function Setup-PowerShellProfile {
 
 function Install-Packages {
     Write-Host "`n📦 Installing required packages..." -ForegroundColor Cyan
-    
+
     # 5.1 Install Starship Prompt
     Write-Host "🚀 Installing Starship prompt..." -ForegroundColor Yellow
     try {
@@ -169,7 +169,7 @@ function Install-Packages {
         Write-Host "❌ Failed to install Starship prompt." -ForegroundColor Red
         Write-Host "   Error: $_" -ForegroundColor Yellow
     }
-    
+
     # 5.2 Install Chocolatey
     Write-Host "🍫 Installing Chocolatey package manager..." -ForegroundColor Yellow
     try {
@@ -182,7 +182,7 @@ function Install-Packages {
         Write-Host "❌ Failed to install Chocolatey." -ForegroundColor Red
         Write-Host "   Error: $_" -ForegroundColor Yellow
     }
-    
+
     # 5.3 Install Terminal Icons module
     Write-Host "🎨 Installing Terminal Icons module..." -ForegroundColor Yellow
     try {
@@ -193,7 +193,7 @@ function Install-Packages {
         Write-Host "❌ Failed to install Terminal Icons module." -ForegroundColor Red
         Write-Host "   Error: $_" -ForegroundColor Yellow
     }
-    
+
     # 5.4 Install zoxide
     Write-Host "📁 Installing zoxide (smarter cd command)..." -ForegroundColor Yellow
     try {
@@ -212,9 +212,9 @@ function Install-Packages {
 
 function Verify-Installation {
     Write-Host "`n🔍 Verifying installation..." -ForegroundColor Cyan
-    
+
     $verificationResults = @()
-    
+
     # Check if profile was created/updated
     if (Test-Path -Path $PROFILE -PathType Leaf) {
         $verificationResults += @{
@@ -229,7 +229,7 @@ function Verify-Installation {
             Color = "Red"
         }
     }
-    
+
     # Check if Starship is installed
     try {
         $starshipCheck = winget list --name "starship" -e 2>$null
@@ -253,7 +253,7 @@ function Verify-Installation {
             Color = "Yellow"
         }
     }
-    
+
     # Check if font is installed
     try {
         [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Drawing")
@@ -278,7 +278,7 @@ function Verify-Installation {
             Color = "Yellow"
         }
     }
-    
+
     # Check if Terminal Icons module is installed
     try {
         if (Get-Module -ListAvailable -Name Terminal-Icons) {
@@ -301,22 +301,22 @@ function Verify-Installation {
             Color = "Yellow"
         }
     }
-    
+
     # Display verification results
     Write-Host "`n📊 INSTALLATION SUMMARY:" -ForegroundColor Cyan
     Write-Host "=" * 50
-    
+
     foreach ($result in $verificationResults) {
         Write-Host "$($result.Component): " -NoNewline
         Write-Host "$($result.Status)" -ForegroundColor $result.Color
     }
-    
+
     Write-Host "=" * 50
-    
+
     # Count successes
     $successCount = ($verificationResults | Where-Object { $_.Status -like "✅*" }).Count
     $totalCount = $verificationResults.Count
-    
+
     if ($successCount -eq $totalCount) {
         Write-Host "`n🎉 All components installed successfully!" -ForegroundColor Green
         return $true
