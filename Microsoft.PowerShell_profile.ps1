@@ -692,12 +692,44 @@ Write-Host "$($PSStyle.Foreground.Yellow)Use 'Show-Help' to display help$($PSSty
 
 ################################################################################################
 # SECTION 22:  EXTRA TOOLS CONFIGURATION
+# bat, eza, fzf, starship, zoxide ...
 ################################################################################################
 
 # ===== BEGIN BAT_THEME CONFIGURATION =====
 # Bat theme environment
 $env:BAT_THEME = "Catppuccin Mocha"
 # ===== END BAT_THEME CONFIGURATION =====
+
+# ===== BEGIN EZA CONFIGURATION =====
+
+$env:EZA_CONFIG_DIR = "$env:USERPROFILE\.config\eza"
+
+if (Test-Path env:\LS_COLORS) { Remove-Item env:\LS_COLORS }
+if (Test-Path env:\EXA_COLORS) { Remove-Item env:\EXA_COLORS }
+
+if (Get-Command eza -ErrorAction SilentlyContinue) {
+
+    function ls  { eza --icons @args }
+    function ll  { eza -lh --git --icons @args }
+    function la  { eza -lah --git --icons @args }
+    function lt  { eza --tree --level=2 --icons @args }
+    function treeg { eza --tree --git --icons @args }
+
+    function llt { eza -lh --git --icons --sort=modified @args }
+    function lls { eza -lh --git --icons --sort=size @args }
+    function lsd { eza -D --icons @args }
+
+    function eza-info {
+        eza --version
+        Write-Host "Theme: $env:EZA_CONFIG_DIR\theme.yml"
+    }
+
+    function eza-test {
+        eza --icons --git --header
+    }
+}
+
+# ===== END EZA CONFIGURATION =====
 
 # ===== BEGIN FZF CONFIGURATION =====
 if (-not (Get-Command fzf -ErrorAction SilentlyContinue)) {
