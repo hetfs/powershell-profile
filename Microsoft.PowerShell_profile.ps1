@@ -693,3 +693,122 @@ Write-Host "$($PSStyle.Foreground.Yellow)Use 'Show-Help' to display help$($PSSty
 ################################################################################################
 # SECTION 22:  EXTRA TOOLS CONFIGURATION
 ################################################################################################
+
+# ===== BEGIN BAT_THEME CONFIGURATION =====
+# Bat theme environment
+$env:BAT_THEME = "Catppuccin Mocha"
+# ===== END BAT_THEME CONFIGURATION =====
+
+# ===== BEGIN FZF CONFIGURATION =====
+if (-not (Get-Command fzf -ErrorAction SilentlyContinue)) {
+    return
+}
+
+# Global fzf defaults
+# Catppuccin Macchiato theme
+# https://github.com/catppuccin/fzf
+$env:FZF_DEFAULT_OPTS = @"
+--height=60%
+--layout=reverse
+--info=inline
+--border
+--input-label ' Input ' --header-label ' File Type '
+--margin=1
+--padding=1
+--multi
+--walker-skip=.git,node_modules,target
+--preview="bat --color=always {}"
+--preview-window="~3"
+--preview-window="right:60%:wrap"
+
+--bind="enter:become(nvim {+})"
+--bind="ctrl-j:down,ctrl-k:up"
+--bind="ctrl-d:preview-page-down,ctrl-u:preview-page-up"
+--bind="ctrl-/:toggle-preview"
+--bind=focus:transform-header:file
+
+--color=bg+:#313244,bg:#1E1E2E,spinner:#F5E0DC,hl:#F38BA8
+--color=fg:#CDD6F4,header:#F38BA8,info:#CBA6F7,pointer:#F5E0DC
+--color=marker:#B4BEFE,fg+:#CDD6F4,prompt:#CBA6F7,hl+:#F38BA8
+--color=selected-bg:#45475A
+--color=border:#6C7086,label:#CDD6F4
+--color=preview-border:#9999cc,preview-label:#ccccff
+--color=list-border:#669966,list-label:#99cc99
+--color=input-border:#996666,input-label:#ffcccc
+--color=header-border:#6699cc,header-label:#99ccff
+"@
+# ===== END FZF CONFIGURATION =====
+
+# ===== BEGIN STARSHIP CONFIGURATION =====
+if (Get-Command starship -ErrorAction SilentlyContinue) {
+    $env:STARSHIP_CONFIG = "$HOME\.config\starship\starship.toml"
+    Invoke-Expression (& starship init powershell)
+}
+# ===== END STARSHIP CONFIGURATION =====
+
+# ===== BEGIN ZOXIDE CONFIGURATION =====
+if (Get-Command zoxide -ErrorAction SilentlyContinue) {
+
+    Invoke-Expression (& {
+        $hook = if ($PSVersionTable.PSVersion.Major -lt 6) { 'prompt' } else { 'pwd' }
+        (zoxide init --hook $hook powershell) -join "`n"
+    })
+
+    # ---------------------------------------------------
+    # Optional: Custom environment variables
+    # Uncomment to enable
+    # ---------------------------------------------------
+    # $env:_ZO_EXCLUDE_DIRS = 'C:\Users\*\.git,C:\Windows\System32'
+    # $env:_ZO_MAXAGE = 10000
+    # $env:_ZO_RESOLVE_SYMLINKS = 1
+
+    # ---------------------------------------------------
+    # Core commands
+    # ---------------------------------------------------
+
+    # Jump to directory
+    function z {
+        __zoxide_z @args
+    }
+
+    # Interactive jump (fzf optional)
+    function zi {
+        __zoxide_zi
+    }
+
+    # Add directory to database
+    function za {
+        param([string]$Path = (Get-Location).Path)
+        zoxide add $Path
+    }
+
+    # Query database without cd
+    function zq {
+        zoxide query @args
+    }
+
+    # List matching directories
+    function zl {
+        zoxide query -l @args
+    }
+
+    # Remove directory from database
+    function zr {
+        param([string]$Path)
+        if ($Path) {
+            zoxide remove $Path
+        }
+    }
+
+    # Clear entire database
+    function zc {
+        zoxide query -l | ForEach-Object { zoxide remove $_ }
+    }
+
+    # ---------------------------------------------------
+    # Optional aliases (uncomment if desired)
+    # ---------------------------------------------------
+    # Set-Alias -Name cd -Value z -Description 'Zoxide enhanced cd'
+    # Set-Alias -Name zi -Value zi -Description 'Interactive directory selection'
+}
+# ===== END ZOXIDE CONFIGURATION =====

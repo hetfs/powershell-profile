@@ -304,14 +304,11 @@ function Verify-Installation {
 
     # Display verification results
     Write-Host "`n📊 INSTALLATION SUMMARY:" -ForegroundColor Cyan
-    Write-Host "=" * 50
 
     foreach ($result in $verificationResults) {
         Write-Host "$($result.Component): " -NoNewline
         Write-Host "$($result.Status)" -ForegroundColor $result.Color
     }
-
-    Write-Host "=" * 50
 
     # Count successes
     $successCount = ($verificationResults | Where-Object { $_.Status -like "✅*" }).Count
@@ -368,7 +365,6 @@ $verification = Verify-Installation
 
 # Step 6: Final instructions
 Write-Host "`n📋 NEXT STEPS:" -ForegroundColor Cyan
-Write-Host "=" * 40
 
 if ($verification) {
     Write-Host "1️⃣ RESTART PowerShell or Terminal to apply changes" -ForegroundColor Green
@@ -384,5 +380,4 @@ Write-Host "   - Run 'starship preset' for preset configurations" -ForegroundCol
 Write-Host "   - Visit https://starship.rs for Starship documentation" -ForegroundColor Yellow
 Write-Host "   - Visit https://github.com/hetfs/powershell-profile for updates" -ForegroundColor Yellow
 
-Write-Host "=" * 40
 Write-Host "`n🎯 Setup completed!" -ForegroundColor Cyan
