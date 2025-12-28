@@ -116,7 +116,9 @@ $Tools = @(
     @{ Name='git';      Cmd='git';      Id='Git.Git' }
     @{ Name='lazygit';  Cmd='lazygit';  Id='JesseDuffield.lazygit' }
     @{ Name='wget';     Cmd='wget';     Id='JernejSimoncic.Wget'}
-    @{ Name='cURL';     Cmd='curl';     Id='cURL.cURL'}
+    @{ Name='curl';     Cmd='curl';     Id='cURL.cURL'}
+    @{ Name='tar';      Cmd='tar';      Id='GnuWin32.Tar'}
+    @{ Name='unzip';    Cmd='unzip';    Id='GnuWin32.UnZip'}
     @{ Name='fzf';      Cmd='fzf';      Id='fzf' }
     @{ Name='bat';      Cmd='bat';      Id='sharkdp.bat' }
     @{ Name='fd';       Cmd='fd';       Id='sharkdp.fd' }
@@ -156,7 +158,47 @@ function Install-Tools {
 }
 
 ################################################################################################
-# SECTION 5: TERMINAL ICONS MODULE
+# SECTION 5: PROFILE SETUP
+################################################################################################
+
+Write-Host '🔧 Configuring PowerShell profile...' -ForegroundColor Cyan
+
+try {
+    # Resolve profile base directory based on PowerShell edition
+    $ProfileRoot = if ($PSVersionTable.PSEdition -eq 'Core') {
+        Join-Path $env:USERPROFILE 'Documents\PowerShell'
+    } else {
+        Join-Path $env:USERPROFILE 'Documents\WindowsPowerShell'
+    }
+
+    # Ensure profile directory exists
+    if (-not (Test-Path -Path $ProfileRoot)) {
+        New-Item -Path $ProfileRoot -ItemType Directory -Force | Out-Null
+    }
+
+    # Backup existing profile (overwrite allowed)
+    if (Test-Path -Path $PROFILE -PathType Leaf) {
+        $BackupPath = Join-Path (Split-Path $PROFILE) 'oldprofile.ps1'
+        Move-Item -Path $PROFILE -Destination $BackupPath -Force
+        Write-Host "📦 Existing profile backed up → $BackupPath" -ForegroundColor Yellow
+    }
+
+    # Download and install profile
+    $ProfileUrl = 'https://raw.githubusercontent.com/hetfs/powershell-profile/main/Microsoft.PowerShell_profile.ps1'
+    Invoke-WebRequest -Uri $ProfileUrl -OutFile $PROFILE -UseBasicParsing
+
+    Write-Host "✅ PowerShell profile installed → $PROFILE" -ForegroundColor Green
+    Write-Host "⚠️ NOTE:" -ForegroundColor Yellow
+    Write-Host "   Put personal customizations in:" -ForegroundColor Gray
+    Write-Host "   $ProfileRoot\Profile.ps1" -ForegroundColor Gray
+    Write-Host "   This file is not touched by the updater." -ForegroundColor Gray
+}
+catch {
+    Write-Error ("❌ Failed to install or update the PowerShell profile: {0}" -f $_)
+}
+
+################################################################################################
+# SECTION 6: TERMINAL ICONS MODULE
 ################################################################################################
 
 function Install-TerminalIcons {
@@ -171,7 +213,7 @@ function Install-TerminalIcons {
 }
 
 ################################################################################################
-# SECTION 6: VERIFICATION
+# SECTION 7: VERIFICATION
 ################################################################################################
 
 function Verify-Installation {
@@ -185,30 +227,6 @@ function Verify-Installation {
             Write-Host "❌ $($Tool.Name) missing" -ForegroundColor Red
         }
     }
-}
-
-################################################################################################
-# SECTION 7: PROFILE SETUP
-################################################################################################
-
-function Setup-PowerShellProfile {
-    Write-Host '🔧 Configuring PowerShell profile...' -ForegroundColor Cyan
-
-    $ProfileDir = Split-Path $PROFILE
-    if (-not (Test-Path $ProfileDir)) {
-        New-Item -Path $ProfileDir -ItemType Directory -Force | Out-Null
-    }
-
-    $ProfileUrl = 'https://raw.githubusercontent.com/hetfs/powershell-profile/main/Microsoft.PowerShell_profile.ps1'
-
-    if (Test-Path $PROFILE) {
-        $Backup = "$PROFILE.bak.$(Get-Date -Format yyyyMMddHHmmss)"
-        Copy-Item $PROFILE $Backup -Force
-        Write-Host "📦 Existing profile backed up → $Backup" -ForegroundColor Yellow
-    }
-
-    Invoke-WebRequest -Uri $ProfileUrl -OutFile $PROFILE
-    Write-Host "✅ Profile installed → $PROFILE" -ForegroundColor Green
 }
 
 ################################################################################################
