@@ -190,7 +190,8 @@ function Setup-PowerShellProfile {
 ################################################################################################
 
 function Install-TerminalIcons {
-    Install-Module Terminal-Icons -Repository PSGallery -Force -Scope AllUsers
+    # Install-Module Terminal-Icons -Repository PSGallery -Force -Scope AllUsers
+    Install-Module -Name Terminal-Icons -Repository PSGallery -Force
     Write-Host '✅ Terminal-Icons module installed' -ForegroundColor Green
 }
 
