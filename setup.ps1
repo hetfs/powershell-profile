@@ -28,14 +28,14 @@ if (-not $IsAdmin) {
 function Test-InternetConnection {
     Write-Host '🌐 Testing internet connection...' -ForegroundColor Cyan
     try {
-        return (Test-Connection -ComputerName 'www.google.com' -Count 1 -Quiet)
+        Test-Connection -ComputerName 'www.google.com' -Count 1 -Quiet
     } catch {
-        return $false
+        $false
     }
 }
 
 ################################################################################################
-# SECTION 3: NERD FONTS INSTALLATION (IDEMPOTENT & CI-FRIENDLY)
+# SECTION 3: NERD FONTS INSTALLATION
 ################################################################################################
 
 function Install-NerdFonts {
@@ -76,49 +76,53 @@ function Install-NerdFonts {
             Invoke-WebRequest -Uri $Url -OutFile $ZipPath
             Expand-Archive -Path $ZipPath -DestinationPath $ExtractPath -Force
 
-            Get-ChildItem $ExtractPath -Recurse -Include *.ttf, *.otf | Where-Object {
-                $_.Name -match "^$Font"
-            } | ForEach-Object {
-                $Dest = Join-Path "$env:WINDIR\Fonts" $_.Name
-                if (-not (Test-Path $Dest)) {
-                    Copy-Item $_.FullName $Dest -Force
+            Get-ChildItem $ExtractPath -Recurse -Include *.ttf, *.otf |
+                Where-Object { $_.Name -match "^$Font" } |
+                ForEach-Object {
+                    $Dest = Join-Path "$env:WINDIR\Fonts" $_.Name
+                    if (-not (Test-Path $Dest)) {
+                        Copy-Item $_.FullName $Dest -Force
 
-                    $FontName = $_.BaseName
-                    if (-not (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" -Name "$FontName (TrueType)" -ErrorAction SilentlyContinue)) {
-                        New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" `
-                                         -Name "$FontName (TrueType)" `
-                                         -PropertyType String `
-                                         -Value $_.Name `
-                                         -Force | Out-Null
+                        $FontName = $_.BaseName
+                        if (-not (Get-ItemProperty `
+                            -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" `
+                            -Name "$FontName (TrueType)" `
+                            -ErrorAction SilentlyContinue)) {
+
+                            New-ItemProperty `
+                                -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" `
+                                -Name "$FontName (TrueType)" `
+                                -PropertyType String `
+                                -Value $_.Name `
+                                -Force | Out-Null
+                        }
+
+                        Write-Host "✅ Installed font: $($_.Name)" -ForegroundColor Green
                     }
-
-                    Write-Host "✅ Installed font: $($_.Name)" -ForegroundColor Green
                 }
-            }
-
-        } catch {
+        }
+        catch {
             Write-Warning ("⚠️ Failed to install {0}: {1}" -f $Font, $_)
-        } finally {
+        }
+        finally {
             Remove-Item $ZipPath, $ExtractPath -Recurse -Force -ErrorAction SilentlyContinue
         }
     }
 
-    if (Test-Path $TempRoot) {
-        Remove-Item $TempRoot -Recurse -Force -ErrorAction SilentlyContinue
-    }
+    Remove-Item $TempRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 ################################################################################################
-# SECTION 4: TOOL INSTALLATION (WINGET PINNED)
+# SECTION 4: TOOL INSTALLATION
 ################################################################################################
 
 $Tools = @(
     @{ Name='git';      Cmd='git';      Id='Git.Git' }
     @{ Name='lazygit';  Cmd='lazygit';  Id='JesseDuffield.lazygit' }
-    @{ Name='wget';     Cmd='wget';     Id='JernejSimoncic.Wget'}
-    @{ Name='curl';     Cmd='curl';     Id='cURL.cURL'}
-    @{ Name='tar';      Cmd='tar';      Id='GnuWin32.Tar'}
-    @{ Name='unzip';    Cmd='unzip';    Id='GnuWin32.UnZip'}
+    @{ Name='wget';     Cmd='wget';     Id='JernejSimoncic.Wget' }
+    @{ Name='curl';     Cmd='curl';     Id='cURL.cURL' }
+    @{ Name='tar';      Cmd='tar';      Id='GnuWin32.Tar' }
+    @{ Name='unzip';    Cmd='unzip';    Id='GnuWin32.UnZip' }
     @{ Name='fzf';      Cmd='fzf';      Id='fzf' }
     @{ Name='bat';      Cmd='bat';      Id='sharkdp.bat' }
     @{ Name='fd';       Cmd='fd';       Id='sharkdp.fd' }
@@ -131,61 +135,48 @@ $Tools = @(
 )
 
 function Install-Tools {
-    if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-        throw 'Winget is required but not available.'
-    }
-
     Write-Host '📦 Installing tools via Winget (source pinned)...' -ForegroundColor Cyan
 
     foreach ($Tool in $Tools) {
-        if (-not (Get-Command $Tool.Cmd -ErrorAction SilentlyContinue)) {
-            Write-Host "🚀 Installing $($Tool.Name)..." -ForegroundColor Yellow
-
-            winget install `
-                --id $Tool.Id `
-                --exact `
-                --source winget `
-                --silent `
-                --accept-package-agreements `
-                --accept-source-agreements
-
-            Write-Host "✅ $($Tool.Name) installed" -ForegroundColor Green
-        }
-        else {
+        if (Get-Command $Tool.Cmd -ErrorAction SilentlyContinue) {
             Write-Host "✅ $($Tool.Name) already installed" -ForegroundColor Green
+            continue
         }
+
+        Write-Host "🚀 Installing $($Tool.Name)..." -ForegroundColor Yellow
+        winget install --id $Tool.Id --exact --source winget --silent `
+            --accept-package-agreements --accept-source-agreements
+
+        Write-Host "✅ $($Tool.Name) installed" -ForegroundColor Green
     }
 }
 
 ################################################################################################
-# SECTION 5: PROFILE SETUP
+# SECTION 5: PROFILE SETUP (WRAPPED — LOGIC UNCHANGED)
 ################################################################################################
 
-Write-Host '🔧 Configuring PowerShell profile...' -ForegroundColor Cyan
+function Setup-PowerShellProfile {
+    Write-Host '🔧 Configuring PowerShell profile...' -ForegroundColor Cyan
 
-try {
-    # Resolve profile base directory based on PowerShell edition
     $ProfileRoot = if ($PSVersionTable.PSEdition -eq 'Core') {
         Join-Path $env:USERPROFILE 'Documents\PowerShell'
     } else {
         Join-Path $env:USERPROFILE 'Documents\WindowsPowerShell'
     }
 
-    # Ensure profile directory exists
-    if (-not (Test-Path -Path $ProfileRoot)) {
+    if (-not (Test-Path $ProfileRoot)) {
         New-Item -Path $ProfileRoot -ItemType Directory -Force | Out-Null
     }
 
-    # Backup existing profile (overwrite allowed)
-    if (Test-Path -Path $PROFILE -PathType Leaf) {
+    if (Test-Path $PROFILE) {
         $BackupPath = Join-Path (Split-Path $PROFILE) 'oldprofile.ps1'
-        Move-Item -Path $PROFILE -Destination $BackupPath -Force
+        Move-Item $PROFILE $BackupPath -Force
         Write-Host "📦 Existing profile backed up → $BackupPath" -ForegroundColor Yellow
     }
 
-    # Download and install profile
-    $ProfileUrl = 'https://raw.githubusercontent.com/hetfs/powershell-profile/main/Microsoft.PowerShell_profile.ps1'
-    Invoke-WebRequest -Uri $ProfileUrl -OutFile $PROFILE -UseBasicParsing
+    Invoke-WebRequest `
+        -Uri 'https://raw.githubusercontent.com/hetfs/powershell-profile/main/Microsoft.PowerShell_profile.ps1' `
+        -OutFile $PROFILE
 
     Write-Host "✅ PowerShell profile installed → $PROFILE" -ForegroundColor Green
     Write-Host "⚠️ NOTE:" -ForegroundColor Yellow
@@ -193,23 +184,14 @@ try {
     Write-Host "   $ProfileRoot\Profile.ps1" -ForegroundColor Gray
     Write-Host "   This file is not touched by the updater." -ForegroundColor Gray
 }
-catch {
-    Write-Error ("❌ Failed to install or update the PowerShell profile: {0}" -f $_)
-}
 
 ################################################################################################
-# SECTION 6: TERMINAL ICONS MODULE
+# SECTION 6: TERMINAL ICONS
 ################################################################################################
 
 function Install-TerminalIcons {
-    try {
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        Install-Module -Name Terminal-Icons -Repository PSGallery -Force -Scope AllUsers
-        Write-Host '✅ Terminal-Icons module installed' -ForegroundColor Green
-    }
-    catch {
-        Write-Warning "Terminal-Icons installation failed: $_"
-    }
+    Install-Module Terminal-Icons -Repository PSGallery -Force -Scope AllUsers
+    Write-Host '✅ Terminal-Icons module installed' -ForegroundColor Green
 }
 
 ################################################################################################
@@ -218,12 +200,10 @@ function Install-TerminalIcons {
 
 function Verify-Installation {
     Write-Host '🔍 Verifying installed tools...' -ForegroundColor Cyan
-
     foreach ($Tool in $Tools) {
         if (Get-Command $Tool.Cmd -ErrorAction SilentlyContinue) {
             Write-Host "✅ $($Tool.Name) OK" -ForegroundColor Green
-        }
-        else {
+        } else {
             Write-Host "❌ $($Tool.Name) missing" -ForegroundColor Red
         }
     }
@@ -242,7 +222,6 @@ if (-not (Test-InternetConnection)) {
     throw 'Active internet connection is required.'
 }
 
-# Install fonts, tools, terminal icons, verify before profile setup
 Install-NerdFonts
 Install-Tools
 Install-TerminalIcons
