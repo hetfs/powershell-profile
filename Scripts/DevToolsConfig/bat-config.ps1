@@ -129,7 +129,7 @@ function Configure-Bat {
 # Core Behavior
 # ──────────────────────────────────────────────────────
 --paging=always
---pager="less"
+--pager="delta"
 --color=always
 --strip-ansi=auto
 
