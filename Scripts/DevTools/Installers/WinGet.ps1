@@ -1,52 +1,41 @@
-function Install-ViaWinGet {
-    param(
-        [string]$PackageId,
-        [string]$ToolName,
-        [hashtable]$AvailableMethods,
-        [bool]$IsAdmin
-    )
-    
-    if (-not $AvailableMethods.WinGet) {
-        Write-Log "WinGet method skipped - WinGet not available" -Level SKIP
+param (
+    [Parameter(Mandatory)]
+    [hashtable]$Tool
+)
+
+# Skip if no WinGet ID is specified
+if (-not $Tool.WinGetId) {
+    Write-Log "No WinGet ID specified for $($Tool.Name). Skipping." -Level WARNING
+    return $false
+}
+
+# Check if tool is already installed
+if ($Tool.BinaryCheck -and (Get-Command $Tool.BinaryCheck -ErrorAction SilentlyContinue)) {
+    Write-Log "$($Tool.Name) already installed (WinGet)." -Level SUCCESS
+    return $true
+}
+
+Write-Log "→ Installing $($Tool.Name) via WinGet..." -Level INFO
+
+try {
+    # Install the tool via WinGet
+    winget install `
+        --id $Tool.WinGetId `
+        --exact `
+        --silent `
+        --accept-package-agreements `
+        --accept-source-agreements
+
+    # Confirm installation if BinaryCheck exists
+    if ($Tool.BinaryCheck -and (Get-Command $Tool.BinaryCheck -ErrorAction SilentlyContinue)) {
+        Write-Log "✔ Installed $($Tool.Name) via WinGet." -Level SUCCESS
+        return $true
+    } else {
+        Write-Log "Installed $($Tool.Name) via WinGet, but binary not found: $($Tool.BinaryCheck)." -Level WARNING
         return $false
     }
-    
-    if ($PSCmdlet.ShouldProcess($ToolName, "Install via WinGet")) {
-        try {
-            Write-Log "Installing $ToolName via WinGet..." -Level INFO
-            
-            $scopeArg = if (-not $IsAdmin) { "--scope user" } else { "" }
-            $command = "winget install --id '$PackageId' --silent --accept-package-agreements --accept-source-agreements $scopeArg"
-            Write-Log "Running: $command" -Level DEBUG
-            
-            $result = Invoke-Expression $command 2>&1
-            $exitCode = $LASTEXITCODE
-            
-            switch ($exitCode) {
-                0 { 
-                    Write-Log "✓ Successfully installed $ToolName via WinGet" -Level SUCCESS
-                    return $true 
-                }
-                -1978335189 {
-                    Write-Log "WinGet: Package may already be installed or requires elevation" -Level INFO
-                    return $false
-                }
-                -1978335212 {
-                    Write-Log "WinGet: Another installation in progress, skipping" -Level WARN
-                    return $false
-                }
-                default {
-                    Write-Log "WinGet installation failed with exit code: $exitCode" -Level WARN
-                    if ($result) {
-                        Write-Log "WinGet output: $result" -Level DEBUG
-                    }
-                    return $false
-                }
-            }
-        } catch {
-            Write-Log "WinGet installation failed: $_" -Level ERROR
-            return $false
-        }
-    }
+} catch {
+    Write-Log "❌ Failed to install $($Tool.Name) via WinGet." -Level ERROR
+    Write-Log $_ -Level ERROR
     return $false
 }
