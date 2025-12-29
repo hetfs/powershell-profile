@@ -182,6 +182,7 @@ function Configure-PowerShellProfile {
 # ===== BEGIN BAT_THEME CONFIGURATION =====
 # Bat theme environment
 `$env:BAT_THEME = "Catppuccin Mocha"
+Set-Alias cat 'bat'
 # ===== END BAT_THEME CONFIGURATION =====
 "@ | Add-Content $PROFILE
 
