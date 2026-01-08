@@ -2,252 +2,252 @@
 
 ## Overview
 
-**DevTools** is a collection of essential tools designed to enhance development productivity, streamline setup processes, and ensure seamless integration across various platforms. This project leverages powerful tools for managing system environments, automating installations, and optimizing workflows.
+**DevTools** is a modular, data-driven PowerShell toolkit for installing, validating, and managing essential developer tools across environments.
 
-This guide provides detailed instructions for setting up, configuring, and using **DevTools** to install and manage a wide variety of essential tools for development, from shell utilities to editors and more.
+It is designed to be:
+
+* **Scalable**—add tools without changing installer logic
+* **Declarative**—tools define themselves
+* **CI-friendly**—works locally, in CI, and GitHub Actions
+* **Cross-platform aware**—WinGet, Chocolatey, and GitHub fallback support
+
+DevTools separates **tool data** from **installer logic**, making it easy to maintain and extend as your toolchain grows.
 
 ---
 
-## Table of Contents
+## Quick Install (Inline)
 
-1. [Getting Started](#getting-started)
-2. [Core Shells & Enhancements](#core-shells--enhancements)
-3. [Data & CLI Tools](#data--cli-tools)
-4. [Code Editors](#code-editors)
-5. [Installation Process](#installation-process)
-6. [Contributing](#contributing)
-7. [Licenses & Acknowledgments](#licenses--acknowledgments)
+Run DevTools directly without cloning the repository:
+
+```powershell
+irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/DevTools/DevTools.ps1 | iex
+```
+
+This will:
+
+* Bootstrap DevTools
+* Load all category registries
+* Validate the environment
+* Install missing tools using the best available provider
+
+---
+
+## Requirements
+
+Before running DevTools, ensure:
+
+* **PowerShell 7.2+**
+* **Windows 10/11** (WinGet supported)
+* **Internet access**
+* Optional:
+
+  * **Chocolatey** (fallback installer)
+  * **Git** (for source-based installs)
+
+PowerShell install:
+[https://learn.microsoft.com/powershell/scripting/install/installing-powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
 
 ---
 
 ## Getting Started
 
-### Requirements
+### Clone (Optional)
 
-Before using **DevTools**, ensure your system meets the following requirements:
+If you prefer local execution or customization:
 
-* **PowerShell** 7.x or higher.
-* **WinGet** (Windows Package Manager).
-* **Chocolatey** (optional, for additional tool management).
-* **GitHub** access for manual installations if required.
-
-### Installation
-
-1. **Clone the Repository**
-
-   Clone the DevTools repository to your local machine:
-
-   ```bash
-   git clone https://github.com/yourusername/DevTools.git
-   cd DevTools
-   ```
-
-2. **Run the Script**
-
-   To begin the installation process, execute the `DevTools.ps1` script:
-
-   ```powershell
-   .\DevTools.ps1
-   ```
-
-   This script will automatically begin installing the listed tools.
-
----
-
-## Core Shells & Enhancements
-
-**DevTools** includes several powerful shells and enhancements designed to improve your command-line experience.
-
-### Tools
-
-* **PowerShell Core**
-
-  * **WinGet ID**: `Microsoft.Powershell`
-  * **Purpose**: The core PowerShell terminal with cross-platform support.
-* **OpenSSH**
-
-  * **WinGet ID**: `Microsoft.OpenSSH`
-  * **Purpose**: Secure Shell (SSH) for remote connections.
-
-### Installation Message
-
-```powershell
-Write-Host "→ Installing Core Shells & Enhancements tools..." -ForegroundColor Cyan
+```bash
+git clone https://github.com/hetfs/powershell-profile.git
+cd powershell-profile/DevTools
 ```
 
-### Example Tools List
+Run DevTools:
 
 ```powershell
-@(
-    [PSCustomObject]@{
-        Name        = "PowerShell"
-        Category    = "CoreShell"
-        WinGetId    = "Microsoft.Powershell"
-        ChocoId     = "powershell-core"
-        GitHubRepo  = "PowerShell/PowerShell"
-        BinaryCheck = "pwsh.exe"
-        PSModule    = $null
-        Dependencies= @()
-    },
-
-    [PSCustomObject]@{
-        Name        = "OpenSSH"
-        Category    = "CoreShell"
-        WinGetId    = "Microsoft.OpenSSH"
-        ChocoId     = "openssh"
-        GitHubRepo  = "PowerShell/openssh-portable"
-        BinaryCheck = "ssh.exe"
-        PSModule    = $null
-        Dependencies= @()
-    }
-)
+.\DevTools.ps1 -Install
 ```
 
 ---
 
-## Data & CLI Tools
+## Architecture Overview
 
-This category includes essential tools for data processing and command-line usage.
+DevTools follows a **CoreShell/DataTools architecture**:
 
-### Tools
+* **Installer logic** is generic and never tool-specific
+* **Each tool is declarative**
+* **Validation is data-driven**
 
-* **jq**: Command-line JSON processor.
-* **yq**: Command-line YAML processor.
-* **ytt**: YAML templating tool for configuration management.
-* **Node.js**: JavaScript runtime for scripting and tooling.
-
-### Installation Message
-
-```powershell
-Write-Host "→ Installing Data & CLI Tools..." -ForegroundColor Cyan
 ```
-
-### Example Tools List
-
-```powershell
-@(
-    [PSCustomObject]@{
-        Name        = "jq"
-        Category    = "DataTools"
-        WinGetId    = "jqlang.jq"
-        ChocoId     = "jq"
-        GitHubRepo  = "jqlang/jq"
-        BinaryCheck = "jq.exe"
-        PSModule    = $null
-        Dependencies= @()
-        Purpose     = "Command-line JSON processor"
-    },
-
-    [PSCustomObject]@{
-        Name        = "yq"
-        Category    = "DataTools"
-        WinGetId    = "MikeFarah.yq"
-        ChocoId     = "yq"
-        GitHubRepo  = "mikefarah/yq"
-        BinaryCheck = "yq.exe"
-        PSModule    = $null
-        Dependencies= @()
-        Purpose     = "Command-line YAML processor"
-    }
-)
+DevTools/
+├── DevTools.ps1
+├── Config/
+│   └── Categories.ps1
+├── Shared/
+│   ├── Logging.ps1
+│   ├── Validation.ps1
+│   └── Schema.ps1
+├── ToolsRegistry/
+│   ├── CoreShell.ps1
+│   ├── ShellProductivity.ps1
+│   ├── DataTools.ps1
+│   ├── Network.ps1
+│   ├── SystemUtils.ps1
+│   ├── Terminals.ps1
+│   └── VersionControl.ps1
 ```
 
 ---
 
-## Code Editors
+## Tool Categories
 
-**DevTools** provides several popular code editors to streamline coding workflows.
+### CoreShell
 
-### Tools
+Core shell environments and UX foundations.
 
-* **Neovim**: Hyperextensible terminal-based text editor.
-* **Vim**: Classic terminal text editor (optional).
-* **Visual Studio Code**: Lightweight, extensible, cross-platform code editor (optional).
-* **Sublime Text**: Fast, lightweight GUI code editor (optional).
+Examples:
 
-### Installation Message
+* PowerShell
+* OpenSSH
+* Starship
+* Terminal Icons
 
-```powershell
-Write-Host "→ Installing Code Editors..." -ForegroundColor Cyan
-```
+---
 
-### Example Tools List
+### ShellProductivity
 
-```powershell
-@(
-    [PSCustomObject]@{
-        Name        = "Neovim"
-        Category    = "Editors"
-        WinGetId    = "Neovim.Neovim"
-        ChocoId     = "neovim"
-        GitHubRepo  = "neovim/neovim"
-        BinaryCheck = "nvim.exe"
-        PSModule    = $null
-        Dependencies= @()
-        Purpose     = "Hyperextensible terminal-based text editor"
-    }
-)
-```
+Navigation, search, and terminal efficiency tools.
+
+Examples:
+
+* fzf
+* zoxide
+* bat
+* ripgrep
+* eza
+
+---
+
+### DataTools
+
+Data inspection and processing CLIs.
+
+Examples:
+
+* jq
+* yq
+* ytt
+* Node.js
+
+---
+
+### Network
+
+Networking, diagnostics, and security tooling.
+
+Examples:
+
+* curl
+* wget
+* httpie
+* trivy
+* globalping
+
+---
+
+### SystemUtils
+
+System inspection, automation, and documentation tools.
+
+Examples:
+
+* fastfetch
+* btop
+* tldr
+* glow
+* task
+* vale
+
+---
+
+### Terminals
+
+Terminal emulators and shells.
+
+Examples:
+
+* Windows Terminal
+* WezTerm
+
+---
+
+### VersionControl
+
+Source control and collaboration tooling.
+
+Examples:
+
+* Git
+* GitHub CLI
+* lazygit
+* delta
 
 ---
 
 ## Installation Process
 
-### Running the Script
+1. DevTools loads all category registry files.
+2. Each tool is normalized and schema-validated.
+3. Installers are selected in priority order:
 
-1. **Execute the Main Script**
+   1. WinGet
+   2. Chocolatey
+   3. GitHub releases
+4. Post-install validation runs automatically.
 
-   After downloading or cloning the repository, navigate to the `Scripts` directory and run the `DevTools.ps1` script to begin the tool installations.
+Example output:
 
-   ```powershell
-   .\DevTools.ps1
-   ```
-
-2. **Installation Output**
-
-   The script will display messages indicating which tools are being installed. Each tool will be installed through WinGet, Chocolatey, or GitHub, depending on its configuration.
-
-   Example output:
-
-   ```powershell
-   → Installing PowerShell Core...
-   ✔ PowerShell Core already installed
-   ```
-
-3. **Manual Interventions**
-
-   In some cases, tools may require additional configuration or intervention. If this happens, the script will notify you with a warning message.
+```text
+→ Installing Git
+✔ Git already installed
+→ Installing lazygit
+✔ lazygit installed successfully
+```
 
 ---
 
-## Contributing
+## Validation Model
 
-**DevTools** is open-source and contributions are welcome. To contribute:
+DevTools uses a **generic validation pipeline**.
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-name`).
-3. Commit your changes (`git commit -am 'Add new feature'`).
-4. Push to the branch (`git push origin feature-name`).
-5. Open a pull request.
+Each tool defines its own validation:
 
----
+```powershell
+Validation = @{
+    Type  = 'Command'
+    Value = 'git.exe'
+}
+```
 
-## Licenses & Acknowledgments
+Supported validation types:
 
-**DevTools** is licensed under the [MIT License](LICENSE).
+* `Command`—binary available in PATH
+* `Path`—file or directory exists
+* `Script`—custom PowerShell validation
 
-We would like to acknowledge the creators of the tools included in this repository, including the maintainers of:
-
-* PowerShell
-* jq
-* yq
-* Neovim
-* and many others.
+The installer never contains tool-specific logic.
 
 ---
 
 ## Conclusion
 
-By using **DevTools**, you streamline the process of installing and managing development tools on your machine. Whether you're setting up a fresh environment or enhancing your existing workflow, this guide ensures you can quickly and efficiently access the right tools for the job.
+DevTools provides a clean, scalable, and professional way to manage developer environments using PowerShell.
 
-Feel free to explore the various categories, contribute, or adjust the configuration to meet your specific needs. Happy coding!
+If you value:
+
+* Reproducibility
+* Declarative configuration
+* CI compatibility
+* Zero hard-coded logic
+
+DevTools is built for you.
+
+Happy hacking.
