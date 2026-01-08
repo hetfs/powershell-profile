@@ -16,12 +16,6 @@
     Version: 1.0.1
     Author: HetFS
     Repository: https://github.com/hetfs/powershell-profile
-
-.EXAMPLE
-    .\DevToolsBootstrap.ps1
-
-.EXAMPLE
-    iex (irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/DevToolsBootstrap.ps1)
 #>
 
 # ------------------------------------------------------------
@@ -70,12 +64,9 @@ function Get-LocalDevToolsPath {
         try {
             $path = & $generator
             if ($path -and (Test-Path -LiteralPath $path)) {
-                Write-Verbose "Found local DevTools at $path"
                 return $path
             }
-        } catch {
-            Write-Verbose "Path check failed: $($_.Exception.Message)"
-        }
+        } catch {}
     }
 
     return $null
@@ -108,14 +99,13 @@ function Invoke-OnlineDevTools {
     $env:DEVTOOLS_ROOT   = "$REPO_URL/tree/main/DevTools"
     $env:DEVTOOLS_BOOTSTRAP_VERSION = $SCRIPT_VERSION
 
+    $tempFile = Join-Path ([IO.Path]::GetTempPath()) (
+        'DevTools-{0}.ps1' -f (Get-Date -Format 'yyyyMMdd-HHmmss')
+    )
+
     try {
-        $content = Invoke-RestMethod -Uri $ONLINE_SCRIPT_URL -ErrorAction Stop
-
-        $tempFile = Join-Path ([IO.Path]::GetTempPath()) (
-            'DevTools-{0}.ps1' -f (Get-Date -Format 'yyyyMMdd-HHmmss')
-        )
-
-        $content | Out-File -FilePath $tempFile -Encoding UTF8 -Force
+        Invoke-RestMethod -Uri $ONLINE_SCRIPT_URL -ErrorAction Stop |
+            Out-File -FilePath $tempFile -Encoding UTF8 -Force
 
         & $tempFile
     }
@@ -144,27 +134,12 @@ function Start-DevTools {
 }
 
 function Test-DevToolsAvailability {
-    $result = [PSCustomObject]@{
-        LocalAvailable  = $false
-        LocalPath       = $null
-        OnlineAvailable = $false
+    [PSCustomObject]@{
+        LocalAvailable  = [bool](Get-LocalDevToolsPath)
+        LocalPath       = Get-LocalDevToolsPath
+        OnlineAvailable = (Invoke-WebRequest -Uri $ONLINE_SCRIPT_URL -Method Head -TimeoutSec 5 -ErrorAction SilentlyContinue).StatusCode -eq 200
         TestTime        = Get-Date
     }
-
-    $localPath = Get-LocalDevToolsPath
-    if ($localPath) {
-        $result.LocalAvailable = $true
-        $result.LocalPath = $localPath
-    }
-
-    try {
-        $head = Invoke-WebRequest -Uri $ONLINE_SCRIPT_URL -Method Head -TimeoutSec 5
-        $result.OnlineAvailable = $head.StatusCode -eq 200
-    } catch {
-        $result.OnlineAvailable = $false
-    }
-
-    $result
 }
 
 # ------------------------------------------------------------
@@ -174,14 +149,13 @@ function Test-DevToolsAvailability {
 if ($MyInvocation.InvocationName -ne '.') {
     try {
         Start-DevTools
-        exit 0
     } catch {
         Write-Host ''
         Write-Host 'Fatal error in DevTools Bootstrap:' -ForegroundColor Red
         Write-Host $_.Exception.Message -ForegroundColor Red
         Write-Host ''
         Write-Host "Report issues at: $REPO_URL/issues" -ForegroundColor Yellow
-        exit 1
+        throw
     }
 } else {
     Write-Host "DevTools Bootstrap v$SCRIPT_VERSION loaded." -ForegroundColor Green
