@@ -1,124 +1,191 @@
+# ============================================================
+# DevTools Bootstrap v1.0.1
+# Minimal, reliable bootstrap for local/online execution
+# ============================================================
+
+<#
+.SYNOPSIS
+    Bootstrap script to run DevTools.ps1 locally or from GitHub.
+
+.DESCRIPTION
+    Automatically detects and runs DevTools.ps1 from:
+    1. Local repository (preferred)
+    2. GitHub raw content (fallback)
+
+.NOTES
+    Version: 1.0.1
+    Author: HetFS
+    Repository: https://github.com/hetfs/powershell-profile
+
+.EXAMPLE
+    .\DevToolsBootstrap.ps1
+
+.EXAMPLE
+    iex (irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/DevToolsBootstrap.ps1)
+#>
+
 # ------------------------------------------------------------
-# DevTools Bootstrap (Minimal Inline Version)
+# Requirements & configuration
 # ------------------------------------------------------------
 
 #Requires -Version 7.0
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# ------------------------------------------------------------
-# Configuration
-# ------------------------------------------------------------
-$REPO_URL = "https://github.com/hetfs/powershell-profile"
-$RAW_BASE_URL = "https://raw.githubusercontent.com/hetfs/powershell-profile/main"
+$SCRIPT_VERSION = '1.0.1'
+$REPO_URL       = 'https://github.com/hetfs/powershell-profile'
+$RAW_BASE_URL   = 'https://raw.githubusercontent.com/hetfs/powershell-profile/main'
 $ONLINE_SCRIPT_URL = "$RAW_BASE_URL/DevTools/DevTools.ps1"
 
-# ------------------------------------------------------------
-# Resolve Local DevTools
-# ------------------------------------------------------------
-function Get-LocalDevTools {
-    # Check relative to bootstrap script
-    if ($PSScriptRoot) {
-        $localPath = Join-Path $PSScriptRoot 'DevTools\DevTools.ps1'
-        if (Test-Path $localPath) {
-            return $localPath
+$LOCAL_PATHS = @(
+    { if ($PSScriptRoot) { Join-Path $PSScriptRoot 'DevTools\DevTools.ps1' } },
+    { Join-Path (Get-Location) 'DevTools\DevTools.ps1' },
+    { Join-Path $env:USERPROFILE 'powershell-profile\DevTools\DevTools.ps1' },
+    {
+        if ($PSScriptRoot) {
+            Join-Path (Split-Path $PSScriptRoot -Parent) 'DevTools\DevTools.ps1'
         }
     }
+)
 
-    # Check in current directory
-    $currentPath = Join-Path (Get-Location) 'DevTools\DevTools.ps1'
-    if (Test-Path $currentPath) {
-        return $currentPath
-    }
+# ------------------------------------------------------------
+# Core helpers
+# ------------------------------------------------------------
 
-    # Check in user's powershell-profile directory
-    $profilePath = Join-Path $env:USERPROFILE 'powershell-profile\DevTools\DevTools.ps1'
-    if (Test-Path $profilePath) {
-        return $profilePath
+function Show-Banner {
+    $line = '═' * 62
+    Write-Host ''
+    Write-Host "╔$line╗" -ForegroundColor Cyan
+    Write-Host ("║ DevTools Bootstrap v{0,-46} ║" -f $SCRIPT_VERSION) -ForegroundColor Cyan
+    Write-Host "╠$line╣" -ForegroundColor Cyan
+    Write-Host ("║ Repository: {0,-48} ║" -f $REPO_URL) -ForegroundColor Cyan
+    Write-Host "╚$line╝" -ForegroundColor Cyan
+    Write-Host ''
+}
+
+function Get-LocalDevToolsPath {
+    Write-Verbose 'Searching for local DevTools.ps1...'
+
+    foreach ($generator in $LOCAL_PATHS) {
+        try {
+            $path = & $generator
+            if ($path -and (Test-Path -LiteralPath $path)) {
+                Write-Verbose "Found local DevTools at $path"
+                return $path
+            }
+        } catch {
+            Write-Verbose "Path check failed: $($_.Exception.Message)"
+        }
     }
 
     return $null
 }
 
-# ------------------------------------------------------------
-# Execute Local Script
-# ------------------------------------------------------------
 function Invoke-LocalDevTools {
-    param([string]$Path)
+    param(
+        [Parameter(Mandatory)]
+        [ValidateScript({ Test-Path $_ })]
+        [string]$Path
+    )
 
-    Write-Host "🚀 Running local DevTools..." -ForegroundColor Green
-    Write-Host "   Source: $Path" -ForegroundColor Gray
+    Write-Host 'Running local DevTools...' -ForegroundColor Green
+    Write-Host "Source   : Local" -ForegroundColor DarkGray
+    Write-Host "Location : $(Split-Path $Path -Parent)" -ForegroundColor DarkGray
 
-    # Set environment variable for context
-    $env:DEVTOOLS_SOURCE = "LOCAL"
-    $env:DEVTOOLS_ROOT = Split-Path $Path -Parent
+    $env:DEVTOOLS_SOURCE = 'Local'
+    $env:DEVTOOLS_ROOT   = Split-Path $Path -Parent
+    $env:DEVTOOLS_BOOTSTRAP_VERSION = $SCRIPT_VERSION
 
-    try {
-        & $Path
-    } catch {
-        Write-Host "❌ Error running local script: $_" -ForegroundColor Red
-        throw
-    }
+    & $Path
 }
 
-# ------------------------------------------------------------
-# Execute Online Script
-# ------------------------------------------------------------
 function Invoke-OnlineDevTools {
-    Write-Host "🌐 Running online DevTools from GitHub..." -ForegroundColor Cyan
-    Write-Host "   URL: $ONLINE_SCRIPT_URL" -ForegroundColor Gray
+    Write-Host 'Running DevTools from GitHub...' -ForegroundColor Cyan
+    Write-Host "Source   : Online" -ForegroundColor DarkGray
+    Write-Host "URL      : $ONLINE_SCRIPT_URL" -ForegroundColor DarkGray
 
-    # Set environment variable for context
-    $env:DEVTOOLS_SOURCE = "ONLINE"
-    $env:DEVTOOLS_ROOT = "$REPO_URL/tree/main/DevTools"
+    $env:DEVTOOLS_SOURCE = 'Online'
+    $env:DEVTOOLS_ROOT   = "$REPO_URL/tree/main/DevTools"
+    $env:DEVTOOLS_BOOTSTRAP_VERSION = $SCRIPT_VERSION
 
     try {
-        # Download and execute in memory
-        $scriptContent = Invoke-RestMethod -Uri $ONLINE_SCRIPT_URL -ErrorAction Stop
+        $content = Invoke-RestMethod -Uri $ONLINE_SCRIPT_URL -ErrorAction Stop
 
-        # Create a temporary script block and execute it
-        $scriptBlock = [ScriptBlock]::Create($scriptContent)
-        & $scriptBlock
+        $tempFile = Join-Path ([IO.Path]::GetTempPath()) (
+            'DevTools-{0}.ps1' -f (Get-Date -Format 'yyyyMMdd-HHmmss')
+        )
 
-    } catch {
-        Write-Host "❌ Failed to run online script: $_" -ForegroundColor Red
+        $content | Out-File -FilePath $tempFile -Encoding UTF8 -Force
 
-        # Try to fallback to local if available
-        $localPath = Get-LocalDevTools
-        if ($localPath) {
-            Write-Host "🔄 Falling back to local version..." -ForegroundColor Yellow
-            Invoke-LocalDevTools -Path $localPath
-        } else {
-            throw "No local version available. Please check your internet connection or clone the repository."
+        & $tempFile
+    }
+    finally {
+        if (Test-Path $tempFile) {
+            Remove-Item -Path $tempFile -Force -ErrorAction SilentlyContinue
         }
     }
 }
 
-# ------------------------------------------------------------
-# Main Execution
-# ------------------------------------------------------------
 function Start-DevTools {
-    Write-Host "🔍 Looking for DevTools..." -ForegroundColor Gray
+    Show-Banner
 
-    # Try to find local script first
-    $localPath = Get-LocalDevTools
+    Write-Host 'Detecting DevTools source...' -ForegroundColor Gray
+    $localPath = Get-LocalDevToolsPath
 
     if ($localPath) {
         Invoke-LocalDevTools -Path $localPath
     } else {
+        Write-Host 'Local DevTools not found. Falling back to GitHub.' -ForegroundColor Yellow
         Invoke-OnlineDevTools
     }
+
+    Write-Host ''
+    Write-Host 'DevTools execution completed.' -ForegroundColor Green
+}
+
+function Test-DevToolsAvailability {
+    $result = [PSCustomObject]@{
+        LocalAvailable  = $false
+        LocalPath       = $null
+        OnlineAvailable = $false
+        TestTime        = Get-Date
+    }
+
+    $localPath = Get-LocalDevToolsPath
+    if ($localPath) {
+        $result.LocalAvailable = $true
+        $result.LocalPath = $localPath
+    }
+
+    try {
+        $head = Invoke-WebRequest -Uri $ONLINE_SCRIPT_URL -Method Head -TimeoutSec 5
+        $result.OnlineAvailable = $head.StatusCode -eq 200
+    } catch {
+        $result.OnlineAvailable = $false
+    }
+
+    $result
 }
 
 # ------------------------------------------------------------
-# Auto-execute when invoked directly
+# Main execution
 # ------------------------------------------------------------
-# Check if script was invoked directly (not sourced/dotted)
+
 if ($MyInvocation.InvocationName -ne '.') {
-    # This runs when script is executed with .\DevToolsBootstrap.ps1
-    # or via iex (irm ...)
-    Start-DevTools
+    try {
+        Start-DevTools
+        exit 0
+    } catch {
+        Write-Host ''
+        Write-Host 'Fatal error in DevTools Bootstrap:' -ForegroundColor Red
+        Write-Host $_.Exception.Message -ForegroundColor Red
+        Write-Host ''
+        Write-Host "Report issues at: $REPO_URL/issues" -ForegroundColor Yellow
+        exit 1
+    }
 } else {
-    # If script was sourced/dotted, just define the function
-    Write-Host "✅ DevToolsBootstrap loaded. Use Start-DevTools to run." -ForegroundColor Green
+    Write-Host "DevTools Bootstrap v$SCRIPT_VERSION loaded." -ForegroundColor Green
+    Write-Host 'Available commands:' -ForegroundColor Gray
+    Write-Host '  Start-DevTools' -ForegroundColor Cyan
+    Write-Host '  Test-DevToolsAvailability' -ForegroundColor Cyan
 }
