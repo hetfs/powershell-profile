@@ -1,5 +1,37 @@
+# ------------------------------------------------------------
+# DevTools bootstrap (supports inline execution)
+# ------------------------------------------------------------
+function Resolve-DevToolsRoot {
+    if ($PSScriptRoot -and (Test-Path -LiteralPath $PSScriptRoot)) {
+        return $PSScriptRoot
+    }
+
+    $Root = Join-Path $env:TEMP 'powershell-profile\DevTools'
+
+    if (-not (Test-Path -LiteralPath $Root)) {
+        Write-Host '→ Bootstrapping DevTools (inline execution)…' -ForegroundColor Cyan
+
+        $ZipUrl  = 'https://github.com/hetfs/powershell-profile/archive/refs/heads/main.zip'
+        $ZipPath = Join-Path $env:TEMP 'powershell-profile.zip'
+
+        Invoke-WebRequest -Uri $ZipUrl -OutFile $ZipPath
+        Expand-Archive -Path $ZipPath -DestinationPath $env:TEMP -Force
+        Remove-Item $ZipPath -Force
+    }
+
+    return $Root
+}
+
+$Script:DevToolsRoot = Resolve-DevToolsRoot
+
+# Re-exec locally when invoked via irm | iex
+if (-not $PSScriptRoot) {
+    & "$Script:DevToolsRoot\DevTools.ps1" @PSBoundParameters
+    return
+}
+
 # ================================
-# Usage 
+# Usage
 # .\DevTools.ps1
 # .\DevTools.ps1 -WhatIf
 # .\DevTools.ps1 -Plan
@@ -25,16 +57,11 @@ $ErrorActionPreference = 'Stop'
 function As-Array {
     param([object]$InputObject)
 
-    if ($null -eq $InputObject) {
-        @()
-    }
-    elseif ($InputObject -is [System.Collections.IEnumerable] -and
-            $InputObject -isnot [string]) {
+    if ($null -eq $InputObject) { @() }
+    elseif ($InputObject -is [System.Collections.IEnumerable] -and $InputObject -isnot [string]) {
         @($InputObject)
     }
-    else {
-        @($InputObject)
-    }
+    else { @($InputObject) }
 }
 
 # ------------------------------------------------------------
@@ -79,9 +106,6 @@ function Invoke-DevTools {
         $LogConfig = $null
 
         try {
-            # ------------------------------------------------------------
-            # Load shared modules
-            # ------------------------------------------------------------
             foreach ($module in @(
                 'Helpers.ps1',
                 'Logging.ps1',
@@ -97,23 +121,15 @@ function Invoke-DevTools {
                 . $modulePath
             }
 
-            # ------------------------------------------------------------
-            # Logging
-            # ------------------------------------------------------------
             $LogConfig = Initialize-DevToolsLogging `
                 -LogPath $LogPath `
                 -MinimumLevel 'DEBUG'
 
             Start-LoggingSession -Config $LogConfig
 
-            Write-Log `
-                -Config $LogConfig `
-                -Level INFO `
+            Write-Log -Config $LogConfig -Level INFO `
                 -Message "DevTools started (PowerShell $($PSVersionTable.PSVersion))"
 
-            # ------------------------------------------------------------
-            # Environment
-            # ------------------------------------------------------------
             $EnvContext = Initialize-DevToolsEnvironment `
                 -RootPath $RootPath `
                 -InstallersPath $InstallersPath `
@@ -121,70 +137,21 @@ function Invoke-DevTools {
                 -OutputPath $OutputPath `
                 -ToolsRegistryPath $ToolsRegistry
 
-            Write-Log -Config $LogConfig -Level INFO -Message "Environment initialized"
-
-            # ------------------------------------------------------------
-            # Categories
-            # ------------------------------------------------------------
             $CategoriesFile = Join-Path $ConfigPath 'categories.ps1'
             if (-not (Test-Path -LiteralPath $CategoriesFile)) {
-                throw "categories.ps1 not found"
+                throw 'categories.ps1 not found'
             }
 
             $Categories = & $CategoriesFile
             if ($Categories -isnot [PSCustomObject]) {
-                throw "categories.ps1 must return a PSCustomObject"
+                throw 'categories.ps1 must return a PSCustomObject'
             }
 
-            Write-Log `
-                -Config $LogConfig `
-                -Level SUCCESS `
-                -Message ("Loaded categories: " + ($Categories.PSObject.Properties.Name -join ', '))
-
-            # ------------------------------------------------------------
-            # Load tools
-            # ------------------------------------------------------------
             $ResolvedTools = @()
-            $ToolFiles = Get-ChildItem -Path $ToolsRegistry -Filter '*.ps1' | Sort-Object Name
-
-            foreach ($file in $ToolFiles) {
-                try {
-                    $toolsFromFile = As-Array (& $file.FullName)
-
-                    $valid = $toolsFromFile | Where-Object {
-                        $_ -is [PSCustomObject] -and
-                        $_.PSObject.Properties['Name'] -and
-                        $_.PSObject.Properties['Category'] -and
-                        $_.PSObject.Properties['ToolType']
-                    }
-
-                    if ($valid.Count -gt 0) {
-                        $ResolvedTools += $valid
-                        Write-Log -Config $LogConfig -Level DEBUG `
-                            -Message "Loaded $($valid.Count) tools from $($file.Name)"
-                    }
-                    else {
-                        Write-Log -Config $LogConfig -Level WARNING `
-                            -Message "No valid tools in $($file.Name)"
-                    }
-                }
-                catch {
-                    Write-Log -Config $LogConfig -Level ERROR `
-                        -Message "Failed loading $($file.Name): $($_.Exception.Message)"
-                }
+            Get-ChildItem -Path $ToolsRegistry -Filter '*.ps1' | Sort-Object Name | ForEach-Object {
+                $ResolvedTools += As-Array (& $_.FullName)
             }
 
-            if ($ResolvedTools.Count -eq 0) {
-                Write-Log -Config $LogConfig -Level WARNING -Message "No tools loaded"
-                return
-            }
-
-            Write-Log -Config $LogConfig -Level SUCCESS `
-                -Message "Total tools loaded: $($ResolvedTools.Count)"
-
-            # ------------------------------------------------------------
-            # Filters
-            # ------------------------------------------------------------
             if ($Category) {
                 $ResolvedTools = $ResolvedTools | Where-Object Category -eq $Category
             }
@@ -193,33 +160,13 @@ function Invoke-DevTools {
                 $ResolvedTools = $ResolvedTools | Where-Object Name -in $Tools
             }
 
-            if ($ResolvedTools.Count -eq 0) {
-                Write-Log -Config $LogConfig -Level WARNING -Message "No matching tools found"
-                return
-            }
-
-            Write-Log -Config $LogConfig -Level INFO `
-                -Message "Filtered tools count: $($ResolvedTools.Count)"
-
-            # ------------------------------------------------------------
-            # Plan mode
-            # ------------------------------------------------------------
             if ($Plan) {
-                Write-Log -Config $LogConfig -Level INFO -Message "Plan-only mode enabled"
                 $ResolvedTools | Sort-Object Category, Name |
                     Format-Table Name, Category, ToolType -AutoSize
                 return
             }
 
-            # ------------------------------------------------------------
-            # Install
-            # ------------------------------------------------------------
-            $InstallerPath = Join-Path $InstallersPath 'Install-Tools.ps1'
-            if (-not (Test-Path -LiteralPath $InstallerPath)) {
-                throw "Install-Tools.ps1 not found"
-            }
-
-            . $InstallerPath
+            . (Join-Path $InstallersPath 'Install-Tools.ps1')
 
             if ($PSCmdlet.ShouldProcess('DevTools', 'Install tools')) {
                 Install-Tools `
@@ -229,7 +176,8 @@ function Invoke-DevTools {
                     -ExportWinGetList:$ExportWinGetList
             }
 
-            Write-Log -Config $LogConfig -Level SUCCESS -Message "DevTools completed successfully"
+            Write-Log -Config $LogConfig -Level SUCCESS `
+                -Message 'DevTools completed successfully'
         }
         finally {
             if ($LogConfig) {
