@@ -22,46 +22,22 @@ $CategoryDescription = 'Cross-platform shells and core command-line environments
 # ====================================================
 $Tools = @(
 
-    # ------------------------------------------------
-    # PowerShell
-    # ------------------------------------------------
-    [PSCustomObject]@{
-        Name                = 'PowerShell'
-        Category            = $CategoryName
-        CategoryDescription = $CategoryDescription
-        ToolType            = 'Shell'
-        WinGetId            = 'Microsoft.PowerShell'
-        ChocoId             = ''
-        GitHubRepo          = 'https://github.com/PowerShell/PowerShell'
-        BinaryCheck         = 'pwsh.exe'
-        Dependencies        = @()
-        Provides            = @('pwsh.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'pwsh.exe'
-        }
+[PSCustomObject]@{
+    Name                = 'gsudo'
+    Category            = 'SystemUtils'
+    CategoryDescription = 'Sudo-like privilege elevation for Windows'
+    ToolType            = 'PrivilegeElevation'
+    WinGetId            = 'gerardog.gsudo'
+    ChocoId             = 'gsudo'
+    GitHubRepo          = 'https://github.com/gerardog/gsudo'
+    BinaryCheck         = Join-Path $env:ProgramFiles 'gsudo\Current\gsudo.exe'
+    Dependencies        = @()
+    Provides            = @('gsudo.exe')
+    Validation          = [PSCustomObject]@{
+        Type  = 'Path'
+        Value = Join-Path $env:ProgramFiles 'gsudo\Current\gsudo.exe'
     }
-
-    # ------------------------------------------------
-    # OpenSSH
-    # ------------------------------------------------
-    [PSCustomObject]@{
-        Name                = 'OpenSSH'
-        Category            = $CategoryName
-        CategoryDescription = $CategoryDescription
-        ToolType            = 'SSHClient'
-        WinGetId            = 'OpenSSH.Client'
-        ChocoId             = ''
-        GitHubRepo          = 'https://github.com/PowerShell/openssh-portable'
-        BinaryCheck         = 'ssh.exe'
-        Dependencies        = @()
-        Provides            = @('ssh.exe', 'scp.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'ssh.exe'
-        }
-    }
-
+}
     # ------------------------------------------------
     # ShellCheck — shell script linting
     # ------------------------------------------------
@@ -83,7 +59,7 @@ $Tools = @(
     }
 
     # ------------------------------------------------
-    # direnv
+    # direnv — manage environment variables per directory
     # ------------------------------------------------
     [PSCustomObject]@{
         Name                = 'direnv'
@@ -103,7 +79,7 @@ $Tools = @(
     }
 
     # ------------------------------------------------
-    # mise-en-place
+    # mise-en-place — runtime manager
     # ------------------------------------------------
     [PSCustomObject]@{
         Name                = 'mise-en-place'
@@ -111,7 +87,7 @@ $Tools = @(
         CategoryDescription = $CategoryDescription
         ToolType            = 'RuntimeManager'
         WinGetId            = 'jdx.mise'
-        ChocoId             = ''
+        ChocoId             = $null
         GitHubRepo          = 'https://github.com/jdx/mise'
         BinaryCheck         = 'mise.exe'
         Dependencies        = @()
@@ -123,7 +99,7 @@ $Tools = @(
     }
 
     # ------------------------------------------------
-    # aliae
+    # aliae — CLI productivity tool
     # ------------------------------------------------
     [PSCustomObject]@{
         Name                = 'aliae'
@@ -131,7 +107,7 @@ $Tools = @(
         CategoryDescription = $CategoryDescription
         ToolType            = 'ShellProductivity'
         WinGetId            = 'JanDeDobbeleer.Aliae'
-        ChocoId             = ''
+        ChocoId             = $null
         GitHubRepo          = 'https://github.com/JanDeDobbeleer/aliae'
         BinaryCheck         = 'aliae.exe'
         Dependencies        = @()
@@ -141,6 +117,7 @@ $Tools = @(
             Value = 'aliae.exe'
         }
     }
+
 )
 
 # ====================================================

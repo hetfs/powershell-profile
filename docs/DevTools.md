@@ -229,23 +229,79 @@ This mode is safe for CI, auditing, and planning.
 
 ## Validation Model
 
-DevTools uses a **generic validation pipeline**.
+DevTools uses a **generic validation pipeline** to ensure tools are installed and accessible. Each tool defines how it should be validated using metadata, which can be either **CLI-based** or **GUI/application-based**.
 
-Each tool defines how it is validated using simple metadata.
+### CLI Tool Validation
 
-Example:
+Most developer tools are CLI executables. Validation ensures the binary exists and is runnable.
+
+**Example metadata for CLI tools:**
 
 ```powershell
+# Git CLI
 BinaryCheck = 'git.exe'
+Validation = [PSCustomObject]@{
+    Type  = 'Command'   # Checks for presence in PATH
+    Value = 'git.exe'
+}
+
+# age encryption tool
+BinaryCheck = 'age.exe'
+Validation = [PSCustomObject]@{
+    Type  = 'Command'   # Uses Get-Command internally
+    Value = 'age.exe'
+}
 ```
 
-Supported validation strategies include:
+**Validation methods for CLI tools:**
 
-* Executable present in PATH
-* File or directory existence
-* Custom PowerShell validation logic
+* **Command:** Checks if the executable is available in the system PATH
+* **Path:** Checks for a specific file path on disk
+* **Custom Script:** Any PowerShell script logic for advanced verification
 
-Installer code never contains tool-specific checks.
+---
+
+### GUI Tool Validation
+
+Some developer tools are GUI applications. Validation ensures the **installation folder or executable** exists.
+
+**Example metadata for GUI tools:**
+
+```powershell
+# Visual Studio Code
+BinaryCheck = 'Code.exe'
+Validation = [PSCustomObject]@{
+    Type  = 'Path'   # Explicit installation path check
+    Value = @(
+        "$env:ProgramFiles\Microsoft VS Code\Code.exe",
+        "$env:LocalAppData\Programs\Microsoft VS Code\Code.exe"
+    )
+}
+
+# RustDesk
+BinaryCheck = 'rustdesk.exe'
+Validation = [PSCustomObject]@{
+    Type  = 'Path'
+    Value = @(
+        "$env:ProgramFiles\RustDesk\rustdesk.exe",
+        "$env:LocalAppData\Programs\RustDesk\rustdesk.exe"
+    )
+}
+```
+
+**Validation methods for GUI tools:**
+
+* **Path:** Looks for the executable or main application folder
+* **Shortcut/Start Menu:** Optional check for shortcuts
+* **Registry (Windows):** Optional check for installed applications
+
+---
+
+### Notes
+
+* **Installer-agnostic:** Validation is independent of WinGet, Chocolatey, or GitHub Release installers
+* **Post-install check:** Every tool runs validation after installation to confirm success
+* **Flexible:** Supports CLI, GUI, and hybrid tools (CLI + optional GUI)
 
 ---
 

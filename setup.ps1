@@ -119,11 +119,11 @@ function Install-NerdFonts {
 $Tools = @(
     @{ Name='git';      Cmd='git';      Id='Git.Git' }
     @{ Name='lazygit';  Cmd='lazygit';  Id='JesseDuffield.lazygit' }
-    @{ Name='wget';     Cmd='wget';     Id='JernejSimoncic.Wget' }
+    @{ Name='Wget2';     Cmd='wget';     Id='GNU.Wget2' }
     @{ Name='curl';     Cmd='curl';     Id='cURL.cURL' }
     @{ Name='tar';      Cmd='tar';      Id='GnuWin32.Tar' }
     @{ Name='unzip';    Cmd='unzip';    Id='GnuWin32.UnZip' }
-    @{ Name='fzf';      Cmd='fzf';      Id='fzf' }
+    @{ Name='fzf';      Cmd='fzf';      Id='junegunn.fzf' }
     @{ Name='bat';      Cmd='bat';      Id='sharkdp.bat' }
     @{ Name='fd';       Cmd='fd';       Id='sharkdp.fd' }
     @{ Name='rg';       Cmd='rg';       Id='BurntSushi.ripgrep.MSVC' }

@@ -773,9 +773,9 @@ if (Get-Command zoxide -ErrorAction SilentlyContinue) {
     # Optional: Custom environment variables
     # Uncomment to enable
     # ---------------------------------------------------
-    # $env:_ZO_EXCLUDE_DIRS = 'C:\Users\*\.git,C:\Windows\System32'
-    # $env:_ZO_MAXAGE = 10000
-    # $env:_ZO_RESOLVE_SYMLINKS = 1
+     $env:_ZO_EXCLUDE_DIRS = 'C:\Users\*\.git,C:\Windows\System32'
+     $env:_ZO_MAXAGE = 10000
+     $env:_ZO_RESOLVE_SYMLINKS = 1
 
     # ---------------------------------------------------
     # Core commands

@@ -26,20 +26,16 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$SCRIPT_VERSION = '1.0.1'
-$REPO_URL       = 'https://github.com/hetfs/powershell-profile'
-$RAW_BASE_URL   = 'https://raw.githubusercontent.com/hetfs/powershell-profile/main'
-$ONLINE_SCRIPT_URL = "$RAW_BASE_URL/DevTools/DevTools.ps1"
+$SCRIPT_VERSION      = '1.0.1'
+$REPO_URL            = 'https://github.com/hetfs/powershell-profile'
+$RAW_BASE_URL        = 'https://raw.githubusercontent.com/hetfs/powershell-profile/main'
+$ONLINE_SCRIPT_URL   = "$RAW_BASE_URL/DevTools/DevTools.ps1"
 
 $LOCAL_PATHS = @(
     { if ($PSScriptRoot) { Join-Path $PSScriptRoot 'DevTools\DevTools.ps1' } },
     { Join-Path (Get-Location) 'DevTools\DevTools.ps1' },
     { Join-Path $env:USERPROFILE 'powershell-profile\DevTools\DevTools.ps1' },
-    {
-        if ($PSScriptRoot) {
-            Join-Path (Split-Path $PSScriptRoot -Parent) 'DevTools\DevTools.ps1'
-        }
-    }
+    { if ($PSScriptRoot) { Join-Path (Split-Path $PSScriptRoot -Parent) 'DevTools\DevTools.ps1' } }
 )
 
 # ------------------------------------------------------------
@@ -47,12 +43,44 @@ $LOCAL_PATHS = @(
 # ------------------------------------------------------------
 
 function Show-Banner {
-    $line = '═' * 62
+    # ------------------------------------------------------------
+    # Define banner lines and colors
+    # Each element: [Text, ForegroundColor]
+    # ------------------------------------------------------------
+    $lines = @(
+        @("DevTools Bootstrap v$SCRIPT_VERSION", 'Cyan'),
+        @("Repository: $REPO_URL", 'Yellow'),
+        @("Author: HETFS LTD.", 'Cyan'),
+        @("Version: $SCRIPT_VERSION", 'Yellow'),
+        @("Windows DevTools Project", 'Cyan')
+    )
+
+    # ------------------------------------------------------------
+    # Calculate dynamic inner width
+    # ------------------------------------------------------------
+    $padding = 2
+    $maxTextLength = ($lines | ForEach-Object { $_[0].Length } | Measure-Object -Maximum).Maximum
+    $innerWidth = $maxTextLength + $padding
+    $line = '═' * $innerWidth
+
+    # ------------------------------------------------------------
+    # Helper function to format each line
+    # ------------------------------------------------------------
+    function Format-Line($text) {
+        $spaces = $innerWidth - $text.Length
+        return "║ $text" + (' ' * $spaces) + "║"
+    }
+
+    # ------------------------------------------------------------
+    # Draw banner
+    # ------------------------------------------------------------
     Write-Host ''
     Write-Host "╔$line╗" -ForegroundColor Cyan
-    Write-Host ("║ DevTools Bootstrap v{0,-46} ║" -f $SCRIPT_VERSION) -ForegroundColor Cyan
-    Write-Host "╠$line╣" -ForegroundColor Cyan
-    Write-Host ("║ Repository: {0,-48} ║" -f $REPO_URL) -ForegroundColor Cyan
+    foreach ($entry in $lines) {
+        $text  = $entry[0]
+        $color = $entry[1]
+        Write-Host (Format-Line $text) -ForegroundColor $color
+    }
     Write-Host "╚$line╝" -ForegroundColor Cyan
     Write-Host ''
 }
