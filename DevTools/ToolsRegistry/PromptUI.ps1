@@ -44,25 +44,6 @@ $Tools = @(
         }
     }
 
-    # ====================================================
-    # Shell UX Enhancements
-    # ====================================================
-    # [PSCustomObject]@{
-    #     Name                = 'Terminal-Icons'
-    #     Category            = $CategoryName
-    #     ToolType            = 'ShellEnhancement'
-    #     CategoryDescription = $CategoryDescription
-    #     WinGetId            = $null
-    #     ChocoId             = 'terminal-icons.powershell'
-    #     GitHubRepo          = 'devhawk/Terminal-Icons'
-    #     BinaryCheck         = $null
-    #     Dependencies        = @('PowerShell')
-    #     Provides            = @('Terminal-Icons PowerShell module')
-    #     Validation          = [PSCustomObject]@{
-    #         Type  = 'Module'
-    #         Value = 'Terminal-Icons'
-    #     }
-    # }
 )
 
 # -----------------------------

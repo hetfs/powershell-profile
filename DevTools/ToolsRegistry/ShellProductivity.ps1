@@ -117,22 +117,25 @@ $Tools = @(
         Validation          = [PSCustomObject]@{ Type='Command'; Value='eza.exe' }
     }
 
-    # ====================================================
-    # Directory Visualization
-    # ====================================================
-    # [PSCustomObject]@{
-    #     Name                = 'tre'
-    #     Category            = $CategoryName
-    #     ToolType            = 'DirectoryTree'
-    #     CategoryDescription = $CategoryDescription
-    #     WinGetId            = $null
-    #     ChocoId             = 'tre-command'
-    #     GitHubRepo          = 'jeffreytse/tre'
-    #     BinaryCheck         = 'tre.exe'
-    #     Dependencies        = @()
-    #     Provides            = @('tre.exe')
-    #     Validation          = [PSCustomObject]@{ Type='Command'; Value='tre.exe' }
-    # }
+[PSCustomObject]@{
+    Name                = 'tre'
+    Category            = $CategoryName
+    ToolType            = 'DirectoryTree'
+    CategoryDescription = $CategoryDescription
+    WinGetId            = 'tre-command'
+    ChocoId             = 'tre-command'
+    GitHubRepo          = 'dduan/tre'
+    BinaryCheck         = 'tre.exe'
+    Dependencies        = @()
+    Provides            = @('tre.exe')
+    Validation          = [PSCustomObject]@{
+        Type  = 'Path'
+        Value = @(
+            "$env:ProgramFiles\tre-command\bin\tre.exe",
+            "$env:ProgramFiles(x86)\tre-command\bin\tre.exe"
+        )
+    }
+}
 )
 
 # -----------------------------

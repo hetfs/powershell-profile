@@ -81,7 +81,7 @@ $categoryTable = @{
 
     SystemUtils = @{
         Description = 'System utilities and diagnostics'
-        Examples    = @('fastfetch', 'btop', '7zip', 'Sysinternals')
+        Examples    = @('fastfetch', 'btop4win', '7zip', 'Sysinternals')
         Priority    = 110
     }
 

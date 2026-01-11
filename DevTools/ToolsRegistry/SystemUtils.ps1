@@ -17,7 +17,7 @@ $ErrorActionPreference = 'Stop'
 # Category metadata
 # -----------------------------
 $CategoryName        = 'SystemUtils'
-$CategoryDescription = 'System utilities, diagnostics, documentation helpers, automation, search, and archiving tools.'
+$CategoryDescription = 'System utilities, diagnostics, automation, and archiving tools.'
 
 # -----------------------------
 # Tool definitions
@@ -56,49 +56,22 @@ $Tools = @(
     }
 
     # ====================================================
-    # CLI Helpers & Documentation
+    # Archiving & Compression
     # ====================================================
-    # [PSCustomObject]@{
-    #     Name                = 'tldr'
-    #     Category            = $CategoryName
-    #     ToolType            = 'CLIHelper'
-    #     CategoryDescription = $CategoryDescription
-    #     WinGetId            = 'tldr-pages.tldr'
-    #     ChocoId             = 'tldr'
-    #     GitHubRepo          = 'tldr-pages/tldr'
-    #     BinaryCheck         = 'tldr.exe'
-    #     Dependencies        = @()
-    #     Provides            = @('tldr.exe')
-    #     Validation          = [PSCustomObject]@{ Type='Command'; Value='tldr.exe' }
-    # }
-
     [PSCustomObject]@{
-        Name                = 'glow'
+        Name                = 'tar'
         Category            = $CategoryName
-        ToolType            = 'MarkdownRenderer'
+        ToolType            = 'Archiver'
         CategoryDescription = $CategoryDescription
-        WinGetId            = 'charmbracelet.glow'
-        ChocoId             = 'glow'
-        GitHubRepo          = 'charmbracelet/glow'
-        BinaryCheck         = 'glow.exe'
+        WinGetId            = 'GnuWin32.Tar'
+        ChocoId             = 'tar'
+        GitHubRepo          = 'libarchive/libarchive'
+        BinaryCheck         = 'tar.exe'
         Dependencies        = @()
-        Provides            = @('glow.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='glow.exe' }
+        Provides            = @('tar.exe')
+        Validation          = [PSCustomObject]@{ Type='Command'; Value='tar.exe' }
     }
 
-    [PSCustomObject]@{
-        Name                = 'Vale'
-        Category            = $CategoryName
-        ToolType            = 'Linter'
-        CategoryDescription = $CategoryDescription
-        WinGetId            = 'errata-ai.Vale'
-        ChocoId             = 'vale'
-        GitHubRepo          = 'errata-ai/vale'
-        BinaryCheck         = 'vale.exe'
-        Dependencies        = @()
-        Provides            = @('vale.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='vale.exe' }
-    }
 
     # ====================================================
     # Task & Automation
@@ -116,40 +89,6 @@ $Tools = @(
     #     Provides            = @('task.exe')
     #     Validation          = [PSCustomObject]@{ Type='Command'; Value='task.exe' }
     # }
-
-    # ====================================================
-    # Search Utilities
-    # ====================================================
-    # [PSCustomObject]@{
-    #     Name                = 'Silver Searcher (ag)'
-    #     Category            = $CategoryName
-    #     ToolType            = 'CodeSearch'
-    #     CategoryDescription = $CategoryDescription
-    #     WinGetId            = 'TheSilverSearcher.AG'
-    #     ChocoId             = 'ag'
-    #     GitHubRepo          = 'ggreer/the_silver_searcher'
-    #     BinaryCheck         = 'ag.exe'
-    #     Dependencies        = @()
-    #     Provides            = @('ag.exe')
-    #     Validation          = [PSCustomObject]@{ Type='Command'; Value='ag.exe' }
-    # }
-    #
-    # ====================================================
-    # Archiving & Compression
-    # ====================================================
-    [PSCustomObject]@{
-        Name                = 'tar'
-        Category            = $CategoryName
-        ToolType            = 'Archiver'
-        CategoryDescription = $CategoryDescription
-        WinGetId            = 'GnuWin32.Tar'
-        ChocoId             = 'tar'
-        GitHubRepo          = 'libarchive/libarchive'
-        BinaryCheck         = 'tar.exe'
-        Dependencies        = @()
-        Provides            = @('tar.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='tar.exe' }
-    }
 
     # [PSCustomObject]@{
     #     Name                = 'unzip'

@@ -3,7 +3,7 @@
     Code editors and editing tooling
 
 .DESCRIPTION
-    Defines terminal, GUI, validation, and note-taking editors.
+    Defines terminal, GUI, and validation .
     Returns a stable array of PSCustomObjects for installers,
     validators, and documentation generators.
 #>
@@ -15,7 +15,7 @@ $ErrorActionPreference = 'Stop'
 # Category metadata
 # ==============================
 $CategoryName        = 'Editors'
-$CategoryDescription = 'Code editors, linters, validators, and note-taking tools'
+$CategoryDescription = 'Code editors, linters, validators'
 
 # ==============================
 # Tool definitions

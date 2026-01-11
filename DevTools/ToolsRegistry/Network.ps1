@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Network and web-related CLI tools for Windows.
+    Network and web-related tools for Windows.
 
 .DESCRIPTION
     Defines HTTP clients, file downloaders, network diagnostics,
@@ -25,128 +25,158 @@ $CategoryDescription = 'Network, Web, HTTP, Security, and Traffic Inspection Too
 $Tools = @(
 
     # ====================================================
-    # HTTP & API Clients
+    # HTTP & API Clients (CLI)
     # ====================================================
-    # [PSCustomObject]@{
-    #     Name                = 'HTTPie CLI'
-    #     Category            = $CategoryName
-    #     ToolType            = 'HttpClient'
-    #     CategoryDescription = $CategoryDescription
-    #     WinGetId            = 'httpie.httpie'
-    #     ChocoId             = 'httpie'
-    #     GitHubRepo          = 'httpie/httpie'
-    #     BinaryCheck         = 'http.exe'
-    #     Dependencies        = @()
-    #     Provides            = @('http.exe')
-    #     Validation          = [PSCustomObject]@{ Type='Command'; Value='http.exe' }
-    # }
 
+[PSCustomObject]@{
+    Name                = 'HTTPie CLI'
+    Category            = $CategoryName
+    CategoryDescription = $CategoryDescription
+    ToolType            = 'HttpClient'
+    WinGetId            = 'httpie.httpie'
+    ChocoId             = 'httpie'
+    GitHubRepo          = 'httpie/httpie'
+    BinaryCheck         = 'HTTPie.exe'
+    Dependencies        = @()
+    Provides            = @('HTTPie.exe')
+    Validation          = [PSCustomObject]@{
+        Type  = 'Path'
+        Value = @(
+            Join-Path $env:LOCALAPPDATA 'Programs\HTTPie\HTTPie.exe'
+        )
+    }
+}
     [PSCustomObject]@{
         Name                = 'curl'
         Category            = $CategoryName
-        ToolType            = 'HttpClient'
         CategoryDescription = $CategoryDescription
+        ToolType            = 'CLI'
         WinGetId            = 'curl.curl'
         ChocoId             = 'curl'
         GitHubRepo          = 'curl/curl'
         BinaryCheck         = 'curl.exe'
         Dependencies        = @()
         Provides            = @('curl.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='curl.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'curl.exe'
+        }
     }
 
     [PSCustomObject]@{
         Name                = 'wget'
         Category            = $CategoryName
-        ToolType            = 'FileDownloader'
         CategoryDescription = $CategoryDescription
+        ToolType            = 'CLI'
         WinGetId            = 'GnuWin32.Wget'
         ChocoId             = 'wget'
         GitHubRepo          = 'mirror/wget'
         BinaryCheck         = 'wget.exe'
         Dependencies        = @()
         Provides            = @('wget.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='wget.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'wget.exe'
+        }
     }
 
     # ====================================================
-    # Network Diagnostics & Monitoring
+    # Network Diagnostics & Monitoring (CLI)
     # ====================================================
     [PSCustomObject]@{
         Name                = 'Globalping'
         Category            = $CategoryName
-        ToolType            = 'NetworkMonitoring'
         CategoryDescription = $CategoryDescription
+        ToolType            = 'CLI'
         WinGetId            = 'jsdelivr.globalping'
         ChocoId             = 'globalping'
         GitHubRepo          = 'jsdelivr/globalping'
         BinaryCheck         = 'globalping.exe'
         Dependencies        = @()
         Provides            = @('globalping.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='globalping.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'globalping.exe'
+        }
     }
 
     [PSCustomObject]@{
         Name                = 'dog'
         Category            = $CategoryName
-        ToolType            = 'DnsClient'
         CategoryDescription = $CategoryDescription
+        ToolType            = 'CLI'
         WinGetId            = 'ogham.dog'
         ChocoId             = 'dog'
         GitHubRepo          = 'ogham/dog'
         BinaryCheck         = 'dog.exe'
         Dependencies        = @()
         Provides            = @('dog.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='dog.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'dog.exe'
+        }
     }
 
     # ====================================================
-    # Security & TLS
+    # Security & TLS (CLI)
     # ====================================================
     [PSCustomObject]@{
         Name                = 'Trivy'
         Category            = $CategoryName
-        ToolType            = 'SecurityScanner'
         CategoryDescription = $CategoryDescription
+        ToolType            = 'CLI'
         WinGetId            = 'AquaSecurity.Trivy'
         ChocoId             = 'trivy'
         GitHubRepo          = 'aquasecurity/trivy'
         BinaryCheck         = 'trivy.exe'
         Dependencies        = @()
         Provides            = @('trivy.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='trivy.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'trivy.exe'
+        }
     }
 
     [PSCustomObject]@{
         Name                = 'Smallstep CLI'
         Category            = $CategoryName
-        ToolType            = 'CertificateManagement'
         CategoryDescription = $CategoryDescription
+        ToolType            = 'CLI'
         WinGetId            = 'smallstep.step'
         ChocoId             = 'step-cli'
         GitHubRepo          = 'smallstep/cli'
         BinaryCheck         = 'step.exe'
         Dependencies        = @()
         Provides            = @('step.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='step.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'step.exe'
+        }
     }
 
     # ====================================================
-    # Traffic Inspection & Debugging
-    # # ====================================================
-    # [PSCustomObject]@{
-    #     Name                = 'HTTP Toolkit'
-    #     Category            = $CategoryName
-    #     ToolType            = 'TrafficInspection'
-    #     CategoryDescription = $CategoryDescription
-    #     WinGetId            = $null
-    #     ChocoId             = $null
-    #     GitHubRepo          = 'httptoolkit/httptoolkit'
-    #     BinaryCheck         = 'httptoolkit.exe'
-    #     Dependencies        = @()
-    #     Provides            = @('httptoolkit.exe')
-    #     Validation          = [PSCustomObject]@{ Type='Command'; Value='httptoolkit.exe' }
-    # }
+    # Traffic Inspection & Debugging (GUI)
+    # https://github.com/httptoolkit/httptoolkit
+    # ====================================================
+[PSCustomObject]@{
+    Name                = 'HTTP Toolkit'
+    Category            = $CategoryName
+    CategoryDescription = $CategoryDescription
+    ToolType            = 'TrafficInspection'
+    WinGetId            = 'HTTPToolKit.HTTPToolKit'
+    ChocoId             = $null
+    GitHubRepo          = 'httptoolkit/httptoolkit'
+    GitHubAssetPattern  = $null
+    BinaryCheck         = 'httptoolkit.exe'
+    Dependencies        = @()
+    Provides            = @('httptoolkit.exe')
+    Validation          = [PSCustomObject]@{
+        Type  = 'Path'
+        Value = @(
+            Join-Path $env:LOCALAPPDATA 'Programs\HTTP Toolkit\HTTP Toolkit.exe'
+        )
+    }
+}
 )
 
 # -----------------------------
