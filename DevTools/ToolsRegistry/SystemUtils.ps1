@@ -72,37 +72,53 @@ $Tools = @(
         Validation          = [PSCustomObject]@{ Type='Command'; Value='tar.exe' }
     }
 
-
     # ====================================================
     # Task & Automation
     # ====================================================
-    # [PSCustomObject]@{
-    #     Name                = 'Task'
-    #     Category            = $CategoryName
-    #     ToolType            = 'TaskRunner'
-    #     CategoryDescription = $CategoryDescription
-    #     WinGetId            = 'GoTask.Task'
-    #     ChocoId             = 'go-task'
-    #     GitHubRepo          = 'go-task/task'
-    #     BinaryCheck         = 'task.exe'
-    #     Dependencies        = @()
-    #     Provides            = @('task.exe')
-    #     Validation          = [PSCustomObject]@{ Type='Command'; Value='task.exe' }
-    # }
+    [PSCustomObject]@{
+        Name                = 'Task'
+        Category            = $CategoryName
+        ToolType            = 'TaskRunner'
+        CategoryDescription = $CategoryDescription
+        WinGetId            = 'GoTask.Task'
+        ChocoId             = 'go-task'
+        GitHubRepo          = 'go-task/task'
+        BinaryCheck         = 'task.exe'
+        Dependencies        = @()
+        Provides            = @('task.exe')
+        Validation          = [PSCustomObject]@{
+            Type  = 'Path'
+            Value = @(
+                "$env:ProgramFiles\task\task.exe",
+                "$env:ProgramFiles(x86)\task\task.exe",
+                "$env:ProgramData\chocolatey\bin\task.exe"
+            )
+        }
+    }
 
-    # [PSCustomObject]@{
-    #     Name                = 'unzip'
-    #     Category            = $CategoryName
-    #     ToolType            = 'Extractor'
-    #     CategoryDescription = $CategoryDescription
-    #     WinGetId            = 'GnuWin32.Unzip'
-    #     ChocoId             = 'unzip'
-    #     GitHubRepo          = 'madler/unzip'
-    #     BinaryCheck         = 'unzip.exe'
-    #     Dependencies        = @()
-    #     Provides            = @('unzip.exe')
-    #     Validation          = [PSCustomObject]@{ Type='Command'; Value='unzip.exe' }
-    # }
+    # ====================================================
+    # Extraction Utilities
+    # ====================================================
+[PSCustomObject]@{
+    Name                = 'unzip'
+    Category            = $CategoryName
+    ToolType            = 'Extractor'
+    CategoryDescription = $CategoryDescription
+    WinGetId            = 'GnuWin32.Unzip'
+    ChocoId             = 'unzip'
+    GitHubRepo          = 'madler/unzip'
+    BinaryCheck         = 'unzip.exe'
+    Dependencies        = @()
+    Provides            = @('unzip.exe')
+    Validation          = [PSCustomObject]@{
+        Type  = 'Path'
+        Value = @(
+            "$env:ProgramFiles\GnuWin32\bin\unzip.exe",
+            "$env:ProgramFiles(x86)\GnuWin32\bin\unzip.exe",
+            "$env:ProgramData\chocolatey\bin\unzip.exe"
+        )
+    }
+}
 )
 
 # -----------------------------
