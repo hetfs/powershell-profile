@@ -1,5 +1,5 @@
 # ============================================================
-# DevTools Bootstrap v1.0.1
+# DevTools Bootstrap v1.0.2
 # Minimal, reliable bootstrap for local/online execution
 # ============================================================
 
@@ -10,10 +10,10 @@
 .DESCRIPTION
     Automatically detects and runs DevTools.ps1 from:
     1. Local repository (preferred)
-    2. GitHub raw content (fallback)
+    2. GitHub ZIP archive (fallback, FIXED)
 
 .NOTES
-    Version: 1.0.1
+    Version: 1.0.2
     Author: HetFS
     Repository: https://github.com/hetfs/powershell-profile
 #>
@@ -26,10 +26,9 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$SCRIPT_VERSION      = '1.0.1'
-$REPO_URL            = 'https://github.com/hetfs/powershell-profile'
-$RAW_BASE_URL        = 'https://raw.githubusercontent.com/hetfs/powershell-profile/main'
-$ONLINE_SCRIPT_URL   = "$RAW_BASE_URL/DevTools/DevTools.ps1"
+$SCRIPT_VERSION = '1.0.2'
+$REPO_URL       = 'https://github.com/hetfs/powershell-profile'
+$ZIP_URL        = "$REPO_URL/archive/refs/heads/main.zip"
 
 $LOCAL_PATHS = @(
     { if ($PSScriptRoot) { Join-Path $PSScriptRoot 'DevTools\DevTools.ps1' } },
@@ -39,14 +38,10 @@ $LOCAL_PATHS = @(
 )
 
 # ------------------------------------------------------------
-# Core helpers
+# Banner
 # ------------------------------------------------------------
 
 function Show-Banner {
-    # ------------------------------------------------------------
-    # Define banner lines and colors
-    # Each element: [Text, ForegroundColor]
-    # ------------------------------------------------------------
     $lines = @(
         @("DevTools Bootstrap v$SCRIPT_VERSION", 'Cyan'),
         @("Repository: $REPO_URL", 'Yellow'),
@@ -55,39 +50,30 @@ function Show-Banner {
         @("Windows DevTools Project", 'Cyan')
     )
 
-    # ------------------------------------------------------------
-    # Calculate dynamic inner width
-    # ------------------------------------------------------------
     $padding = 2
-    $maxTextLength = ($lines | ForEach-Object { $_[0].Length } | Measure-Object -Maximum).Maximum
-    $innerWidth = $maxTextLength + $padding
-    $line = '═' * $innerWidth
+    $maxLen  = ($lines | ForEach-Object { $_[0].Length } | Measure-Object -Maximum).Maximum
+    $width   = $maxLen + $padding
+    $bar     = '═' * $width
 
-    # ------------------------------------------------------------
-    # Helper function to format each line
-    # ------------------------------------------------------------
-    function Format-Line($text) {
-        $spaces = $innerWidth - $text.Length
-        return "║ $text" + (' ' * $spaces) + "║"
+    function Format-Line([string]$Text) {
+        $spaces = $width - $Text.Length
+        "║ $Text$(' ' * $spaces)║"
     }
 
-    # ------------------------------------------------------------
-    # Draw banner
-    # ------------------------------------------------------------
     Write-Host ''
-    Write-Host "╔$line╗" -ForegroundColor Cyan
+    Write-Host "╔$bar╗" -ForegroundColor Cyan
     foreach ($entry in $lines) {
-        $text  = $entry[0]
-        $color = $entry[1]
-        Write-Host (Format-Line $text) -ForegroundColor $color
+        Write-Host (Format-Line $entry[0]) -ForegroundColor $entry[1]
     }
-    Write-Host "╚$line╝" -ForegroundColor Cyan
+    Write-Host "╚$bar╝" -ForegroundColor Cyan
     Write-Host ''
 }
 
-function Get-LocalDevToolsPath {
-    Write-Verbose 'Searching for local DevTools.ps1...'
+# ------------------------------------------------------------
+# Local execution
+# ------------------------------------------------------------
 
+function Get-LocalDevToolsPath {
     foreach ($generator in $LOCAL_PATHS) {
         try {
             $path = & $generator
@@ -96,7 +82,6 @@ function Get-LocalDevToolsPath {
             }
         } catch {}
     }
-
     return $null
 }
 
@@ -108,41 +93,65 @@ function Invoke-LocalDevTools {
     )
 
     Write-Host 'Running local DevTools...' -ForegroundColor Green
-    Write-Host "Source   : Local" -ForegroundColor DarkGray
+    Write-Host 'Source   : Local' -ForegroundColor DarkGray
     Write-Host "Location : $(Split-Path $Path -Parent)" -ForegroundColor DarkGray
 
-    $env:DEVTOOLS_SOURCE = 'Local'
-    $env:DEVTOOLS_ROOT   = Split-Path $Path -Parent
+    $env:DEVTOOLS_SOURCE  = 'Local'
+    $env:DEVTOOLS_ROOT    = Split-Path $Path -Parent
     $env:DEVTOOLS_BOOTSTRAP_VERSION = $SCRIPT_VERSION
 
     & $Path
 }
 
+# ------------------------------------------------------------
+# Online execution (FIXED)
+# ------------------------------------------------------------
+
 function Invoke-OnlineDevTools {
     Write-Host 'Running DevTools from GitHub...' -ForegroundColor Cyan
-    Write-Host "Source   : Online" -ForegroundColor DarkGray
-    Write-Host "URL      : $ONLINE_SCRIPT_URL" -ForegroundColor DarkGray
+    Write-Host 'Source   : Online' -ForegroundColor DarkGray
 
     $env:DEVTOOLS_SOURCE = 'Online'
-    $env:DEVTOOLS_ROOT   = "$REPO_URL/tree/main/DevTools"
     $env:DEVTOOLS_BOOTSTRAP_VERSION = $SCRIPT_VERSION
 
-    $tempFile = Join-Path ([IO.Path]::GetTempPath()) (
-        'DevTools-{0}.ps1' -f (Get-Date -Format 'yyyyMMdd-HHmmss')
+    $tempRoot = Join-Path ([IO.Path]::GetTempPath()) (
+        'DevTools-' + (Get-Date -Format 'yyyyMMdd-HHmmss')
     )
 
-    try {
-        Invoke-RestMethod -Uri $ONLINE_SCRIPT_URL -ErrorAction Stop |
-            Out-File -FilePath $tempFile -Encoding UTF8 -Force
+    $zipPath = "$tempRoot.zip"
 
-        & $tempFile
+    try {
+        Write-Host 'Downloading repository bundle...' -ForegroundColor Gray
+        Invoke-WebRequest -Uri $ZIP_URL -OutFile $zipPath -UseBasicParsing
+
+        Expand-Archive -Path $zipPath -DestinationPath $tempRoot -Force
+
+        $repoRoot = Get-ChildItem $tempRoot |
+            Where-Object { $_.PSIsContainer } |
+            Select-Object -First 1
+
+        $devToolsDir = Join-Path $repoRoot.FullName 'DevTools'
+        $entryScript = Join-Path $devToolsDir 'DevTools.ps1'
+
+        if (-not (Test-Path $entryScript)) {
+            throw 'DevTools.ps1 not found in downloaded repository'
+        }
+
+        $env:DEVTOOLS_ROOT = $devToolsDir
+
+        Write-Host "Location : $devToolsDir" -ForegroundColor DarkGray
+        & $entryScript
     }
     finally {
-        if (Test-Path $tempFile) {
-            Remove-Item -Path $tempFile -Force -ErrorAction SilentlyContinue
+        if (Test-Path $zipPath) {
+            Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
         }
     }
 }
+
+# ------------------------------------------------------------
+# Entry point
+# ------------------------------------------------------------
 
 function Start-DevTools {
     Show-Banner
@@ -165,13 +174,13 @@ function Test-DevToolsAvailability {
     [PSCustomObject]@{
         LocalAvailable  = [bool](Get-LocalDevToolsPath)
         LocalPath       = Get-LocalDevToolsPath
-        OnlineAvailable = (Invoke-WebRequest -Uri $ONLINE_SCRIPT_URL -Method Head -TimeoutSec 5 -ErrorAction SilentlyContinue).StatusCode -eq 200
+        OnlineAvailable = $true
         TestTime        = Get-Date
     }
 }
 
 # ------------------------------------------------------------
-# Main execution
+# Script execution
 # ------------------------------------------------------------
 
 if ($MyInvocation.InvocationName -ne '.') {
