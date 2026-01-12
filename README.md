@@ -221,49 +221,24 @@ Or invoke DevTools directly:
 ## Supported Tooling
 
 Optional but supported backends:
-
-* WinGet
-  [https://learn.microsoft.com/windows/package-manager/winget/](https://learn.microsoft.com/windows/package-manager/winget/)
-
-* Chocolatey
-  [https://chocolatey.org/](https://chocolatey.org/)
-
-* Git
-  Required for source-based workflows
-
-PowerShell installation guide:
-[https://learn.microsoft.com/powershell/scripting/install/installing-powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
-
----
-
-## License
-
-MIT License.
-See the [LICENSE](./LICENSE) file for details.
+[Git](https://git-scm.com/)
+[Winget](https://learn.microsoft.com/windows/package-manager/winget/)
+[Chocolatey](https://chocolatey.org/)
+[powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
 
 ---
 
 ## Acknowledgments
 
-Inspired by the original work of Chris Titus Tech:
-[https://christitus.com/](https://christitus.com/)
+Inspired by the original work of [Chris Titus Tech](https://github.com/ChrisTitusTech/powershell-profile)
 
 Built with and powered by:
 
-* Starship
-  [https://starship.rs/](https://starship.rs/)
-
-* Nerd Fonts
-  [https://www.nerdfonts.com/](https://www.nerdfonts.com/)
-
-* Terminal-Icons
-  [https://github.com/devblackops/Terminal-Icons](https://github.com/devblackops/Terminal-Icons)
-
-* zoxide
-  [https://github.com/ajeetdsouza/zoxide](https://github.com/ajeetdsouza/zoxide)
-
-* PSReadLine
-  [https://github.com/PowerShell/PSReadLine](https://github.com/PowerShell/PSReadLine)
+* [Zoxide](https://github.com/ajeetdsouza/zoxide)
+* [Starship](https://starship.rs/)
+* [Nerd Fonts](https://www.nerdfonts.com/)
+* [PSReadLine](https://github.com/PowerShell/PSReadLine)
+* [Terminal-Icons](https://github.com/devblackops/Terminal-Icons)
 
 ---
 
@@ -285,7 +260,6 @@ Built with and powered by:
 # **Happy PowerShelling.**
 
 </div>
----
 
 ## Star History
 
