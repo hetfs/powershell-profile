@@ -1,8 +1,11 @@
 <div align="center">
 
-# PowerShell Profile & DevTools **HETFS LTD Edition**
+# PowerShell Profile & DevTools
+
+# **HETFS LTD Edition**
 
 [![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-blue)](https://learn.microsoft.com/powershell/)
+
 [![License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
 
 A production-grade PowerShell environment with a bootstrap-first DevTools system for managing developer tools at scale.
@@ -235,9 +238,13 @@ Inspired by the original work of [Chris Titus Tech](https://github.com/ChrisTitu
 Built with and powered by:
 
 * [Zoxide](https://github.com/ajeetdsouza/zoxide)
+
 * [Starship](https://starship.rs/)
+
 * [Nerd Fonts](https://www.nerdfonts.com/)
+
 * [PSReadLine](https://github.com/PowerShell/PSReadLine)
+
 * [Terminal-Icons](https://github.com/devblackops/Terminal-Icons)
 
 ---
