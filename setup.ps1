@@ -30,6 +30,8 @@ function Test-InternetConnection {
 
 ################################################################################################
 # SECTION 3: NERD FONTS INSTALLATION VIA CHOCOLATEY
+# source https://github.com/ryanoasis/nerd-fonts
+# For run: & ([scriptblock]::Create((iwr 'https://to.loredo.me/Install-NerdFont.ps1')))
 ################################################################################################
 
 function Install-NerdFontsAuto {
