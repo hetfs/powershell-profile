@@ -56,9 +56,9 @@ function Install-NerdFontsAuto {
 
     # Install Nerd Fonts (idempotent)
     choco install `
-        nerd-fonts-hack --force `
-        nerd-fonts-firacode --force `
-        nerd-fonts-jetbrainsmono --force `
+        nerd-fonts-hack `
+        nerd-fonts-firacode `
+        nerd-fonts-jetbrainsmono `
         -y --no-progress
 
     Write-Host '✅ Nerd Fonts installation completed' -ForegroundColor Green
