@@ -3,7 +3,7 @@
 Thank you for your interest in contributing to **PowerShell Profile & DevTools** 🎉
 This project delivers a **clean, modular, reproducible, and professional PowerShell environment** for developers.
 
-We welcome all contributions—code, documentation, ideas, and bug reports.
+We welcome all contributions code, documentation, ideas, and bug reports.
 
 ---
 
@@ -72,18 +72,44 @@ You can contribute by:
 
 ```
 powershell-profile/
-├── DevTools/
-│   ├── DevTools.ps1
-│   ├── DevToolsBootstrap.ps1
-│   ├── Shared/
-│   ├── Config/
-│   ├── Installers/
-│   └── ToolsRegistry/
-├── Profile/
-├── docs/CONTRIBUTING.md
-├── setprofile.ps1
-├── setup.ps1
-└── README.md
+DevTools/
+├──  Config
+│   ├──  categories.ps1
+│   └──  defaults.ps1
+├──  DevTools.ps1
+├──  Installers
+│   ├──  Chocolatey.ps1
+│   ├──  GitHubRelease.ps1
+│   ├──  Install-Tools.ps1
+│   └──  WinGet.ps1
+├──  Output
+│   ├──  DevToolsInstall.log
+│   └──  winget-tools.txt
+├──  Shared
+│   ├──  DependencyResolver.ps1
+│   ├──  DocsGenerator.ps1
+│   ├──  Environment.ps1
+│   ├──  Helpers.ps1
+│   ├──  Logging.ps1
+│   └──  ToolValidator.ps1
+├──  Test-DevTools.ps1
+└──  ToolsRegistry
+    ├──  BuildTools.ps1
+    ├──  CollaborationTools.ps1
+    ├──  CoreShell.ps1
+    ├──  DataTools.ps1
+    ├──  Documentation.ps1
+    ├──  Editors.ps1
+    ├──  Languages.ps1
+    ├──  Multimedia.ps1
+    ├──  NetworkToolKit.ps1
+    ├──  PromptUI.ps1
+    ├──  RemoteAccess.ps1
+    ├──  Security.ps1
+    ├──  ShellProductivity.ps1
+    ├──  SystemUtils.ps1
+    ├──  TerminalEmulators.ps1
+    └──  VersionControl.ps1
 ```
 
 ---

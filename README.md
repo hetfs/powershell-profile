@@ -1,6 +1,3 @@
-[![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-blue)](https://learn.microsoft.com/powershell/)
-[![License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
-
 <div align="center">
 
 # PowerShell Profile & DevTools
