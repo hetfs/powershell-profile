@@ -34,83 +34,83 @@ function Test-InternetConnection {
     }
 }
 
-#################################################################################################
-## SECTION 3: NERD FONTS INSTALLATION
-#################################################################################################
-#
-#function Install-NerdFonts {
-#    [CmdletBinding(SupportsShouldProcess)]
-#    param (
-#        [string]$Version = '3.4.0'
-#    )
-#
-#    $Fonts = @(
-#        'Hack'
-#        'FiraCode'
-#        'JetBrainsMono'
-#        'DejaVuSansMono'
-#        'CascadiaCode'
-#    )
-#
-#    Write-Host '📝 Verifying Nerd Fonts installation...' -ForegroundColor Cyan
-#
-#    Add-Type -AssemblyName System.Drawing
-#    $InstalledFonts = (New-Object System.Drawing.Text.InstalledFontCollection).Families.Name
-#
-#    $TempRoot = Join-Path $env:TEMP "nerd-fonts-$Version"
-#    New-Item -Path $TempRoot -ItemType Directory -Force | Out-Null
-#
-#    foreach ($Font in $Fonts) {
-#        if ($InstalledFonts -contains "$Font Nerd Font") {
-#            Write-Host "✅ $Font Nerd Font already installed" -ForegroundColor Green
-#            continue
-#        }
-#
-#        $ZipPath     = Join-Path $TempRoot "$Font.zip"
-#        $ExtractPath = Join-Path $TempRoot $Font
-#        $Url         = "https://github.com/ryanoasis/nerd-fonts/releases/download/v$Version/$Font.zip"
-#
-#        Write-Host "📥 Installing $Font Nerd Font..." -ForegroundColor Yellow
-#
-#        try {
-#            Invoke-WebRequest -Uri $Url -OutFile $ZipPath
-#            Expand-Archive -Path $ZipPath -DestinationPath $ExtractPath -Force
-#
-#            Get-ChildItem $ExtractPath -Recurse -Include *.ttf, *.otf |
-#                Where-Object { $_.Name -match "^$Font" } |
-#                ForEach-Object {
-#                    $Dest = Join-Path "$env:WINDIR\Fonts" $_.Name
-#                    if (-not (Test-Path $Dest)) {
-#                        Copy-Item $_.FullName $Dest -Force
-#
-#                        $FontName = $_.BaseName
-#                        if (-not (Get-ItemProperty `
-#                            -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" `
-#                            -Name "$FontName (TrueType)" `
-#                            -ErrorAction SilentlyContinue)) {
-#
-#                            New-ItemProperty `
-#                                -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" `
-#                                -Name "$FontName (TrueType)" `
-#                                -PropertyType String `
-#                                -Value $_.Name `
-#                                -Force | Out-Null
-#                        }
-#
-#                        Write-Host "✅ Installed font: $($_.Name)" -ForegroundColor Green
-#                    }
-#                }
-#        }
-#        catch {
-#            Write-Warning ("⚠️ Failed to install {0}: {1}" -f $Font, $_)
-#        }
-#        finally {
-#            Remove-Item $ZipPath, $ExtractPath -Recurse -Force -ErrorAction SilentlyContinue
-#        }
-#    }
-#
-#    Remove-Item $TempRoot -Recurse -Force -ErrorAction SilentlyContinue
-#}
+################################################################################################
+# SECTION 3: NERD FONTS INSTALLATION
+################################################################################################
+
+function Install-NerdFonts {
+    [CmdletBinding(SupportsShouldProcess)]
+    param (
+        [string]$Version = '3.4.0'
+    )
+
+    $Fonts = @(
+        'Hack'
+        'FiraCode'
+        'JetBrainsMono'
+        'DejaVuSansMono'
+        'CascadiaCode'
+    )
+
+    Write-Host '📝 Verifying Nerd Fonts installation...' -ForegroundColor Cyan
+
+    Add-Type -AssemblyName System.Drawing
+    $InstalledFonts = (New-Object System.Drawing.Text.InstalledFontCollection).Families.Name
+
+    $TempRoot = Join-Path $env:TEMP "nerd-fonts-$Version"
+    New-Item -Path $TempRoot -ItemType Directory -Force | Out-Null
+
+    foreach ($Font in $Fonts) {
+        if ($InstalledFonts -contains "$Font Nerd Font") {
+            Write-Host "✅ $Font Nerd Font already installed" -ForegroundColor Green
+            continue
+        }
+
+        $ZipPath     = Join-Path $TempRoot "$Font.zip"
+        $ExtractPath = Join-Path $TempRoot $Font
+        $Url         = "https://github.com/ryanoasis/nerd-fonts/releases/download/v$Version/$Font.zip"
+
+        Write-Host "📥 Installing $Font Nerd Font..." -ForegroundColor Yellow
+
+        try {
+            Invoke-WebRequest -Uri $Url -OutFile $ZipPath
+            Expand-Archive -Path $ZipPath -DestinationPath $ExtractPath -Force
+
+            Get-ChildItem $ExtractPath -Recurse -Include *.ttf, *.otf |
+                Where-Object { $_.Name -match "^$Font" } |
+                ForEach-Object {
+                    $Dest = Join-Path "$env:WINDIR\Fonts" $_.Name
+                    if (-not (Test-Path $Dest)) {
+                        Copy-Item $_.FullName $Dest -Force
+
+                        $FontName = $_.BaseName
+                        if (-not (Get-ItemProperty `
+                            -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" `
+                            -Name "$FontName (TrueType)" `
+                            -ErrorAction SilentlyContinue)) {
+
+                            New-ItemProperty `
+                                -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts" `
+                                -Name "$FontName (TrueType)" `
+                                -PropertyType String `
+                                -Value $_.Name `
+                                -Force | Out-Null
+                        }
+
+                        Write-Host "✅ Installed font: $($_.Name)" -ForegroundColor Green
+                    }
+                }
+        }
+        catch {
+            Write-Warning ("⚠️ Failed to install {0}: {1}" -f $Font, $_)
+        }
+        finally {
+            Remove-Item $ZipPath, $ExtractPath -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    Remove-Item $TempRoot -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 ################################################################################################
 # SECTION 4: TOOL INSTALLATION
