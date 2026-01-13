@@ -120,7 +120,7 @@ $Tools = @(
     @{ Name='gsudo';    Cmd='gsudo';    Id='gerardog.gsudo' }
     @{ Name='git';      Cmd='git';      Id='Git.Git' }
     @{ Name='lazygit';  Cmd='lazygit';  Id='JesseDuffield.lazygit' }
-    @{ Name='Wget2';    Cmd='wget';     Id='GNU.Wget2' }
+    @{ Name='Wget2';    Cmd='wget2';    Id='GNU.Wget2' }
     @{ Name='curl';     Cmd='curl';     Id='cURL.cURL' }
     @{ Name='tar';      Cmd='tar';      Id='GnuWin32.Tar' }
     @{ Name='unzip';    Cmd='unzip';    Id='GnuWin32.UnZip' }
