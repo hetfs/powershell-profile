@@ -3,6 +3,7 @@
 # .\DevTools.ps1
 # .\DevTools.ps1 -WhatIf
 # .\DevTools.ps1 -Plan
+# .\DevTools.ps1 -WhatIf -Verbose
 # .\DevTools.ps1 -Category terminal
 # .\DevTools.ps1 -Tools git,neovim
 # =================================
