@@ -225,6 +225,7 @@ Or invoke DevTools directly:
 ## Supported Tooling
 
 Optional but supported backends:
+
 [Git](https://git-scm.com/)
 
 [Winget](https://learn.microsoft.com/windows/package-manager/winget/)
