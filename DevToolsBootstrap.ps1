@@ -167,7 +167,7 @@ function Start-DevTools {
     }
 
     Write-Host ''
-    Write-Host 'DevTools execution completed.' -ForegroundColor Green
+    Write-Host '🎉 DevTools execution completed.' -ForegroundColor Green
 }
 
 function Test-DevToolsAvailability {

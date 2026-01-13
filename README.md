@@ -1,12 +1,14 @@
+
+[![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-blue)](https://learn.microsoft.com/powershell/)
+[![License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
+
+![DevTools Validation](https://github.com/hetfs/powershell-profile/actions/workflows/devtools-validate.yml/badge.svg)
+
 <div align="center">
 
 # PowerShell Profile & DevTools
 
 # **HETFS LTD Edition**
-
-[![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-blue)](https://learn.microsoft.com/powershell/)
-
-[![License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
 
 A production-grade PowerShell environment with a bootstrap-first DevTools system for managing developer tools at scale.
 
@@ -139,7 +141,7 @@ sysinfo          # System information
 | ---------------- | ------------------ | -------------------------------------------- |
 | Main Profile     | Core profile logic | `$PROFILE`                                   |
 | Custom Overrides | Personal settings  | `$HOME\Documents\PowerShell\profile.ps1`     |
-| Extended Custom  | Extra functions    | `$HOME\Documents\PowerShell\HETFScustom.ps1` |
+| Extended Custom  | Extra functions    | `$HOME\Documents\PowerShell\HETFSCustom.ps1` |
 | Starship Config  | Prompt styling     | `$HOME\.config\starship.toml`                |
 
 ---
@@ -161,20 +163,25 @@ Tool definitions are cleanly separated from installer logic, making the system e
 
 DevTools is intentionally designed to be:
 
-* **Bootstrap-driven**
-  A minimal loader determines local versus online execution.
+**Bootstrap-driven**
 
-* **Declarative**
-  Tools describe themselves as data.
+* A minimal loader determines local versus online execution.
 
-* **Scalable**
-  Add tools without modifying core logic.
+**Declarative**
 
-* **CI-safe**
-  Runs consistently in local shells, CI pipelines, and automation.
+* Tools describe themselves as data.
 
-* **Backend-agnostic**
-  Supports WinGet, Chocolatey, and GitHub Releases.
+**Scalable**
+
+* Add tools without modifying core logic.
+
+**CI-safe**
+
+* Runs consistently in local shells, CI pipelines, and automation.
+
+**Backend-agnostic**
+
+* Supports WinGet, Chocolatey, and GitHub Releases.
 
 ---
 
@@ -225,8 +232,11 @@ Or invoke DevTools directly:
 
 Optional but supported backends:
 [Git](https://git-scm.com/)
+
 [Winget](https://learn.microsoft.com/windows/package-manager/winget/)
+
 [Chocolatey](https://chocolatey.org/)
+
 [powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
 
 ---
@@ -238,13 +248,9 @@ Inspired by the original work of [Chris Titus Tech](https://github.com/ChrisTitu
 Built with and powered by:
 
 * [Zoxide](https://github.com/ajeetdsouza/zoxide)
-
 * [Starship](https://starship.rs/)
-
 * [Nerd Fonts](https://www.nerdfonts.com/)
-
 * [PSReadLine](https://github.com/PowerShell/PSReadLine)
-
 * [Terminal-Icons](https://github.com/devblackops/Terminal-Icons)
 
 ---
@@ -264,7 +270,7 @@ Built with and powered by:
 
 <div align="center">
 
-# **Happy PowerShelling.**
+# **Happy PowerShelling**
 
 </div>
 

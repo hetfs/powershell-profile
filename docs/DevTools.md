@@ -1,119 +1,175 @@
-# Architecture Overview
+# DevTools Unified Developer Tools Installer
 
-DevTools follows a **bootstrap + controller + registry** architecture.
+**Version:** 1.0.1
+**Author:** HetFS
+**Repository:** [https://github.com/hetfs/powershell-profile](https://github.com/hetfs/powershell-profile)
 
-* The bootstrap decides *where* DevTools runs from
-* The controller (`DevTools.ps1`) decides *what* to install
-* Registries define *how* tools are installed and validated
+**DevTools** is a **modular, cross-platform, and fully automated PowerShell toolkit** for installing, validating, and managing developer tools. It supports **WinGet**, **Chocolatey**, and **GitHub release-based installations**, and provides **declarative tool definitions**, **dependency resolution**, and **generic validation pipelines**.
+
+---
+
+## ✨ Key Features
+
+* **Single Entry Point:** `DevTools.ps1` orchestrates all installations.
+* **Centralized Tool Registry:** All tools defined in `ToolsRegistry/*.ps1` with metadata.
+* **Automatic Dependency Resolution:** Tools installed in proper order.
+* **Installer Backends:** Priority order — WinGet → Chocolatey → GitHub Releases.
+* **Dry-Run Simulation:** Preview installations without changes.
+* **Structured Logging:** Info, Success, Warning, and Error messages.
+* **Extensible & Modular:** Add new tools, categories, or installers easily.
+
+---
+
+## 🔧 Requirements
+
+* **PowerShell 7.2+**
+* **Windows 10/11** (WinGet supported)
+* **Internet Access**
+
+Optional:
+
+* **Chocolatey** for fallback installs
+* **Git** for source-based installations
+
+---
+
+## 🚀 Installation
+
+### Inline Installation
+
+Run DevTools directly:
+
+```powershell
+irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/DevTools/DevTools.ps1 | iex
+```
+
+This will:
+
+* Bootstrap DevTools
+* Load tool registries
+* Validate the environment
+* Install missing tools
+
+### Local Installation (Optional)
+
+Clone the repository for offline use or custom modifications:
+
+```bash
+git clone https://github.com/hetfs/powershell-profile.git
+cd powershell-profile/DevTools
+.\DevTools.ps1
+```
+
+### -WhatIf Mode
+
+Simulate installation without changing the system:
+
+```powershell
+.\DevTools.ps1 -WhatIf
 
 ```
-powershell-profile/
-├── DevToolsBootstrap.ps1
-├── DevTools/
-│   ├── DevTools.ps1
-│   ├── Installers/
-│   │   ├── Install-Tools.ps1
-│   │   ├── WinGet.ps1
-│   │   ├── Chocolatey.ps1
-│   │   └── GitHubRelease.ps1
-│   ├── ToolsRegistry/
-│   │   ├── Editors.ps1
-│   │   ├── VersionControl.ps1
-│   │   ├── Languages.ps1
-│   │   ├── Terminals.ps1
-│   │   └── SystemUtils.ps1
-│   ├── Shared/
-│   │   ├── Logging.ps1
-│   │   ├── Environment.ps1
-│   │   ├── DependencyResolver.ps1
-│   │   └── ToolValidator.ps1
-│   ├── Config/
-│   └── Output/
+
+### Filtered Installation
+
+Install only selected categories or tools:
+
+```powershell
+# Only Terminals and Editors
+.\DevTools.ps1 -Category Terminals,Editors
+
+# Specific tools only
+.\DevTools.ps1 -ToolName "Git","Neovim","Starship"
+```
+
+### Export WinGet Manifest
+
+Generate JSON for WinGet-available tools:
+
+```powershell
+.\DevTools.ps1 -ExportWinGetList
 ```
 
 ---
 
-## Tool Categories
+## 🏗️ Architecture Overview
 
-Tools are grouped logically but installed dynamically.
+DevTools uses a **bootstrap → controller → registry → installer → validation** model:
 
-### Editors
+* **Bootstrap (`DevToolsBootstrap.ps1`)** Determines execution source (local or online).
+* **Controller (`DevTools.ps1`)** Orchestrates filtering, installation, and logging.
+* **Tool Registry (`ToolsRegistry/*.ps1`)** Declarative tool definitions including dependencies, installers, and validation.
+* **Shared Modules (`Shared/*.ps1`)** Logging, environment checks, dependency resolution, and validation logic.
+* **Installers (`Installers/*.ps1`)** Execute installation via WinGet, Chocolatey, or GitHub Releases.
 
-Code editors and IDE tooling.
+**Project Structure:**
 
-Examples:
-
-* Neovim
-* Visual Studio Code
-
----
-
-### VersionControl
-
-Source control and collaboration tools.
-
-Examples:
-
-* Git
-* GitHub CLI
-* lazygit
-* delta
-
----
-
-### Languages
-
-Language runtimes and SDKs.
-
-Examples:
-
-* Node.js
-* Python
-* Go
-
----
-
-### Terminals
-
-Terminal emulators and shells.
-
-Examples:
-
-* Windows Terminal
-* WezTerm
-
----
-
-### SystemUtils
-
-System inspection and productivity tools.
-
-Examples:
-
-* fastfetch
-* btop
-* tldr
-* glow
-* vale
+```
+DevTools/
+├──  Config
+│   ├──  categories.ps1
+│   └──  defaults.ps1
+├──  DevTools.ps1
+├──  Installers
+│   ├──  Chocolatey.ps1
+│   ├──  GitHubRelease.ps1
+│   ├──  Install-Tools.ps1
+│   └──  WinGet.ps1
+├──  Output
+│   ├──  DevToolsInstall.log
+│   └──  winget-tools.txt
+├──  Shared
+│   ├──  DependencyResolver.ps1
+│   ├──  DocsGenerator.ps1
+│   ├──  Environment.ps1
+│   ├──  Helpers.ps1
+│   ├──  Logging.ps1
+│   └──  ToolValidator.ps1
+├──  Test-DevTools.ps1
+└──  ToolsRegistry
+    ├──  BuildTools.ps1
+    ├──  CollaborationTools.ps1
+    ├──  CoreShell.ps1
+    ├──  DataTools.ps1
+    ├──  Documentation.ps1
+    ├──  Editors.ps1
+    ├──  Languages.ps1
+    ├──  Multimedia.ps1
+    ├──  NetworkToolKit.ps1
+    ├──  PromptUI.ps1
+    ├──  RemoteAccess.ps1
+    ├──  Security.ps1
+    ├──  ShellProductivity.ps1
+    ├──  SystemUtils.ps1
+    ├──  TerminalEmulators.ps1
+    └──  VersionControl.ps1
+```
 
 ---
 
-## Installation Workflow
+## 🧩 Tool Categories
 
-1. Bootstrap determines execution source (local or online)
-2. DevTools loads shared modules
-3. Tool registries are loaded and normalized
-4. Filters are applied (category or tool name)
-5. Dependencies are resolved and ordered
-6. Installers are selected in priority order:
+| Category           | Description                            | Examples                          |
+| ------------------ | -------------------------------------- | --------------------------------- |
+| **Editors**        | Code editors & IDEs                    | Neovim, VSCode                    |
+| **VersionControl** | Source control & collaboration         | Git, GitHub CLI, lazygit, delta   |
+| **Languages**      | Language runtimes & SDKs               | Node.js, Python, Go               |
+| **Terminals**      | Terminal emulators & shells            | Windows Terminal, WezTerm         |
+| **SystemUtils**    | Productivity & system inspection tools | fastfetch, btop, tldr, glow, vale |
 
-   1. WinGet
-   2. Chocolatey
-   3. GitHub Releases
-7. Each tool is validated post-install
-8. Results are logged and summarized
+---
 
-Example output:
+## 🛠️ Installation Workflow
+
+1. Bootstrap determines execution source.
+2. Shared modules are loaded.
+3. Registries are normalized.
+4. Filters applied (category/tool name).
+5. Dependencies resolved.
+6. Installer backend selected (WinGet → Chocolatey → GitHub Releases).
+7. Each tool is validated post-install.
+8. Results are logged and summarized.
+
+**Example output:**
 
 ```text
 → Installing Git
@@ -124,107 +180,79 @@ Example output:
 
 ---
 
-## Dry Run Mode
+## 🔍 Validation Model
 
-Dry Run simulates the entire process without making changes.
+DevTools uses **metadata-driven, installer-agnostic validation** for CLI and GUI tools.
 
-```powershell
-.\DevTools\DevTools.ps1 -DryRun
-```
-
-This mode is safe for CI, auditing, and planning.
-
----
-
-## Validation Model
-
-DevTools uses a **generic validation pipeline** to ensure tools are installed and accessible. Each tool defines how it should be validated using metadata, which can be either **CLI-based** or **GUI/application-based**.
-
-### CLI Tool Validation
-
-Most developer tools are CLI executables. Validation ensures the binary exists and is runnable.
-
-**Example metadata for CLI tools:**
+### CLI Tools
 
 ```powershell
-# Git CLI
 BinaryCheck = 'git.exe'
 Validation = [PSCustomObject]@{
-    Type  = 'Command'   # Checks for presence in PATH
+    Type  = 'Command'
     Value = 'git.exe'
-}
-
-# age encryption tool
-BinaryCheck = 'age.exe'
-Validation = [PSCustomObject]@{
-    Type  = 'Command'   # Uses Get-Command internally
-    Value = 'age.exe'
 }
 ```
 
-**Validation methods for CLI tools:**
+* **Command:** Binary exists in PATH
+* **Path:** File or folder exists
+* **Script:** Custom PowerShell logic
 
-* **Command:** Checks if the executable is available in the system PATH
-* **Path:** Checks for a specific file path on disk
-* **Custom Script:** Any PowerShell script logic for advanced verification
-
----
-
-### GUI Tool Validation
-
-Some developer tools are GUI applications. Validation ensures the **installation folder or executable** exists.
-
-**Example metadata for GUI tools:**
+### GUI Tools
 
 ```powershell
-# Visual Studio Code
 BinaryCheck = 'Code.exe'
 Validation = [PSCustomObject]@{
-    Type  = 'Path'   # Explicit installation path check
+    Type  = 'Path'
     Value = @(
         "$env:ProgramFiles\Microsoft VS Code\Code.exe",
         "$env:LocalAppData\Programs\Microsoft VS Code\Code.exe"
     )
 }
-
-# RustDesk
-BinaryCheck = 'rustdesk.exe'
-Validation = [PSCustomObject]@{
-    Type  = 'Path'
-    Value = @(
-        "$env:ProgramFiles\RustDesk\rustdesk.exe",
-        "$env:LocalAppData\Programs\RustDesk\rustdesk.exe"
-    )
-}
 ```
 
-**Validation methods for GUI tools:**
+* **Path:** Executable or folder exists
+* **Shortcut/Start Menu:** Optional
+* **Registry (Windows):** Optional
 
-* **Path:** Looks for the executable or main application folder
-* **Shortcut/Start Menu:** Optional check for shortcuts
-* **Registry (Windows):** Optional check for installed applications
+**Notes:**
 
----
-
-### Notes
-
-* **Installer-agnostic:** Validation is independent of WinGet, Chocolatey, or GitHub Release installers
-* **Post-install check:** Every tool runs validation after installation to confirm success
-* **Flexible:** Supports CLI, GUI, and hybrid tools (CLI + optional GUI)
+* Validation is **independent of installer backend**
+* Post-install checks confirm success
+* Supports CLI, GUI, and hybrid tools
 
 ---
 
-## Summary
+## 🔧 Key Commands
 
-DevTools provides a clean, scalable, and automation-friendly way to manage developer environments with PowerShell.
+| Command                            | Description                       |
+| ---------------------------------- | --------------------------------- |
+| `.\DevTools.ps1 -DryRun`           | Simulate installations            |
+| `.\DevTools.ps1 -Category <cat>`   | Install only specified categories |
+| `.\DevTools.ps1 -ToolName <tool>`  | Install only specified tools      |
+| `.\DevTools.ps1 -ExportWinGetList` | Export WinGet manifest            |
 
-If you value:
+---
 
-* Reproducibility
-* Declarative configuration
-* CI compatibility
+## 🔄 Updates & Maintenance
+
+* DevTools checks for updates to registries and scripts automatically.
+* Manual update:
+
+```powershell
+# Re-download DevTools scripts
+irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/DevTools/DevTools.ps1 | iex
+```
+
+* Dry-run recommended before production installation.
+
+---
+
+## ✅ Summary
+
+**DevTools** is a **professional, scalable, reproducible, and automation-friendly toolkit** for developer environments on Windows:
+
+* Declarative tool definitions
+* Installer-agnostic workflows
+* CI-friendly automation
 * Minimal bootstrap friction
-
-DevTools is built for that workflow.
-
-Happy building.
