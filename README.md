@@ -1,8 +1,5 @@
-
 [![PowerShell](https://img.shields.io/badge/PowerShell-7%2B-blue)](https://learn.microsoft.com/powershell/)
 [![License](https://img.shields.io/badge/License-MIT-green)](./LICENSE)
-
-![DevTools Validation](https://github.com/hetfs/powershell-profile/actions/workflows/devtools-validate.yml/badge.svg)
 
 <div align="center">
 
