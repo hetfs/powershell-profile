@@ -2,61 +2,47 @@
 
 # PowerShell Profile & DevTools
 
-# **HETFS LTD Edition**
+## **HETFS LTD Edition**
 
-A production-grade PowerShell environment with a bootstrap-first DevTools system for managing developer tools at scale.
+A production-grade PowerShell environment with a **bootstrap-first DevTools system** for managing developer tools at scale.
 
 </div>
 
-A **fully modular PowerShell environment** that turns your terminal into a powerful, reproducible, and developer-focused workspace.
-This repository unifies a **modern PowerShell profile** with **DevTools**, a data-driven toolkit for bootstrapping and managing developer tools at scale.
-It is built for **maintainability**, **extensibility**, and **long-term productivity**.
+A **fully modular PowerShell environment** that transforms your terminal into a **powerful, reproducible, developer-focused workspace**.
+This repository unifies a **modern PowerShell profile** with **DevTools**, a data-driven toolkit for bootstrapping and managing developer tools efficiently.
+It is designed for **maintainability**, **extensibility**, and **long-term productivity**.
 
 ---
 
 ## Overview
 
-This project delivers:
+This project provides:
 
-* A **modular PowerShell profile** optimized for daily development
-* A **bootstrap-first DevTools system** for installing and validating tools
-* Safe defaults with explicit override points
-* First-class support for local usage, CI, and automation
+* A **modular PowerShell profile** optimized for daily development.
+* A **bootstrap-first DevTools system** for installing, validating, and managing developer tools.
+* Safe defaults with explicit override points for customization.
+* First-class support for **local usage**, **CI pipelines**, and **automation**.
 
-Each component works seamlessly together, while remaining fully usable on its own.
+Each component works seamlessly together, while remaining fully usable independently.
 
 ---
 
 ## PowerShell Profile
 
-The PowerShell profile enhances your shell with modern tooling, smart defaults, and productivity shortcuts—without sacrificing reliability or maintainability.
-PowerShell Profile Setup [Installed Tools](./docs/pwsh-profile-tools.md)
+The PowerShell profile enhances your shell with modern tooling, **smart defaults**, and productivity shortcuts without sacrificing reliability or maintainability.
 
-### Features
+Check out the [Installed Tools](./docs/pwsh-profile-tools.md) document.
 
-1. **Modular architecture**
-   Clear separation of concerns with readable, maintainable sections.
+### Key Features
 
-2. **Starship prompt**
-   Fast, cross-shell prompt with rich context and deep customization.
-
-3. **Smart navigation**
-   zoxide-powered directory jumping.
-
-4. **Terminal icons**
-   Improved file and folder visibility.
-
-5. **Auto-updating**
-   Built-in checks for PowerShell and profile updates.
-
-6. **Override system**
-   Safe customization without modifying core files.
-
-7. **Developer-focused defaults**
-   Git shortcuts, completions, and quality-of-life enhancements.
-
-8. **Debug-friendly**
-   Dedicated debug mode for quickly isolating profile issues.
+1. **Modular architecture** — clear separation of concerns with readable, maintainable sections.
+2. **Starship prompt** — fast, cross-shell prompt with rich context and deep customization.
+3. **Smart navigation** — zoxide-powered directory jumping.
+4. **Terminal icons** — improved file and folder visibility.
+5. **Auto-updating** — built-in checks for PowerShell and profile updates.
+6. **Override system** — safe customization without modifying core files.
+7. **Developer-focused defaults** — Git shortcuts, completions, and quality-of-life enhancements.
+8. **Debug-friendly** — dedicated debug mode for quickly isolating profile issues.
 
 ---
 
@@ -67,7 +53,7 @@ PowerShell Profile Setup [Installed Tools](./docs/pwsh-profile-tools.md)
 * PowerShell 7.0 or newer
 * Internet access for downloads
 * Administrator privileges for full installation
-* WinGet (Windows 10 1809+ or Windows 11)
+* Winget (Windows 10 1809+ or Windows 11)
 
 ### One-Line Installation
 
@@ -75,9 +61,9 @@ Run as Administrator:
 
 ```powershell
 irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/setup.ps1 | iex
-```
+````
 
-This installs the profile, required tools, and optional enhancements.
+This installs the profile, required tools, and optional enhancements automatically.
 
 ---
 
@@ -103,7 +89,8 @@ Restart your terminal when complete.
 ## Essential Commands
 
 ```powershell
-Show-Help        # Quick help and overview
+# Quick help
+Show-Help
 
 # Profile management
 ep               # Edit profile
@@ -139,44 +126,27 @@ sysinfo          # System information
 | Extended Custom  | Extra functions    | `$HOME\Documents\PowerShell\HETFSCustom.ps1` |
 | Starship Config  | Prompt styling     | `$HOME\.config\starship.toml`                |
 
+For additional customization, see [HETFScustom.md](./docs/HETFScustom.md).
+
 ---
 
 ## DevTools
 
-**DevTools** is a modular, data-driven PowerShell toolkit for **bootstrapping, installing, validating, and managing developer tools** in a reproducible way.
+**DevTools** is a modular, **data-driven PowerShell toolkit** for bootstrapping, installing, validating, and managing developer tools in a reproducible way.
 
-It follows a **bootstrap-first workflow**, allowing execution:
-
-* From a **local clone** for customization
-* Directly from **GitHub** with zero setup
-
-Tool definitions are cleanly separated from installer logic, making the system easy to extend, test, and maintain as your toolchain evolves.
+* **Bootstrap-first workflow**: execute locally or directly from GitHub with zero setup.
+* **Declarative tool definitions**: tools describe themselves as data, separating logic from configuration.
+* **Extendable & testable**: easy to maintain as your toolchain evolves.
 
 ---
 
 ## Design Goals
 
-DevTools is intentionally designed to be:
-
-**Bootstrap-driven**
-
-* A minimal loader determines local versus online execution.
-
-**Declarative**
-
-* Tools describe themselves as data.
-
-**Scalable**
-
-* Add tools without modifying core logic.
-
-**CI-safe**
-
-* Runs consistently in local shells, CI pipelines, and automation.
-
-**Backend-agnostic**
-
-* Supports WinGet, Chocolatey, and GitHub Releases.
+* **Bootstrap-driven** — minimal loader detects local versus online execution.
+* **Declarative** — tool definitions describe themselves as data.
+* **Scalable** — add tools without modifying core logic.
+* **CI-safe** — runs consistently in local shells, CI pipelines, and automation.
+* **Backend-agnostic** — supports WinGet, Chocolatey, and GitHub Releases.
 
 ---
 
@@ -188,15 +158,12 @@ Run DevTools directly from GitHub:
 iex (irm https://raw.githubusercontent.com/hetfs/powershell-profile/main/DevToolsBootstrap.ps1)
 ```
 
-This process will:
+This process:
 
-* Detect a local DevTools checkout if available
-* Otherwise execute DevTools directly from GitHub
-* Initialize the environment
-* Load all tool registries
-* Run with safe defaults
-
-No cloning is required.
+* Detects a local DevTools checkout if available
+* Otherwise executes DevTools directly from GitHub
+* Initializes the environment and loads tool registries
+* Runs with safe defaults, no cloning required
 
 ---
 
@@ -227,20 +194,16 @@ Or invoke DevTools directly:
 
 Optional but supported backends:
 
-[Git](https://git-scm.com/)
-
-[Winget](https://learn.microsoft.com/windows/package-manager/winget/)
-
-[Chocolatey](https://chocolatey.org/)
-
-[powershell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
+* [Git](https://git-scm.com/)
+* [Winget](https://learn.microsoft.com/windows/package-manager/winget/)
+* [Chocolatey](https://chocolatey.org/)
+* [PowerShell](https://learn.microsoft.com/powershell/scripting/install/installing-powershell)
 
 ---
 
 ## Acknowledgments
 
-Inspired by the original work of [Chris Titus Tech](https://github.com/ChrisTitusTech/powershell-profile)
-
+Inspired by the work of [Chris Titus Tech](https://github.com/ChrisTitusTech/powershell-profile).
 Built with and powered by:
 
 * [Zoxide](https://github.com/ajeetdsouza/zoxide)
@@ -253,23 +216,21 @@ Built with and powered by:
 
 ## Support
 
-* Issues and feature requests:
-  [https://github.com/hetfs/powershell-profile/issues](https://github.com/hetfs/powershell-profile/issues)
-
+* Issues and feature requests: [GitHub Issues](https://github.com/hetfs/powershell-profile/issues)
 * Quick help inside PowerShell:
 
-  ```powershell
-  Show-Help
-  ```
+```powershell
+Show-Help
+```
 
 ---
 
 <div align="center">
 
-# **Happy PowerShelling**
+# **Happy PowerShelling!**
 
 </div>
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=hetfs/powershell-profile&type=date&legend=top-left)](https://www.star-history.com/#hetfs/powershell-profile&type=date&legend=top-left)
+[![Star History Chart](https://api.star-history.com/svg?repos=hetfs/powershell-profile\&type=date\&legend=top-left)](https://www.star-history.com/#hetfs/powershell-profile&type=date&legend=top-left)
