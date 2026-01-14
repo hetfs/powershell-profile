@@ -30,6 +30,7 @@ Each component works seamlessly together, while remaining fully usable on its ow
 ## PowerShell Profile
 
 The PowerShell profile enhances your shell with modern tooling, smart defaults, and productivity shortcuts—without sacrificing reliability or maintainability.
+PowerShell Profile Setup [Installed Tools](./docs/pwsh-profile-tools.md)
 
 ### Features
 
