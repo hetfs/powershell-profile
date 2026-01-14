@@ -757,7 +757,12 @@ $env:FZF_DEFAULT_OPTS = @"
 # ===== BEGIN STARSHIP CONFIGURATION =====
 if (Get-Command starship -ErrorAction SilentlyContinue) {
     $env:STARSHIP_CONFIG = "$HOME\.config\starship\starship.toml"
-    Invoke-Expression (& starship init powershell)
+
+    # Only initialize if not already initialized in this session
+    if (-not (Get-Variable -Name StarshipInitialized -Scope Global -ErrorAction SilentlyContinue)) {
+        Invoke-Expression (& starship init powershell)
+        $Global:StarshipInitialized = $true
+    }
 }
 # ===== END STARSHIP CONFIGURATION =====
 
