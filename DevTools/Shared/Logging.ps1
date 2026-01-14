@@ -3,6 +3,7 @@
 # ----------------------------------------
 # PowerShell 7+
 # Text-only logging, CI-safe, WhatIf-safe
+# Structured, machine-readable logging
 # ----------------------------------------
 
 Set-StrictMode -Version Latest
@@ -89,7 +90,7 @@ Duration: ${duration}s
 }
 
 # ------------------------------------------------------------
-# Core logger
+# Core logger (structured + text)
 # ------------------------------------------------------------
 function Write-Log {
     [CmdletBinding()]
@@ -102,7 +103,10 @@ function Write-Log {
         [string]$Message,
 
         [Parameter(Mandatory)]
-        [pscustomobject]$Config
+        [pscustomobject]$Config,
+
+        [Parameter()]
+        [pscustomobject]$Data
     )
 
     if (-not $Config) { return }
@@ -115,20 +119,74 @@ function Write-Log {
         ERROR   = 5
     }
 
-    if ($levelOrder[$Level] -lt $levelOrder[$Config.MinimumLevel]) {
-        return
-    }
+    if ($levelOrder[$Level] -lt $levelOrder[$Config.MinimumLevel]) { return }
 
     $timestamp = Get-Date
-    $line = "[{0:yyyy-MM-dd HH:mm:ss.fff}][{1}] {2}" -f $timestamp, $Level, $Message
+    $line      = "[{0:yyyy-MM-dd HH:mm:ss.fff}][{1}] {2}" -f $timestamp, $Level, $Message
 
-    switch ($Level) {
-        'DEBUG'   { Write-Host $line -ForegroundColor DarkGray }
-        'INFO'    { Write-Host $line -ForegroundColor White }
-        'SUCCESS' { Write-Host $line -ForegroundColor Green }
-        'WARNING' { Write-Host $line -ForegroundColor Yellow }
-        'ERROR'   { Write-Host $line -ForegroundColor Red }
+    # Write to host with color
+    $colorMap = @{
+        DEBUG   = 'DarkGray'
+        INFO    = 'White'
+        SUCCESS = 'Green'
+        WARNING = 'Yellow'
+        ERROR   = 'Red'
+    }
+    Write-Host $line -ForegroundColor $colorMap[$Level]
+
+    # Append text log
+    Add-Content -LiteralPath $Config.LogPath -Value $line
+
+    # Structured log for CI / tooling
+    if ($Data) {
+        $structured = [PSCustomObject]@{
+            Timestamp = $timestamp
+            Level     = $Level
+            Message   = $Message
+            Data      = $Data
+        }
+        $json = $structured | ConvertTo-Json -Depth 5 -Compress
+        Add-Content -LiteralPath $Config.LogPath -Value $json
+    }
+}
+
+# ------------------------------------------------------------
+# Convenience wrapper for structured tool validation logging
+# ------------------------------------------------------------
+function Write-ToolLog {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [pscustomobject]$Tool,
+
+        [Parameter(Mandatory)]
+        [pscustomobject]$Config,
+
+        [Parameter(Mandatory)]
+        [bool]$Success,
+
+        [Parameter()]
+        [string]$Reason = $null,
+
+        [Parameter()]
+        [string]$Version = $null
+    )
+
+    $message = if ($Success) {
+        "$($Tool.Name) validated successfully (version $Version)"
+    } else {
+        "$($Tool.Name) validation failed: $Reason"
     }
 
-    Add-Content -LiteralPath $Config.LogPath -Value $line
+    $data = [PSCustomObject]@{
+        Tool      = $Tool.Name
+        Success   = $Success
+        Version   = $Version
+        Validator = $Tool.Validation.Type
+    }
+
+    Write-Log -Level (if ($Success) { 'SUCCESS' } else { 'ERROR' }) `
+              -Message $message `
+              -Config $Config `
+              -Data $data
 }

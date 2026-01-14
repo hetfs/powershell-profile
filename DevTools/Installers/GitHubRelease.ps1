@@ -17,14 +17,9 @@ $ErrorActionPreference = 'Stop'
 function Install-WithGitHubRelease {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
     param (
-        [Parameter(Mandatory=$true)]
-        [PSCustomObject]$Tool,
-
-        [Parameter()]
-        [string]$OutputPath = (Join-Path $PSScriptRoot '..\Output'),
-
-        [Parameter()]
-        [string]$BinPath = (Join-Path $PSScriptRoot '..\bin')
+        [Parameter(Mandatory=$true)][PSCustomObject]$Tool,
+        [Parameter()] [string]$OutputPath = (Join-Path $PSScriptRoot '..\Output'),
+        [Parameter()] [string]$BinPath    = (Join-Path $PSScriptRoot '..\bin')
     )
 
     begin {
@@ -37,15 +32,15 @@ function Install-WithGitHubRelease {
 
     process {
         try {
-            # Validate required properties
+            # Required properties
             foreach ($prop in @('Name','Category','GitHubRepo')) {
                 if (-not $Tool.PSObject.Properties[$prop]) {
                     throw "GitHubRelease: missing required property '$prop'"
                 }
             }
 
-            $toolName     = if ($Tool.DisplayName) { $Tool.DisplayName.Trim() } else { $Tool.Name.Trim() }
-            $categoryDesc = if ($Tool.CategoryDescription) { $Tool.CategoryDescription.Trim() } else { $Tool.Category.Trim() }
+            $toolName     = ($Tool.DisplayName ?? $Tool.Name).Trim()
+            $categoryDesc = ($Tool.CategoryDescription ?? $Tool.Category).Trim()
 
             # Skip if binary already exists
             if ($Tool.BinaryCheck -and (Get-Command $Tool.BinaryCheck -ErrorAction SilentlyContinue)) {
@@ -57,7 +52,7 @@ function Install-WithGitHubRelease {
             $repo = $Tool.GitHubRepo.Trim('/')
             if ($repo -notmatch '^[^/]+/[^/]+$') { throw "Invalid GitHub repository format: '$repo'" }
 
-            # ShouldProcess / WhatIf support
+            # ShouldProcess / WhatIf
             $opDesc = "Install '$toolName' from GitHub Release"
             if (-not $PSCmdlet.ShouldProcess($opDesc, "Category: $($Tool.Category)")) { return $false }
             if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('WhatIf')) {
@@ -65,7 +60,7 @@ function Install-WithGitHubRelease {
                 return $true
             }
 
-            # Ensure 7-Zip is available for .7z/.tar.gz extraction
+            # 7-Zip detection
             $sevenZip = Get-Command '7z' -ErrorAction SilentlyContinue
             if (-not $sevenZip) {
                 Write-Verbose "7-Zip not found. Attempting installation via Chocolatey..."
@@ -79,7 +74,7 @@ function Install-WithGitHubRelease {
 
             # Query latest GitHub release
             $releaseApi = "https://api.github.com/repos/$repo/releases/latest"
-            $headers = @{
+            $headers    = @{
                 "User-Agent" = "DevToolsInstaller/1.0 (PowerShell)"
                 "Accept"     = "application/vnd.github+json"
             }
@@ -91,9 +86,8 @@ function Install-WithGitHubRelease {
                 return $false
             }
 
-            # Select asset using GitHubAssetPattern or common defaults
-            $assetPatterns = @(
-                $Tool.GitHubAssetPattern,
+            # Select asset using pattern(s)
+            $assetPatterns = @($Tool.GitHubAssetPattern) + @(
                 '.*windows.*x64.*\.zip$', '.*windows.*amd64.*\.zip$', '.*win64.*\.zip$',
                 '.*windows.*x64.*\.exe$', '.*windows.*amd64.*\.exe$', '.*win64.*\.exe$',
                 '.*\.zip$', '.*\.exe$', '.*\.msi$', '.*\.7z$', '.*\.tar\.gz$'
@@ -108,19 +102,21 @@ function Install-WithGitHubRelease {
 
             # Prepare directories
             $downloadDir = Join-Path $OutputPath 'downloads' $Tool.Name
-            if (-not (Test-Path $downloadDir)) { New-Item -Path $downloadDir -ItemType Directory -Force | Out-Null }
+            Ensure-Directory $downloadDir
             $archivePath = Join-Path $downloadDir $asset.name
 
             $installDir = Join-Path $BinPath $Tool.Name
-            if (-not (Test-Path $installDir)) { New-Item -Path $installDir -ItemType Directory -Force | Out-Null }
+            Ensure-Directory $installDir
 
-            # Download asset
+            # Download
             Write-Host "Downloading $($asset.name)..." -ForegroundColor Cyan
-            Invoke-WebRequest -Uri $asset.browser_download_url -Headers @{ "User-Agent"="DevToolsInstaller/1.0" } `
-                -OutFile $archivePath -UseBasicParsing -ErrorAction Stop
+            Invoke-WebRequest -Uri $asset.browser_download_url `
+                              -OutFile $archivePath `
+                              -Headers @{ "User-Agent"="DevToolsInstaller/1.0" } `
+                              -UseBasicParsing -ErrorAction Stop
             Write-Host "✓ Downloaded: $($asset.name)" -ForegroundColor Green
 
-            # Install / Extract asset
+            # Install / Extract
             Write-Host "Installing '$toolName'..." -ForegroundColor Cyan
             switch -Regex ($archivePath) {
                 '\.zip$'         { Expand-Archive -Path $archivePath -DestinationPath $installDir -Force }
@@ -132,14 +128,12 @@ function Install-WithGitHubRelease {
                 default { Write-Warning "Unsupported file type: $($asset.name)"; return $false }
             }
 
-            # Verify binary
+            # Binary verification
             if ($Tool.BinaryCheck) {
                 $env:Path += ";$installDir"
                 Start-Sleep 2
                 if (Get-Command $Tool.BinaryCheck -ErrorAction SilentlyContinue) {
                     Write-Host "✓ '$toolName' installed successfully" -ForegroundColor Green
-
-                    # Add to user PATH if requested
                     if ($Tool.AddToPath) {
                         $userPath = [Environment]::GetEnvironmentVariable("PATH","User")
                         if ($installDir -notin ($userPath -split ';')) {
@@ -161,3 +155,6 @@ function Install-WithGitHubRelease {
 
     end { Write-Verbose "[End] GitHub Release installer completed" }
 }
+
+# Helper: ensure directory exists
+function Ensure-Directory { param($Path) if (-not (Test-Path $Path)) { New-Item -Path $Path -ItemType Directory -Force | Out-Null } return $Path }

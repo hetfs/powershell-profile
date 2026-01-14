@@ -7,12 +7,13 @@ $ErrorActionPreference = 'Stop'
     Chocolatey installer module for DevTools.
 
 .DESCRIPTION
-    Installs and manages tools using Chocolatey with full PowerShell CmdletBinding support.
+    Installs and manages tools using Chocolatey silently, with full CmdletBinding support.
+    No interactive prompts; supports -WhatIf and -Confirm.
 #>
 
 # ------------------------------------------------------------
-# Test if Chocolatey is available
-# ------------------------------------------------------------
+#region ===== Chocolatey Detection =====
+
 function Test-ChocolateyAvailable {
     [CmdletBinding()]
     [OutputType([bool])]
@@ -25,9 +26,6 @@ function Test-ChocolateyAvailable {
     return $false
 }
 
-# ------------------------------------------------------------
-# Get Chocolatey version
-# ------------------------------------------------------------
 function Get-ChocolateyVersion {
     [CmdletBinding()]
     [OutputType([System.Version])]
@@ -42,15 +40,11 @@ function Get-ChocolateyVersion {
     catch { Write-Verbose "Failed to get Chocolatey version: $_"; return $null }
 }
 
-# ------------------------------------------------------------
-# Upgrade Chocolatey itself
-# ------------------------------------------------------------
 function Update-ChocolateySelf {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
     param()
 
     if (-not (Test-ChocolateyAvailable)) { return $false }
-
     if (-not $PSCmdlet.ShouldProcess("Chocolatey", "Upgrade Chocolatey to latest version")) { return $false }
     if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('WhatIf')) {
         Write-Host "[WHATIF] Would upgrade Chocolatey itself" -ForegroundColor Cyan
@@ -59,16 +53,17 @@ function Update-ChocolateySelf {
 
     Write-Host "[Action] Upgrading Chocolatey..." -ForegroundColor Cyan
     try {
-        & choco upgrade chocolatey -y --no-progress
+        & choco upgrade chocolatey -y --no-progress --ignore-checksums
         Write-Host "✓ Chocolatey upgraded successfully" -ForegroundColor Green
         return $true
     }
     catch { Write-Error "Failed to upgrade Chocolatey: $_"; return $false }
 }
 
+#endregion
 # ------------------------------------------------------------
-# Install a tool via Chocolatey
-# ------------------------------------------------------------
+#region ===== Tool Installation =====
+
 function Install-WithChocolatey {
     [CmdletBinding(SupportsShouldProcess=$true, ConfirmImpact='High')]
     param (
@@ -79,17 +74,16 @@ function Install-WithChocolatey {
     begin { Write-Verbose "[Begin] Chocolatey installer initialization" }
 
     process {
-        # Validate required properties
         if (-not $Tool.Name) { throw "Chocolatey: missing 'Name' property" }
         if (-not $Tool.ChocoId) {
             Write-Verbose "Skipping '$($Tool.Name)': no ChocoId defined [$($Tool.Category)]"
             return $false
         }
 
-        $toolName      = if ($Tool.DisplayName) { $Tool.DisplayName.Trim() } else { $Tool.Name.Trim() }
-        $categoryDesc  = $Tool.CategoryDescription.Trim()
+        $toolName     = ($Tool.DisplayName ?? $Tool.Name).Trim()
+        $categoryDesc = ($Tool.CategoryDescription ?? $Tool.Category).Trim()
 
-        # Skip if already installed
+        # Skip if binary already exists
         if ($Tool.BinaryCheck -and (Get-Command $Tool.BinaryCheck -ErrorAction SilentlyContinue)) {
             Write-Verbose "'$toolName' already installed [$($Tool.Category): $categoryDesc]"
             return $true
@@ -102,16 +96,15 @@ function Install-WithChocolatey {
         }
 
         # ShouldProcess / WhatIf support
-        $opDesc = "Install '$toolName' via Chocolatey"
-        if (-not $PSCmdlet.ShouldProcess($opDesc, "Category: $($Tool.Category)")) { return $false }
+        if (-not $PSCmdlet.ShouldProcess("Install '$toolName' via Chocolatey")) { return $false }
         if ($PSCmdlet.MyInvocation.BoundParameters.ContainsKey('WhatIf')) {
             Write-Host "[WHATIF] Would install '$toolName' via Chocolatey (ID: $($Tool.ChocoId))" -ForegroundColor Cyan
             return $true
         }
 
-        # Build install arguments
-        $args = @('install', $Tool.ChocoId, '-y', '--no-progress', '--accept-license')
-        if ($Tool.ChocoParams) { $args += $Tool.ChocoParams } else { $args += '--ignore-checksums' }
+        # Build silent install arguments
+        $args = @('install', $Tool.ChocoId, '-y', '--no-progress', '--accept-license', '--ignore-checksums')
+        if ($Tool.ChocoParams) { $args += $Tool.ChocoParams }
 
         Write-Host "Installing '$toolName' via Chocolatey..." -ForegroundColor Cyan
         Write-Debug "Chocolatey arguments: $($args -join ' ')"
@@ -123,7 +116,7 @@ function Install-WithChocolatey {
                 return $false
             }
 
-            # Post-install validation
+            # Binary validation
             if ($Tool.BinaryCheck) {
                 Start-Sleep 2
                 if (Get-Command $Tool.BinaryCheck -ErrorAction SilentlyContinue) {
@@ -154,3 +147,6 @@ function Install-WithChocolatey {
 
     end { Write-Verbose "[End] Chocolatey installer completed" }
 }
+
+#endregion
+# ----------------------------------------

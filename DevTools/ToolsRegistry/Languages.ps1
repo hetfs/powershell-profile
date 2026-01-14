@@ -34,7 +34,7 @@ $Tools = @(
         WinGetId            = 'BrechtSanders.WinLibs.POSIX.MSVCRT.LLVM'
         ChocoId             = 'winlibs-llvm'
         GitHubRepo          = 'brechtsanders/winlibs_mingw'
-        BinaryCheck         = 'clang++.exe' # Or clang.exe
+        BinaryCheck         = 'clang++.exe'
         Dependencies        = @()
         Provides            = @(
             'clang.exe',
@@ -45,13 +45,12 @@ $Tools = @(
             'clang-tidy.exe'
         )
         Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'clang++.exe' # Or clang.exe
-
+            Type  = 'command'
+            Value = 'clang++'
         }
-    }
+    },
 
-    # ---------- Rust Programming Language ----------
+    # ---------- Rust ----------
     [PSCustomObject]@{
         Name                = 'Rust'
         Category            = $CategoryName
@@ -64,12 +63,12 @@ $Tools = @(
         Dependencies        = @()
         Provides            = @('rustc.exe','cargo.exe')
         Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'rustc.exe'
+            Type  = 'command'
+            Value = 'rustc'
         }
-    }
+    },
 
-    # ---------- GO ----------
+    # ---------- Go ----------
     [PSCustomObject]@{
         Name                = 'Go'
         Category            = $CategoryName
@@ -82,8 +81,9 @@ $Tools = @(
         Dependencies        = @()
         Provides            = @('go.exe')
         Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'go.exe'
+            Type       = 'command'
+            Value      = 'go'
+            MinVersion = '1.21'
         }
     },
 
@@ -91,25 +91,27 @@ $Tools = @(
     # Interpreted Languages
     # ====================================================
 
-    # ---------- PYTHON ----------
+    # ---------- Python ----------
     [PSCustomObject]@{
         Name                = 'Python'
         Category            = $CategoryName
         CategoryDescription = $CategoryDescription
         ToolType            = 'Interpreter'
-        WinGetId            = 'Python.Python.3'
-        ChocoId             = 'python'
+        WinGetId            = 'Python.Python.3.14'
+        ChocoId             = $null
         GitHubRepo          = 'python/cpython'
         BinaryCheck         = 'python.exe'
         Dependencies        = @()
-        Provides            = @('python.exe','pip.exe')
+        Provides            = @('python.exe','pip.exe','py.exe')
         Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'python.exe'
+            Type           = 'command'
+            Value          = 'python'
+            MinVersion     = '3.11'
+            PreferLauncher = $true
         }
     },
 
-    # ---------- LUA ----------
+    # ---------- Lua ----------
     [PSCustomObject]@{
         Name                = 'Lua'
         Category            = $CategoryName
@@ -122,12 +124,12 @@ $Tools = @(
         Dependencies        = @()
         Provides            = @('lua.exe')
         Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'lua.exe'
+            Type  = 'command'
+            Value = 'lua'
         }
     },
 
-    # ---------- STRAWBERRY PERL ----------
+    # ---------- Strawberry Perl ----------
     [PSCustomObject]@{
         Name                = 'Strawberry Perl'
         Category            = $CategoryName
@@ -140,8 +142,8 @@ $Tools = @(
         Dependencies        = @()
         Provides            = @('perl.exe','cpan.exe')
         Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'perl.exe'
+            Type  = 'command'
+            Value = 'perl'
         }
     }
 )

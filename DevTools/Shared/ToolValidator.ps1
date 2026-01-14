@@ -20,7 +20,7 @@ function ConvertTo-NormalizedTool {
     # ------------------------------------------------------------
     # Required properties
     # ------------------------------------------------------------
-    foreach ($prop in @('Name', 'Category')) {
+    foreach ($prop in @('Name', 'Category', 'ToolType')) {
         if (-not $Tool.PSObject.Properties[$prop] -or
             [string]::IsNullOrWhiteSpace($Tool.$prop)) {
             throw "Tool definition missing required property '$prop'"
@@ -42,6 +42,27 @@ function ConvertTo-NormalizedTool {
     }
 
     # ------------------------------------------------------------
+    # Normalize Validation object
+    # ------------------------------------------------------------
+    $rawValidation = Get-Optional 'Validation' @{}
+    $normalizedValidation = [PSCustomObject]@{
+        Type           = (Get-Optional 'Type' $rawValidation.Type 'command').ToString().ToLower()
+        Value          = Get-Optional 'Value' $rawValidation.Value
+        MinVersion     = Get-Optional 'MinVersion' $rawValidation.MinVersion
+        ExactVersion   = Get-Optional 'ExactVersion' $rawValidation.ExactVersion
+        PreferLauncher = [bool](Get-Optional 'PreferLauncher' $rawValidation.PreferLauncher $false)
+    }
+
+    # Enforce lint: interpreters must not use path validation
+    if ($Tool.ToolType -eq 'Interpreter' -and $normalizedValidation.Type -eq 'path') {
+        throw @"
+Invalid validation for interpreter '$($Tool.Name)'.
+Path-based validation is not allowed for interpreters.
+Use command-based validation with version constraints instead.
+"@
+    }
+
+    # ------------------------------------------------------------
     # Normalized object
     # ------------------------------------------------------------
     $normalized = [PSCustomObject]@{
@@ -49,18 +70,19 @@ function ConvertTo-NormalizedTool {
         DisplayName         = (Get-Optional 'DisplayName' $Tool.Name).ToString().Trim()
         Category            = $Tool.Category.Trim()
         CategoryDescription = (Get-Optional 'CategoryDescription' '').ToString().Trim()
+        ToolType            = $Tool.ToolType.Trim()
 
         # Installer selectors
         WinGetId           = Get-Optional 'WinGetId'
         ChocoId            = Get-Optional 'ChocoId'
         GitHubRepo         = Get-Optional 'GitHubRepo'
         GitHubAssetPattern = Get-Optional 'GitHubAssetPattern'
-
         InstallerScript    = Get-Optional 'InstallerScript'
 
         # Validation hooks
         BinaryCheck        = Get-Optional 'BinaryCheck'
         AltCheck           = Get-Optional 'AltCheck'
+        Validation         = $normalizedValidation
 
         # Behavior flags
         AddToPath          = [bool](Get-Optional 'AddToPath' $false)
@@ -89,7 +111,7 @@ function Validate-AndNormalizeTools {
     )
 
     $validatedTools = [System.Collections.Generic.List[object]]::new()
-    $namesSeen = @{}
+    $namesSeen = @{ }
 
     foreach ($tool in $Tools) {
         if (-not $tool) { continue }
