@@ -13,53 +13,65 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# -----------------------------
+# ====================================================
 # Category metadata
-# -----------------------------
-$CategoryName        = 'Terminals'
+# ====================================================
+$CategoryName        = 'TerminalEmulators'
 $CategoryDescription = 'Terminal emulators and interactive shell environments.'
 
-# -----------------------------
+# ====================================================
 # Terminal definitions
-# -----------------------------
+# ====================================================
 $Tools = @(
 
     # ====================================================
-    # GPU-accelerated terminal emulators
+    # WezTerm - GPU-accelerated terminal emulator
+    # ----------------------------------------------------
+    # Modern terminal with GPU acceleration, ligature support,
+    # and cross-platform compatibility.
     # ====================================================
     [PSCustomObject]@{
         Name                = 'WezTerm'
         Category            = $CategoryName
         ToolType            = 'TerminalEmulator'
-        CategoryDescription = 'GPU-accelerated, cross-platform, highly configurable terminal emulator.'
+        CategoryDescription = $CategoryDescription
         WinGetId            = 'wez.wezterm'
         ChocoId             = 'wezterm'
         GitHubRepo          = 'wez/wezterm'
         BinaryCheck         = 'wezterm.exe'
         Dependencies        = @()
         Provides            = @('wezterm.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='wezterm.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'wezterm.exe'
+        }
     }
 
     # ====================================================
-    # Windows-native terminal
+    # Windows Terminal - Native Windows terminal
+    # ----------------------------------------------------
+    # Microsoft’s native terminal with tabs, profiles,
+    # and deep integration into Windows ecosystem.
     # ====================================================
     [PSCustomObject]@{
         Name                = 'Windows Terminal'
         Category            = $CategoryName
         ToolType            = 'TerminalEmulator'
-        CategoryDescription = 'Modern, tabbed terminal for Windows with multiple shells support.'
+        CategoryDescription = $CategoryDescription
         WinGetId            = 'Microsoft.WindowsTerminal'
         ChocoId             = 'microsoft-windows-terminal'
         GitHubRepo          = 'microsoft/terminal'
         BinaryCheck         = 'wt.exe'
         Dependencies        = @()
         Provides            = @('wt.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='wt.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'wt.exe'
+        }
     }
 )
 
-# -----------------------------
-# Return tools array safely for dot-sourcing
-# -----------------------------
+# ====================================================
+# Return tools array safely
+# ====================================================
 @($Tools)

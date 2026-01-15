@@ -4,10 +4,10 @@
 
 .DESCRIPTION
     Defines security-focused CLI tools for encryption, key management,
-    secret storage, and secure communication.
+    secrets storage, and secure communication.
 
     Validation strategy:
-    - Command validation is used when installers reliably add binaries to PATH
+    - Command validation is used when installers reliably expose binaries in PATH
     - Path validation is used when Windows installers are inconsistent
 
     Returns a stable array of PSCustomObjects for DevTools installer
@@ -17,23 +17,25 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# ------------------------------------------------
+# ====================================================
 # Category metadata
-# ------------------------------------------------
+# ====================================================
 $CategoryName        = 'Security'
-$CategoryDescription = 'Security, cryptography, secrets management, and encryption tools.'
+$CategoryDescription = 'Security, cryptography, secrets management, and encryption tools'
 
-# ------------------------------------------------
+# ====================================================
 # Tool definitions
-# ------------------------------------------------
+# ====================================================
 $Tools = @(
 
     # ====================================================
-    # Secure Shell
-    # ====================================================
-    # OpenSSH client for secure remote access, file transfer,
-    # and automation over SSH.
+    # OpenSSH
+    # ----------------------------------------------------
+    # Secure Shell client for remote access, file transfer,
+    # and automation over encrypted channels.
+    #
     # Windows optional feature reliably exposes ssh.exe in PATH.
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'OpenSSH'
         Category            = $CategoryName
@@ -52,12 +54,13 @@ $Tools = @(
     }
 
     # ====================================================
-    # Cryptography Foundations
+    # OpenSSL
+    # ----------------------------------------------------
+    # Cryptography toolkit for TLS, certificates, hashing,
+    # and low-level crypto primitives.
+    #
+    # Windows installers do not reliably update PATH.
     # ====================================================
-    # OpenSSL provides TLS, certificate management,
-    # hashing, and low-level crypto primitives.
-    # Windows installers do not reliably update PATH,
-    # so explicit path validation is required.
     [PSCustomObject]@{
         Name                = 'OpenSSL'
         Category            = $CategoryName
@@ -79,11 +82,10 @@ $Tools = @(
     }
 
     # ====================================================
-    # Secrets Management
+    # HashiCorp Vault
+    # ----------------------------------------------------
+    # Centralized secrets, credentials, and PKI management.
     # ====================================================
-    # HashiCorp Vault CLI for centralized secrets,
-    # credentials, and PKI management.
-    # CLI installers reliably expose vault.exe in PATH.
     [PSCustomObject]@{
         Name                = 'Vault'
         Category            = $CategoryName
@@ -102,10 +104,11 @@ $Tools = @(
     }
 
     # ====================================================
-    # Modern Encryption (age / rage)
+    # age
+    # ----------------------------------------------------
+    # Modern, minimal encryption tool designed for humans.
+    # Commonly used with sops.
     # ====================================================
-    # age is a simple, modern file encryption tool
-    # designed as a safer alternative to GPG.
     [PSCustomObject]@{
         Name                = 'age'
         Category            = $CategoryName
@@ -123,8 +126,11 @@ $Tools = @(
         }
     }
 
-    # rage is a Rust implementation compatible with age,
-    # commonly used by sops and modern secret workflows.
+    # ====================================================
+    # rage
+    # ----------------------------------------------------
+    # Rust implementation of age with improved UX.
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'rage'
         Category            = $CategoryName
@@ -143,12 +149,12 @@ $Tools = @(
     }
 
     # ====================================================
-    # Classic Cryptography (GnuPG)
+    # GnuPG
+    # ----------------------------------------------------
+    # OpenPGP encryption, signing, and key management.
+    #
+    # Windows installers may not update PATH reliably.
     # ====================================================
-    # GnuPG provides OpenPGP encryption, signing,
-    # and key management.
-    # Windows installers often skip PATH updates,
-    # so path-based validation is required.
     [PSCustomObject]@{
         Name                = 'GnuPG'
         Category            = $CategoryName
@@ -170,10 +176,11 @@ $Tools = @(
     }
 
     # ====================================================
-    # Secrets Encryption & Git Integration
+    # sops
+    # ----------------------------------------------------
+    # Structured secrets encryption supporting age, GPG,
+    # and cloud KMS backends.
     # ====================================================
-    # sops encrypts structured data files using
-    # age, GPG, or cloud KMS backends.
     [PSCustomObject]@{
         Name                = 'sops'
         Category            = $CategoryName
@@ -190,10 +197,9 @@ $Tools = @(
             Value = 'sops.exe'
         }
     }
-
 )
 
-# ------------------------------------------------
+# ====================================================
 # Return tools array safely
-# ------------------------------------------------
+# ====================================================
 @($Tools)

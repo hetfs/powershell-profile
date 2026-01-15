@@ -26,8 +26,6 @@ $Tools = @(
     # ====================================================
     # Markdown & Text Rendering
     # ====================================================
-
-    # ---------- GLOW ----------
     [PSCustomObject]@{
         Name                = 'glow'
         Category            = $CategoryName
@@ -39,17 +37,12 @@ $Tools = @(
         BinaryCheck         = 'glow.exe'
         Dependencies        = @()
         Provides            = @('glow.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'glow.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'glow.exe' }
     }
 
     # ====================================================
     # Documentation Linters
     # ====================================================
-
-    # ---------- VALE ----------
     [PSCustomObject]@{
         Name                = 'Vale'
         Category            = $CategoryName
@@ -61,17 +54,12 @@ $Tools = @(
         BinaryCheck         = 'vale.exe'
         Dependencies        = @()
         Provides            = @('vale.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'vale.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'vale.exe' }
     }
 
     # ====================================================
     # PDF Processing & Viewing
     # ====================================================
-
-    # ---------- POPPLER ----------
     [PSCustomObject]@{
         Name                = 'Poppler'
         Category            = $CategoryName
@@ -82,18 +70,10 @@ $Tools = @(
         GitHubRepo          = 'poppler/poppler'
         BinaryCheck         = 'pdftoppm.exe'
         Dependencies        = @()
-        Provides            = @(
-            'pdftoppm.exe',
-            'pdfinfo.exe',
-            'pdftocairo.exe'
-        )
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'pdftoppm.exe'
-        }
+        Provides            = @('pdftoppm.exe','pdfinfo.exe','pdftocairo.exe')
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'pdftoppm.exe' }
     }
 
-    # ---------- OKULAR ----------
     [PSCustomObject]@{
         Name                = 'Okular'
         Category            = $CategoryName
@@ -117,10 +97,6 @@ $Tools = @(
     # ====================================================
     # Diff & Merge Tools
     # ====================================================
-
-    # ---------- KDIFF3 ----------
-    # KDiff3 – File and directory diff and merge tool
-    # https://github.com/KDE/kdiff3
     [PSCustomObject]@{
         Name                = 'KDiff3'
         Category            = $CategoryName
@@ -144,8 +120,6 @@ $Tools = @(
     # ====================================================
     # CLI Helpers & Reference Tools
     # ====================================================
-
-    # ---------- TLRC ----------
     [PSCustomObject]@{
         Name                = 'tlrc'
         Category            = $CategoryName
@@ -157,11 +131,9 @@ $Tools = @(
         BinaryCheck         = 'tldr.exe'
         Dependencies        = @()
         Provides            = @('tldr.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'tldr.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'tldr.exe' }
     }
+
 )
 
 # ==============================

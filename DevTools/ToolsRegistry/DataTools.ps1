@@ -12,20 +12,20 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# ====================================================
+# ==============================
 # Category metadata
-# ====================================================
+# ==============================
 $CategoryName        = 'DataTools'
 $CategoryDescription = 'Database and data processing tools'
 
-# ====================================================
+# ==============================
 # Tool definitions
-# ====================================================
+# ==============================
 $Tools = @(
 
-    # ------------------------------------------------
+    # ====================================================
     # Node.js — JavaScript runtime
-    # ------------------------------------------------
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'Node.js'
         Category            = $CategoryName
@@ -36,16 +36,13 @@ $Tools = @(
         GitHubRepo          = 'https://github.com/nodejs/node'
         BinaryCheck         = 'node.exe'
         Dependencies        = @()
-        Provides            = @('node.exe', 'npm.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'node.exe'
-        }
+        Provides            = @('node.exe','npm.exe')
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'node.exe' }
     }
 
-    # ------------------------------------------------
+    # ====================================================
     # jq — JSON processor
-    # ------------------------------------------------
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'jq'
         Category            = $CategoryName
@@ -57,15 +54,12 @@ $Tools = @(
         BinaryCheck         = 'jq.exe'
         Dependencies        = @()
         Provides            = @('jq.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'jq.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'jq.exe' }
     }
 
-    # ------------------------------------------------
+    # ====================================================
     # yq — YAML processor
-    # ------------------------------------------------
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'yq'
         Category            = $CategoryName
@@ -77,15 +71,12 @@ $Tools = @(
         BinaryCheck         = 'yq.exe'
         Dependencies        = @()
         Provides            = @('yq.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'yq.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'yq.exe' }
     }
 
-    # ------------------------------------------------
+    # ====================================================
     # ytt — YAML templating tool
-    # ------------------------------------------------
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'ytt'
         Category            = $CategoryName
@@ -97,15 +88,12 @@ $Tools = @(
         BinaryCheck         = 'ytt.exe'
         Dependencies        = @()
         Provides            = @('ytt.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'ytt.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'ytt.exe' }
     }
 
 )
 
-# ====================================================
+# ==============================
 # Return tools array safely
-# ====================================================
+# ==============================
 @($Tools)

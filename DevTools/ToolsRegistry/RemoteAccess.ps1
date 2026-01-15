@@ -19,123 +19,104 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# ------------------------------------------------
+# ==============================
 # Category metadata
-# ------------------------------------------------
-$CategoryName         = 'RemoteAccess'
-$CategoryDescription = 'Cross-platform remote desktop, remote access, and device management tools.'
+# ==============================
+$CategoryName        = 'RemoteAccess'
+$CategoryDescription = 'Cross-platform remote desktop, remote access, and device management tools'
 
-# ------------------------------------------------
+# ==============================
 # Tool definitions
-# ------------------------------------------------
+# ==============================
 $Tools = @(
 
     # ====================================================
     # RustDesk
-    # ----------------------------------------------------
-    # Theme: Self-hosted, private remote desktop
-    # Positioning:
-    # - Open-source alternative to TeamViewer and AnyDesk
-    # - Full control over infrastructure and data
-    # - End-to-end encrypted connections
-    # Best for:
-    # - Developers
-    # - Privacy-conscious teams
-    # - Cross-platform personal or enterprise remote access
-    # Trade-offs:
-    # - Requires minimal setup for self-hosting advanced features
     # ====================================================
-[PSCustomObject]@{
-    Name                = 'RustDesk'
-    Category            = $CategoryName
-    CategoryDescription = $CategoryDescription
-    ToolType            = 'RemoteDesktop'
-
-    WinGetId            = 'RustDesk.RustDesk'
-    ChocoId             = 'rustdesk'
-    GitHubRepo          = 'rustdesk/rustdesk'
-
-    BinaryCheck         = 'rustdesk.exe'
-    Dependencies        = @()
-    Provides            = @('rustdesk.exe')
-
-    Validation          = [PSCustomObject]@{
-        Type  = 'Path'
-        Value = "$env:ProgramFiles\RustDesk\rustdesk.exe"
+    [PSCustomObject]@{
+        Name                = 'RustDesk'
+        Category            = $CategoryName
+        CategoryDescription = $CategoryDescription
+        ToolType            = 'RemoteDesktop'
+        WinGetId            = 'RustDesk.RustDesk'
+        ChocoId             = 'rustdesk'
+        GitHubRepo          = 'rustdesk/rustdesk'
+        BinaryCheck         = 'rustdesk.exe'
+        Dependencies        = @()
+        Provides            = @('rustdesk.exe')
+        Validation          = [PSCustomObject]@{
+            Type  = 'Path'
+            Value = Join-Path $env:ProgramFiles 'RustDesk\rustdesk.exe'
+        }
     }
-}
 
     # ====================================================
     # Alternatives (Informational Only)
-    # ----------------------------------------------------
+    # ====================================================
     # The following tools are NOT installed by DevTools.
     # They are listed to document the remote-access ecosystem
-    # and clarify when RustDesk may or may not be the best fit.
-    # ====================================================
+    # and help users evaluate architectural trade-offs.
 
     # ----------------------------------------------------
     # TigerVNC
-    # Theme: Low-level, direct VNC access
+    # Low-level VNC server and client.
     # Best for:
-    # - Private LAN environments
+    # - Private LAN usage
     # - Lightweight GUI forwarding
     # Trade-offs:
-    # - No built-in encryption by default
+    # - No encryption by default
     # - Manual security hardening required
     # https://github.com/TigerVNC/tigervnc
-    # ----------------------------------------------------
 
     # ----------------------------------------------------
     # Remmina
-    # Theme: Multi-protocol client hub
+    # Multi-protocol remote desktop client.
+    # Supports RDP, VNC, SSH, SPICE.
     # Best for:
-    # - Developers managing many servers
-    # - Mixed environments (RDP, VNC, SSH, SPICE)
+    # - Managing many remote systems
+    # - Mixed protocol environments
     # Trade-offs:
     # - Client-only
     # - Primarily Linux-focused
     # https://remmina.org/
-    # ----------------------------------------------------
 
     # ----------------------------------------------------
     # xrdp
-    # Theme: Native Linux RDP integration
+    # RDP server for Linux systems.
     # Best for:
     # - Accessing Linux desktops from Windows RDP clients
     # Trade-offs:
     # - Linux-only server
-    # - Desktop experience varies by distro and DE
+    # - Desktop experience depends on DE and distro
     # https://github.com/neutrinolabs/xrdp
-    # ----------------------------------------------------
 
     # ----------------------------------------------------
     # Apache Guacamole
-    # Theme: Browser-based remote desktop gateway
+    # Browser-based remote desktop gateway.
+    # Supports RDP, VNC, SSH via web UI.
     # Best for:
     # - Teams
     # - Zero-client environments
     # - Centralized access control
     # Trade-offs:
-    # - Requires server-side deployment
+    # - Requires server deployment
     # - More infrastructure complexity
     # https://github.com/apache/guacamole-client
-    # ----------------------------------------------------
 
     # ----------------------------------------------------
     # MeshCentral
-    # Theme: Full device management and remote support
+    # Full device management and remote support platform.
     # Best for:
     # - IT teams
-    # - Secure remote assistance
     # - Fleet management
+    # - Secure remote assistance
     # Trade-offs:
     # - Heavier than pure remote desktop tools
     # - Requires self-hosted server
     # https://github.com/Ylianst/MeshCentral
-    # ----------------------------------------------------
 )
 
-# ------------------------------------------------
-# Return tools array safely for DevTools
-# ------------------------------------------------
+# ==============================
+# Return tools array safely
+# ==============================
 @($Tools)

@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Core shell and CLI environments
+    Core shell and CLI environments.
 
 .DESCRIPTION
     Defines cross-platform shells and core command-line environments.
@@ -11,36 +11,37 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# ====================================================
+# ==============================
 # Category metadata
-# ====================================================
+# ==============================
 $CategoryName        = 'CoreShell'
 $CategoryDescription = 'Cross-platform shells and core command-line environments'
 
-# ====================================================
+# ==============================
 # Tool definitions
-# ====================================================
+# ==============================
 $Tools = @(
 
-[PSCustomObject]@{
-    Name                = 'gsudo'
-    Category            = 'SystemUtils'
-    CategoryDescription = 'Sudo-like privilege elevation for Windows'
-    ToolType            = 'PrivilegeElevation'
-    WinGetId            = 'gerardog.gsudo'
-    ChocoId             = 'gsudo'
-    GitHubRepo          = 'https://github.com/gerardog/gsudo'
-    BinaryCheck         = Join-Path $env:ProgramFiles 'gsudo\Current\gsudo.exe'
-    Dependencies        = @()
-    Provides            = @('gsudo.exe')
-    Validation          = [PSCustomObject]@{
-        Type  = 'Path'
-        Value = Join-Path $env:ProgramFiles 'gsudo\Current\gsudo.exe'
+    # ====================================================
+    # gsudo — Sudo-like privilege elevation for Windows
+    # ====================================================
+    [PSCustomObject]@{
+        Name                = 'gsudo'
+        Category            = $CategoryName
+        CategoryDescription = $CategoryDescription
+        ToolType            = 'PrivilegeElevation'
+        WinGetId            = 'gerardog.gsudo'
+        ChocoId             = 'gsudo'
+        GitHubRepo          = 'https://github.com/gerardog/gsudo'
+        BinaryCheck         = Join-Path $env:ProgramFiles 'gsudo\Current\gsudo.exe'
+        Dependencies        = @()
+        Provides            = @('gsudo.exe')
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'gsudo.exe' }
     }
-}
-    # ------------------------------------------------
-    # ShellCheck — shell script linting
-    # ------------------------------------------------
+
+    # ====================================================
+    # ShellCheck — Shell script linter
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'ShellCheck'
         Category            = $CategoryName
@@ -52,15 +53,12 @@ $Tools = @(
         BinaryCheck         = 'shellcheck.exe'
         Dependencies        = @()
         Provides            = @('shellcheck.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'shellcheck.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'shellcheck.exe' }
     }
 
-    # ------------------------------------------------
-    # direnv — manage environment variables per directory
-    # ------------------------------------------------
+    # ====================================================
+    # direnv — Manage environment variables per directory
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'direnv'
         Category            = $CategoryName
@@ -72,15 +70,12 @@ $Tools = @(
         BinaryCheck         = 'direnv.exe'
         Dependencies        = @()
         Provides            = @('direnv.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'direnv.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'direnv.exe' }
     }
 
-    # ------------------------------------------------
-    # mise-en-place — runtime manager
-    # ------------------------------------------------
+    # ====================================================
+    # mise-en-place — Runtime manager
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'mise-en-place'
         Category            = $CategoryName
@@ -92,15 +87,12 @@ $Tools = @(
         BinaryCheck         = 'mise.exe'
         Dependencies        = @()
         Provides            = @('mise.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'mise.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'mise.exe' }
     }
 
-    # ------------------------------------------------
+    # ====================================================
     # aliae — CLI productivity tool
-    # ------------------------------------------------
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'aliae'
         Category            = $CategoryName
@@ -112,15 +104,12 @@ $Tools = @(
         BinaryCheck         = 'aliae.exe'
         Dependencies        = @()
         Provides            = @('aliae.exe')
-        Validation          = [PSCustomObject]@{
-            Type  = 'Command'
-            Value = 'aliae.exe'
-        }
+        Validation          = [PSCustomObject]@{ Type = 'Command'; Value = 'aliae.exe' }
     }
 
 )
 
-# ====================================================
+# ==============================
 # Return tools array safely
-# ====================================================
+# ==============================
 @($Tools)

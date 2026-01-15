@@ -13,15 +13,15 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# -----------------------------
+# ==============================
 # Category metadata
-# -----------------------------
+# ==============================
 $CategoryName        = 'PromptUI'
 $CategoryDescription = 'Prompt engines, shell UX enhancements, and terminal theming tools'
 
-# -----------------------------
+# ==============================
 # Tool definitions
-# -----------------------------
+# ==============================
 $Tools = @(
 
     # ====================================================
@@ -30,8 +30,8 @@ $Tools = @(
     [PSCustomObject]@{
         Name                = 'Starship Prompt'
         Category            = $CategoryName
-        ToolType            = 'PromptEngine'
         CategoryDescription = $CategoryDescription
+        ToolType            = 'PromptEngine'
         WinGetId            = 'Starship.Starship'
         ChocoId             = 'starship'
         GitHubRepo          = 'starship/starship'
@@ -40,13 +40,13 @@ $Tools = @(
         Provides            = @('starship.exe')
         Validation          = [PSCustomObject]@{
             Type  = 'Command'
-            Value = 'starship.exe'
+            Value = 'starship'
         }
     }
 
 )
 
-# -----------------------------
+# ==============================
 # Return tools array safely
-# -----------------------------
+# ==============================
 @($Tools)

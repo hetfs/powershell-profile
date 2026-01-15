@@ -4,7 +4,11 @@
 
 .DESCRIPTION
     Defines tools for fuzzy searching, directory navigation, file listing,
-    and fast text or file inspection.
+    terminal file managers, directory trees, and fast text and file inspection.
+
+    Validation strategy:
+    - Command validation is used when binaries are reliably added to PATH.
+    - Path validation is used when Windows installers are inconsistent.
 
     Returns a stable array of PSCustomObjects for DevTools installer
     and validator consumption.
@@ -13,19 +17,22 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# -----------------------------
+# ====================================================
 # Category metadata
-# -----------------------------
+# ====================================================
 $CategoryName        = 'ShellProductivity'
-$CategoryDescription = 'Productivity and navigation tools for the shell, including fuzzy finders, directory navigators, and file utilities'
+$CategoryDescription = 'Productivity and navigation tools for the shell, including fuzzy finders, directory navigators, file utilities, terminal file managers, and directory trees'
 
-# -----------------------------
+# ====================================================
 # Tool definitions
-# -----------------------------
+# ====================================================
 $Tools = @(
 
     # ====================================================
-    # Fuzzy Finders
+    # fzf - Fuzzy Finder
+    # ----------------------------------------------------
+    # Interactive fuzzy search for files, command history,
+    # and text streams.
     # ====================================================
     [PSCustomObject]@{
         Name                = 'fzf'
@@ -38,11 +45,16 @@ $Tools = @(
         BinaryCheck         = 'fzf.exe'
         Dependencies        = @()
         Provides            = @('fzf.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='fzf.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'fzf.exe'
+        }
     }
 
     # ====================================================
-    # Directory Navigation
+    # zoxide - Directory Navigator
+    # ----------------------------------------------------
+    # Fast directory jumping with history-based ranking.
     # ====================================================
     [PSCustomObject]@{
         Name                = 'zoxide'
@@ -55,11 +67,17 @@ $Tools = @(
         BinaryCheck         = 'zoxide.exe'
         Dependencies        = @()
         Provides            = @('zoxide.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='zoxide.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'zoxide.exe'
+        }
     }
 
     # ====================================================
-    # File and Text Utilities
+    # fd - File Search Utility
+    # ----------------------------------------------------
+    # Recursive file search with regex support.
+    # Faster and more user-friendly than find.
     # ====================================================
     [PSCustomObject]@{
         Name                = 'fd'
@@ -72,9 +90,18 @@ $Tools = @(
         BinaryCheck         = 'fd.exe'
         Dependencies        = @()
         Provides            = @('fd.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='fd.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'fd.exe'
+        }
     }
 
+    # ====================================================
+    # ripgrep - Text Search Utility
+    # ----------------------------------------------------
+    # High-performance recursive text search.
+    # Common replacement for grep.
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'ripgrep'
         Category            = $CategoryName
@@ -86,9 +113,17 @@ $Tools = @(
         BinaryCheck         = 'rg.exe'
         Dependencies        = @()
         Provides            = @('rg.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='rg.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'rg.exe'
+        }
     }
 
+    # ====================================================
+    # bat - File Preview Utility
+    # ----------------------------------------------------
+    # Syntax-highlighted file preview with paging support.
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'bat'
         Category            = $CategoryName
@@ -100,9 +135,17 @@ $Tools = @(
         BinaryCheck         = 'bat.exe'
         Dependencies        = @()
         Provides            = @('bat.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='bat.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'bat.exe'
+        }
     }
 
+    # ====================================================
+    # eza - Directory Listing Utility
+    # ----------------------------------------------------
+    # Modern replacement for ls with colors and icons.
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'eza'
         Category            = $CategoryName
@@ -114,31 +157,62 @@ $Tools = @(
         BinaryCheck         = 'eza.exe'
         Dependencies        = @()
         Provides            = @('eza.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='eza.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'eza.exe'
+        }
     }
 
-[PSCustomObject]@{
-    Name                = 'tre'
-    Category            = $CategoryName
-    ToolType            = 'DirectoryTree'
-    CategoryDescription = $CategoryDescription
-    WinGetId            = 'tre-command'
-    ChocoId             = 'tre-command'
-    GitHubRepo          = 'dduan/tre'
-    BinaryCheck         = 'tre.exe'
-    Dependencies        = @()
-    Provides            = @('tre.exe')
-    Validation          = [PSCustomObject]@{
-        Type  = 'Path'
-        Value = @(
-            "$env:ProgramFiles\tre-command\bin\tre.exe",
-            "$env:ProgramFiles(x86)\tre-command\bin\tre.exe"
-        )
+    # ====================================================
+    # lf - Terminal File Manager
+    # ----------------------------------------------------
+    # Minimal, keyboard-driven file manager for the terminal.
+    # ====================================================
+    [PSCustomObject]@{
+        Name                = 'lf'
+        Category            = $CategoryName
+        ToolType            = 'FileManager'
+        CategoryDescription = $CategoryDescription
+        WinGetId            = 'gokcehan.lf'
+        ChocoId             = 'lf'
+        GitHubRepo          = 'gokcehan/lf'
+        BinaryCheck         = 'lf.exe'
+        Dependencies        = @()
+        Provides            = @('lf.exe')
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'lf.exe'
+        }
     }
-}
+
+    # ====================================================
+    # tre - Directory Tree Viewer
+    # ----------------------------------------------------
+    # Displays directory trees in a clean, readable format.
+    # ====================================================
+    [PSCustomObject]@{
+        Name                = 'tre'
+        Category            = $CategoryName
+        ToolType            = 'DirectoryTree'
+        CategoryDescription = $CategoryDescription
+        WinGetId            = 'tre-command'
+        ChocoId             = 'tre-command'
+        GitHubRepo          = 'dduan/tre'
+        BinaryCheck         = 'tre.exe'
+        Dependencies        = @()
+        Provides            = @('tre.exe')
+        Validation          = [PSCustomObject]@{
+            Type  = 'Path'
+            Value = @(
+                "$env:ProgramFiles\tre-command\bin\tre.exe",
+                "$env:ProgramFiles(x86)\tre-command\bin\tre.exe"
+            )
+        }
+    }
+
 )
 
-# -----------------------------
+# ====================================================
 # Return tools array safely
-# -----------------------------
+# ====================================================
 @($Tools)

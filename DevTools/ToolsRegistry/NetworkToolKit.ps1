@@ -5,7 +5,6 @@
 .DESCRIPTION
     Defines HTTP clients, file downloaders, network diagnostics,
     security scanners, certificate management, and traffic inspection tools.
-
     Returns a stable array of PSCustomObjects for DevTools installer
     and validator consumption.
 #>
@@ -13,39 +12,39 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# -----------------------------
+# ==============================
 # Category metadata
-# -----------------------------
-$CategoryName        = 'Network'
+# ==============================
+$CategoryName        = 'NetworkToolKit'
 $CategoryDescription = 'Network, Web, HTTP, Security, and Traffic Inspection Tools'
 
-# -----------------------------
+# ==============================
 # Tool definitions
-# -----------------------------
+# ==============================
 $Tools = @(
 
     # ====================================================
     # HTTP & API Clients (CLI)
     # ====================================================
-
-[PSCustomObject]@{
-    Name                = 'HTTPie CLI'
-    Category            = $CategoryName
-    CategoryDescription = $CategoryDescription
-    ToolType            = 'HttpClient'
-    WinGetId            = 'httpie.httpie'
-    ChocoId             = 'httpie'
-    GitHubRepo          = 'httpie/httpie'
-    BinaryCheck         = 'HTTPie.exe'
-    Dependencies        = @()
-    Provides            = @('HTTPie.exe')
-    Validation          = [PSCustomObject]@{
-        Type  = 'Path'
-        Value = @(
+    [PSCustomObject]@{
+        Name                = 'HTTPie CLI'
+        Category            = $CategoryName
+        CategoryDescription = $CategoryDescription
+        ToolType            = 'HttpClient'
+        WinGetId            = 'httpie.httpie'
+        ChocoId             = 'httpie'
+        GitHubRepo          = 'httpie/httpie'
+        BinaryCheck         = 'HTTPie.exe'
+        Dependencies        = @()
+        Provides            = @('HTTPie.exe')
+        Validation          = [PSCustomObject]@{
+            Type  = 'Path'
+            Value = @(
             Join-Path $env:LOCALAPPDATA 'Programs\HTTPie\HTTPie.exe'
-        )
+            )
+        }
     }
-}
+
     [PSCustomObject]@{
         Name                = 'curl'
         Category            = $CategoryName
@@ -156,30 +155,27 @@ $Tools = @(
 
     # ====================================================
     # Traffic Inspection & Debugging (GUI)
-    # https://github.com/httptoolkit/httptoolkit
     # ====================================================
-[PSCustomObject]@{
-    Name                = 'HTTP Toolkit'
-    Category            = $CategoryName
-    CategoryDescription = $CategoryDescription
-    ToolType            = 'TrafficInspection'
-    WinGetId            = 'HTTPToolKit.HTTPToolKit'
-    ChocoId             = $null
-    GitHubRepo          = 'httptoolkit/httptoolkit'
-    GitHubAssetPattern  = $null
-    BinaryCheck         = 'httptoolkit.exe'
-    Dependencies        = @()
-    Provides            = @('httptoolkit.exe')
-    Validation          = [PSCustomObject]@{
-        Type  = 'Path'
-        Value = @(
-            Join-Path $env:LOCALAPPDATA 'Programs\HTTP Toolkit\HTTP Toolkit.exe'
-        )
+    [PSCustomObject]@{
+        Name                = 'HTTP Toolkit'
+        Category            = $CategoryName
+        CategoryDescription = $CategoryDescription
+        ToolType            = 'TrafficInspection'
+        WinGetId            = 'HTTPToolKit.HTTPToolKit'
+        ChocoId             = $null
+        GitHubRepo          = 'httptoolkit/httptoolkit'
+        BinaryCheck         = 'httptoolkit.exe'
+        Dependencies        = @()
+        Provides            = @('httptoolkit.exe')
+        Validation          = [PSCustomObject]@{
+            Type  = 'Path'
+            Value = Join-Path $env:LOCALAPPDATA 'Programs\HTTP Toolkit\HTTP Toolkit.exe'
+        }
     }
-}
+
 )
 
-# -----------------------------
+# ==============================
 # Return tools array safely
-# -----------------------------
+# ==============================
 @($Tools)

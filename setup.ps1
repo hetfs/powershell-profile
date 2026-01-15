@@ -8,17 +8,17 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 
-################################################################################################
+# ============================================================
 # SECTION 1: PLATFORM CHECK
-################################################################################################
+# ============================================================
 
 if ($PSVersionTable.Platform -ne 'Win32NT') {
     throw '❌ This script supports Windows only.'
 }
 
-################################################################################################
+# ============================================================
 # SECTION 2: INTERNET CONNECTIVITY CHECK
-################################################################################################
+# ============================================================
 
 function Test-InternetConnection {
     <#
@@ -35,18 +35,18 @@ function Test-InternetConnection {
     }
 }
 
-################################################################################################
+# ============================================================
 # SECTION 3: NERD FONTS INSTALLATION VIA CHOCOLATEY
 # Source: https://github.com/ryanoasis/nerd-fonts
-################################################################################################
+# ============================================================
 
 function Install-NerdFontsAuto {
     <#
     .SYNOPSIS
         Installs popular Nerd Fonts via Chocolatey.
     .DESCRIPTION
-        This function ensures Chocolatey is installed, then installs Hack, FiraCode, and JetBrainsMono Nerd Fonts.
-        It enforces TLS 1.2 for secure download and is idempotent.
+        Ensures Chocolatey is installed, then installs Hack, FiraCode, and JetBrainsMono Nerd Fonts.
+        Enforces TLS 1.2 and is idempotent.
     #>
     Write-Host '🔤 Installing Nerd Fonts via Chocolatey...' -ForegroundColor Cyan
 
@@ -76,9 +76,9 @@ function Install-NerdFontsAuto {
     Write-Host '✅ Nerd Fonts installation completed' -ForegroundColor Green
 }
 
-################################################################################################
+# ============================================================
 # SECTION 4: TOOL INSTALLATION VIA WINGET
-################################################################################################
+# ============================================================
 
 # Tools metadata: Name, executable command, Winget package Id
 $Tools = @(
@@ -128,9 +128,9 @@ function Install-Tools {
     }
 }
 
-################################################################################################
+# ============================================================
 # SECTION 5: TERMINAL ICONS MODULE
-################################################################################################
+# ============================================================
 
 function Install-TerminalIcons {
     <#
@@ -165,9 +165,9 @@ function Install-TerminalIcons {
     }
 }
 
-################################################################################################
+# ============================================================
 # SECTION 6: INSTALLATION VERIFICATION
-################################################################################################
+# ============================================================
 
 function Verify-Installation {
     <#
@@ -193,9 +193,9 @@ function Verify-Installation {
     }
 }
 
-################################################################################################
+# ============================================================
 # SECTION 7: MAIN EXECUTION
-################################################################################################
+# ============================================================
 
 Write-Host ('=' * 60) -ForegroundColor Cyan
 Write-Host ' PowerShell Profile Setup ' -ForegroundColor Cyan

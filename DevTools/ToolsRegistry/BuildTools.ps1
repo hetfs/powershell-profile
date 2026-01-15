@@ -25,8 +25,6 @@ $Tools = @(
     # ====================================================
     # Language Servers
     # ====================================================
-
-    # ---------- CLANGD ----------
     [PSCustomObject]@{
         Name                = 'clangd'
         Category            = $CategoryName
@@ -47,8 +45,6 @@ $Tools = @(
     # ====================================================
     # Build Systems
     # ====================================================
-
-    # ---------- CMAKE ----------
     [PSCustomObject]@{
         Name                = 'CMake'
         Category            = $CategoryName
@@ -66,7 +62,6 @@ $Tools = @(
         }
     }
 
-    # ---------- NINJA ----------
     [PSCustomObject]@{
         Name                = 'Ninja'
         Category            = $CategoryName
@@ -84,7 +79,6 @@ $Tools = @(
         }
     }
 
-    # ---------- CCACHE ----------
     [PSCustomObject]@{
         Name                = 'Ccache'
         Category            = $CategoryName

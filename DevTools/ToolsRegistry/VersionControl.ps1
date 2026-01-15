@@ -13,87 +13,131 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# -----------------------------
+# ====================================================
 # Category metadata
-# -----------------------------
+# ====================================================
 $CategoryName        = 'VersionControl'
 $CategoryDescription = 'Version control systems, Git tooling, and collaboration CLIs.'
 
-# -----------------------------
+# ====================================================
 # Tool definitions
-# -----------------------------
+# ====================================================
 $Tools = @(
 
     # ====================================================
-    # Core Version Control Systems
+    # Git - Core version control system
+    # ----------------------------------------------------
+    # Distributed VCS for code and content management
     # ====================================================
     [PSCustomObject]@{
         Name                = 'Git'
         Category            = $CategoryName
         ToolType            = 'VCS'
-        CategoryDescription = 'Distributed version control system for code and content.'
+        CategoryDescription = $CategoryDescription
         WinGetId            = 'Git.Git'
         ChocoId             = 'git'
         GitHubRepo          = 'git/git'
         BinaryCheck         = 'git.exe'
         Dependencies        = @()
         Provides            = @('git.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='git.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'git.exe'
+        }
     }
 
     # ====================================================
-    # Terminal UIs for Git
+    # LazyGit - Terminal-based Git UI
+    # ----------------------------------------------------
+    # Interactive TUI for browsing and managing Git repositories
     # ====================================================
     [PSCustomObject]@{
         Name                = 'lazygit'
         Category            = $CategoryName
         ToolType            = 'GitUI'
-        CategoryDescription = 'Terminal-based UI for Git repositories.'
+        CategoryDescription = $CategoryDescription
         WinGetId            = 'JesseDuffield.lazygit'
         ChocoId             = 'lazygit'
         GitHubRepo          = 'jesseduffield/lazygit'
         BinaryCheck         = 'lazygit.exe'
         Dependencies        = @('Git')
         Provides            = @('lazygit.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='lazygit.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'lazygit.exe'
+        }
     }
 
     # ====================================================
-    # GitHub CLI tooling
+    # GitHub CLI - Repository and issue management
+    # ----------------------------------------------------
+    # Manage GitHub repos, issues, pull requests, and actions via CLI
     # ====================================================
     [PSCustomObject]@{
         Name                = 'GitHub CLI'
         Category            = $CategoryName
         ToolType            = 'GitHubCLI'
-        CategoryDescription = 'Manage GitHub repositories, issues, and pull requests from CLI.'
+        CategoryDescription = $CategoryDescription
         WinGetId            = 'GitHub.cli'
         ChocoId             = 'gh'
         GitHubRepo          = 'cli/cli'
         BinaryCheck         = 'gh.exe'
         Dependencies        = @('Git')
         Provides            = @('gh.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='gh.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'gh.exe'
+        }
     }
 
     # ====================================================
-    # Git Diff & Pager Tools
+    # Delta - Git diff pager
+    # ----------------------------------------------------
+    # Syntax-highlighting pager for Git diffs and code review
     # ====================================================
     [PSCustomObject]@{
         Name                = 'delta'
         Category            = $CategoryName
         ToolType            = 'GitDiffPager'
-        CategoryDescription = 'Syntax-highlighting pager for Git diffs and code review.'
+        CategoryDescription = $CategoryDescription
         WinGetId            = 'dandavison.delta'
         ChocoId             = 'delta'
         GitHubRepo          = 'dandavison/delta'
         BinaryCheck         = 'delta.exe'
         Dependencies        = @('Git')
         Provides            = @('delta.exe')
-        Validation          = [PSCustomObject]@{ Type='Command'; Value='delta.exe' }
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'delta.exe'
+        }
     }
+
+    # ====================================================
+    # Git-cliff - Changelog generator
+    # ----------------------------------------------------
+    # Generate changelogs from Git commit history
+    # Official docs: https://git-cliff.org/docs/configuration
+    # ====================================================
+    [PSCustomObject]@{
+        Name                = 'git-cliff'
+        Category            = $CategoryName
+        ToolType            = 'ChangelogGenerator'
+        CategoryDescription = $CategoryDescription
+        WinGetId            = 'git-cliff.git-cliff'
+        ChocoId             = 'git-cliff'
+        GitHubRepo          = 'x-motemen/git-cliff'
+        BinaryCheck         = 'git-cliff.exe'
+        Dependencies        = @('Git')
+        Provides            = @('git-cliff.exe')
+        Validation          = [PSCustomObject]@{
+            Type  = 'Command'
+            Value = 'git-cliff.exe'
+        }
+    }
+
 )
 
-# -----------------------------
-# Return tools array safely for dot-sourcing
-# -----------------------------
+# ====================================================
+# Return tools array safely
+# ====================================================
 @($Tools)

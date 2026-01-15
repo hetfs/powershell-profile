@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Programming languages and compilers (Windows only).
+    Programming languages and compilers (Windows only)
 
 .DESCRIPTION
     Defines Windows-supported programming languages and compilers for DevTools.
@@ -24,8 +24,6 @@ $Tools = @(
     # ====================================================
     # Compiled Languages
     # ====================================================
-
-    # ---------- LLVM (WinLibs) ----------
     [PSCustomObject]@{
         Name                = 'LLVM'
         Category            = $CategoryName
@@ -45,12 +43,11 @@ $Tools = @(
             'clang-tidy.exe'
         )
         Validation          = [PSCustomObject]@{
-            Type  = 'command'
+            Type  = 'Command'
             Value = 'clang++'
         }
-    },
+    }
 
-    # ---------- Rust ----------
     [PSCustomObject]@{
         Name                = 'Rust'
         Category            = $CategoryName
@@ -61,14 +58,13 @@ $Tools = @(
         GitHubRepo          = 'rust-lang/rust'
         BinaryCheck         = 'rustc.exe'
         Dependencies        = @()
-        Provides            = @('rustc.exe','cargo.exe')
+        Provides            = @('rustc.exe', 'cargo.exe')
         Validation          = [PSCustomObject]@{
-            Type  = 'command'
+            Type  = 'Command'
             Value = 'rustc'
         }
-    },
+    }
 
-    # ---------- Go ----------
     [PSCustomObject]@{
         Name                = 'Go'
         Category            = $CategoryName
@@ -81,17 +77,15 @@ $Tools = @(
         Dependencies        = @()
         Provides            = @('go.exe')
         Validation          = [PSCustomObject]@{
-            Type       = 'command'
+            Type       = 'Command'
             Value      = 'go'
             MinVersion = '1.21'
         }
-    },
+    }
 
     # ====================================================
     # Interpreted Languages
     # ====================================================
-
-    # ---------- Python ----------
     [PSCustomObject]@{
         Name                = 'Python'
         Category            = $CategoryName
@@ -102,16 +96,15 @@ $Tools = @(
         GitHubRepo          = 'python/cpython'
         BinaryCheck         = 'python.exe'
         Dependencies        = @()
-        Provides            = @('python.exe','pip.exe','py.exe')
+        Provides            = @('python.exe', 'pip.exe', 'py.exe')
         Validation          = [PSCustomObject]@{
-            Type           = 'command'
+            Type           = 'Command'
             Value          = 'python'
             MinVersion     = '3.11'
             PreferLauncher = $true
         }
-    },
+    }
 
-    # ---------- Lua ----------
     [PSCustomObject]@{
         Name                = 'Lua'
         Category            = $CategoryName
@@ -124,12 +117,11 @@ $Tools = @(
         Dependencies        = @()
         Provides            = @('lua.exe')
         Validation          = [PSCustomObject]@{
-            Type  = 'command'
+            Type  = 'Command'
             Value = 'lua'
         }
-    },
+    }
 
-    # ---------- Strawberry Perl ----------
     [PSCustomObject]@{
         Name                = 'Strawberry Perl'
         Category            = $CategoryName
@@ -140,12 +132,13 @@ $Tools = @(
         GitHubRepo          = 'StrawberryPerl/Perl-Dist-Strawberry'
         BinaryCheck         = 'perl.exe'
         Dependencies        = @()
-        Provides            = @('perl.exe','cpan.exe')
+        Provides            = @('perl.exe', 'cpan.exe')
         Validation          = [PSCustomObject]@{
-            Type  = 'command'
+            Type  = 'Command'
             Value = 'perl'
         }
     }
+
 )
 
 # ==============================

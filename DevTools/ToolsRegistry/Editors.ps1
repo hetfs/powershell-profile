@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Code editors and editing tooling
+    Code editors and code-validation tooling for DevTools
 
 .DESCRIPTION
-    Defines terminal, GUI, and validation .
-    Returns a stable array of PSCustomObjects for installers,
-    validators, and documentation generators.
+    Defines terminal and GUI code editors plus validation utilities.
+    This file only declares tool metadata.
+    Installation, validation, and execution are handled by DevTools core.
 #>
 
 Set-StrictMode -Version Latest
@@ -15,55 +15,57 @@ $ErrorActionPreference = 'Stop'
 # Category metadata
 # ==============================
 $CategoryName        = 'Editors'
-$CategoryDescription = 'Code editors, linters, validators'
+$CategoryDescription = 'Code editors, linters, and validation tools'
 
 # ==============================
 # Tool definitions
 # ==============================
 $Tools = @(
 
-    # ----------------------
+    # ====================================================
     # Neovim — Terminal-based code editor
-    # ----------------------
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'Neovim'
         Category            = $CategoryName
         CategoryDescription = $CategoryDescription
         ToolType            = 'CodeEditor'
+        Homepage            = 'https://neovim.io'
+        GitHubRepo          = 'neovim/neovim'
         WinGetId            = 'Neovim.Neovim'
         ChocoId             = 'neovim'
-        GitHubRepo          = 'neovim/neovim'
         BinaryCheck         = 'nvim.exe'
-        Dependencies        = @()
         Provides            = @('nvim.exe')
+        Dependencies        = @()
         Validation          = [PSCustomObject]@{
             Type  = 'Command'
             Value = 'nvim.exe'
         }
     }
 
-    # ----------------------
+    # ====================================================
     # EditorConfig Checker — .editorconfig validation
-    # ----------------------
+    # ====================================================
     [PSCustomObject]@{
         Name                = 'EditorConfig Checker'
         Category            = $CategoryName
         CategoryDescription = $CategoryDescription
         ToolType            = 'CodeValidation'
+        Homepage            = 'https://editorconfig-checker.github.io'
+        GitHubRepo          = 'editorconfig-checker/editorconfig-checker'
         WinGetId            = 'editorconfig-checker.editorconfig-checker'
         ChocoId             = 'editorconfig-checker'
-        GitHubRepo          = 'editorconfig-checker/editorconfig-checker'
-        BinaryCheck         = 'ec-windows-amd64'
+        BinaryCheck         = 'ec-windows-amd64.exe'
+        Provides            = @('ec-windows-amd64.exe')
         Dependencies        = @()
-        Provides            = @('ec-windows-amd64')
         Validation          = [PSCustomObject]@{
             Type  = 'Command'
-            Value = 'ec-windows-amd64'
+            Value = 'ec-windows-amd64.exe'
         }
     }
 
     # ====================================================
-    # Optional Editors (uncomment if desired)
+    # Optional Editors (disabled by default)
     # ====================================================
 
     # ----------------------
@@ -74,12 +76,13 @@ $Tools = @(
     #     Category            = $CategoryName
     #     CategoryDescription = $CategoryDescription
     #     ToolType            = 'CodeEditor'
+    #     Homepage            = 'https://www.vim.org'
+    #     GitHubRepo          = 'vim/vim'
     #     WinGetId            = 'Vim.Vim'
     #     ChocoId             = 'vim'
-    #     GitHubRepo          = 'vim/vim'
     #     BinaryCheck         = 'vim.exe'
-    #     Dependencies        = @()
     #     Provides            = @('vim.exe')
+    #     Dependencies        = @()
     #     Validation          = [PSCustomObject]@{
     #         Type  = 'Command'
     #         Value = 'vim.exe'
@@ -94,12 +97,13 @@ $Tools = @(
     #     Category            = $CategoryName
     #     CategoryDescription = $CategoryDescription
     #     ToolType            = 'CodeEditor'
+    #     Homepage            = 'https://code.visualstudio.com'
+    #     GitHubRepo          = 'microsoft/vscode'
     #     WinGetId            = 'Microsoft.VisualStudioCode'
     #     ChocoId             = 'vscode'
-    #     GitHubRepo          = 'microsoft/vscode'
     #     BinaryCheck         = 'code.exe'
-    #     Dependencies        = @()
     #     Provides            = @('code.exe')
+    #     Dependencies        = @()
     #     Validation          = [PSCustomObject]@{
     #         Type  = 'Command'
     #         Value = 'code.exe'
@@ -114,12 +118,13 @@ $Tools = @(
     #     Category            = $CategoryName
     #     CategoryDescription = $CategoryDescription
     #     ToolType            = 'CodeEditor'
+    #     Homepage            = 'https://www.sublimetext.com'
+    #     GitHubRepo          = 'sublimehq/sublime_text'
     #     WinGetId            = 'SublimeHQ.SublimeText'
     #     ChocoId             = 'sublimetext3'
-    #     GitHubRepo          = 'sublimehq/sublime_text'
     #     BinaryCheck         = 'sublime_text.exe'
-    #     Dependencies        = @()
     #     Provides            = @('sublime_text.exe')
+    #     Dependencies        = @()
     #     Validation          = [PSCustomObject]@{
     #         Type  = 'Command'
     #         Value = 'sublime_text.exe'
@@ -128,6 +133,6 @@ $Tools = @(
 )
 
 # ==============================
-# Return tools array safely
+# Return tools safely
 # ==============================
 @($Tools)

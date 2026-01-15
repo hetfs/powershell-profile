@@ -1,13 +1,14 @@
 # ================================
-# Usage
+# DevTools.ps1
+# Usage examples:
 # .\DevTools.ps1
 # .\DevTools.ps1 -WhatIf
 # .\DevTools.ps1 -Plan
-# .\DevTools.ps1 -WhatIf -Verbose
-# .\DevTools.ps1 -Category terminal
+# .\DevTools.ps1 -Category TerminalEmulators
 # .\DevTools.ps1 -Tools git,neovim
-# =================================
+# ================================
 #Requires -Version 7.0
+
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [string[]] $Tools,
@@ -20,9 +21,9 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# ------------------------------------------------------------
-# Helper: normalize to array
-# ------------------------------------------------------------
+# ============================================================
+# Helper: Normalize input to array
+# ============================================================
 function As-Array {
     param([object]$InputObject)
 
@@ -38,9 +39,9 @@ function As-Array {
     }
 }
 
-# ------------------------------------------------------------
-# Main
-# ------------------------------------------------------------
+# ============================================================
+# Main Execution Function
+# ============================================================
 function Invoke-DevTools {
     [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
     param(
@@ -52,6 +53,7 @@ function Invoke-DevTools {
     )
 
     begin {
+        # Suppress confirmation in CI
         if ($env:CI -or $env:GITHUB_ACTIONS -or $env:TF_BUILD) {
             $ConfirmPreference = 'None'
         }
@@ -99,7 +101,7 @@ function Invoke-DevTools {
             }
 
             # ------------------------------------------------------------
-            # Logging
+            # Logging setup
             # ------------------------------------------------------------
             $LogConfig = Initialize-DevToolsLogging `
                 -LogPath $LogPath `
@@ -113,7 +115,7 @@ function Invoke-DevTools {
                 -Message "DevTools started (PowerShell $($PSVersionTable.PSVersion))"
 
             # ------------------------------------------------------------
-            # Environment
+            # Environment initialization
             # ------------------------------------------------------------
             $EnvContext = Initialize-DevToolsEnvironment `
                 -RootPath $RootPath `
@@ -125,7 +127,7 @@ function Invoke-DevTools {
             Write-Log -Config $LogConfig -Level INFO -Message "Environment initialized"
 
             # ------------------------------------------------------------
-            # Categories
+            # Load categories
             # ------------------------------------------------------------
             $CategoriesFile = Join-Path $ConfigPath 'categories.ps1'
             if (-not (Test-Path -LiteralPath $CategoriesFile)) {
@@ -143,7 +145,7 @@ function Invoke-DevTools {
                 -Message ("Loaded categories: " + ($Categories.PSObject.Properties.Name -join ', '))
 
             # ------------------------------------------------------------
-            # Load tools
+            # Load tools from registry
             # ------------------------------------------------------------
             $ResolvedTools = @()
             $ToolFiles = Get-ChildItem -Path $ToolsRegistry -Filter '*.ps1' | Sort-Object Name
@@ -151,13 +153,14 @@ function Invoke-DevTools {
             foreach ($file in $ToolFiles) {
                 try {
                     $toolsFromFile = As-Array (& $file.FullName)
-
                     $valid = $toolsFromFile | Where-Object {
                         $_ -is [PSCustomObject] -and
                         $_.PSObject.Properties['Name'] -and
                         $_.PSObject.Properties['Category'] -and
                         $_.PSObject.Properties['ToolType']
                     }
+
+                    $valid = @($valid) # Always array
 
                     if ($valid.Count -gt 0) {
                         $ResolvedTools += $valid
@@ -175,6 +178,8 @@ function Invoke-DevTools {
                 }
             }
 
+            $ResolvedTools = @($ResolvedTools) # Ensure array
+
             if ($ResolvedTools.Count -eq 0) {
                 Write-Log -Config $LogConfig -Level WARNING -Message "No tools loaded"
                 return
@@ -184,14 +189,22 @@ function Invoke-DevTools {
                 -Message "Total tools loaded: $($ResolvedTools.Count)"
 
             # ------------------------------------------------------------
-            # Filters
+            # Apply filters (case-insensitive, safe array)
             # ------------------------------------------------------------
             if ($Category) {
-                $ResolvedTools = $ResolvedTools | Where-Object Category -eq $Category
+                $ResolvedTools = @(
+                    $ResolvedTools | Where-Object {
+                        $_.Category.Trim().ToLower() -eq $Category.Trim().ToLower()
+                    }
+                )
             }
 
             if ($Tools) {
-                $ResolvedTools = $ResolvedTools | Where-Object Name -in $Tools
+                $ResolvedTools = @(
+                    $ResolvedTools | Where-Object {
+                        $_.Name.Trim().ToLower() -in ($Tools | ForEach-Object { $_.Trim().ToLower() })
+                    }
+                )
             }
 
             if ($ResolvedTools.Count -eq 0) {
@@ -213,7 +226,7 @@ function Invoke-DevTools {
             }
 
             # ------------------------------------------------------------
-            # Install
+            # Tool installation
             # ------------------------------------------------------------
             $InstallerPath = Join-Path $InstallersPath 'Install-Tools.ps1'
             if (-not (Test-Path -LiteralPath $InstallerPath)) {
@@ -240,10 +253,12 @@ function Invoke-DevTools {
     }
 }
 
+# ============================================================
+# Invoke main function safely
+# ============================================================
 Invoke-DevTools `
     -Tools $Tools `
     -Category $Category `
     -WinGetOnly:$WinGetOnly `
     -ExportWinGetList:$ExportWinGetList `
-    -Plan:$Plan `
-    -WhatIf:$WhatIfPreference
+    -Plan:$Plan
