@@ -37,10 +37,11 @@ $Tools = @(
         BinaryCheck         = 'HTTPie.exe'
         Dependencies        = @()
         Provides            = @('HTTPie.exe')
-        Validation          = [PSCustomObject]@{
+        Validation = [PSCustomObject]@{
             Type  = 'Path'
             Value = @(
-            Join-Path $env:LOCALAPPDATA 'Programs\HTTPie\HTTPie.exe'
+                Join-Path $env:LOCALAPPDATA 'Programs\HTTPie\HTTPie.exe'
+                Join-Path $env:LOCALAPPDATA 'Programs\HTTPie\bin\HTTPie.exe'
             )
         }
     }
@@ -169,7 +170,10 @@ $Tools = @(
         Provides            = @('httptoolkit.exe')
         Validation          = [PSCustomObject]@{
             Type  = 'Path'
-            Value = Join-Path $env:LOCALAPPDATA 'Programs\HTTP Toolkit\HTTP Toolkit.exe'
+            Value =@(
+            Join-Path $env:LOCALAPPDATA 'Programs\HTTP Toolkit\HTTP Toolkit.exe'
+
+            )
         }
     }
 
