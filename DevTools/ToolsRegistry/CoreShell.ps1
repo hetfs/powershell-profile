@@ -74,15 +74,15 @@ $Tools = @(
     }
 
     # ====================================================
-    # mise-en-place — Runtime manager
+    # mise (mise-en-place) — Runtime manager
     # ====================================================
     [PSCustomObject]@{
-        Name                = 'mise-en-place'
+        Name                = 'mise'
         Category            = $CategoryName
         CategoryDescription = $CategoryDescription
         ToolType            = 'RuntimeManager'
         WinGetId            = 'jdx.mise'
-        ChocoId             = $null
+        ChocoId             = 'mise'
         GitHubRepo          = 'https://github.com/jdx/mise'
         BinaryCheck         = 'mise.exe'
         Dependencies        = @()
@@ -108,7 +108,7 @@ $Tools = @(
     }
 
 )
-
+# Coming soon https://github.com/git-lfs/git-lfs?tab=readme-ov-file
 # ==============================
 # Return tools array safely
 # ==============================
